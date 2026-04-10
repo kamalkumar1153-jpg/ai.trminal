@@ -5,24 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Pro Terminal - Kamal Trader</title>
     <style>
-        body { background-color: #0d1117; color: #ffffff; font-family: sans-serif; text-align: center; padding: 15px; margin: 0; }
-        .container { max-width: 450px; margin: auto; background: #161b22; padding: 20px; border-radius: 15px; border: 1px solid #30363d; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .market-card { background: #21262d; margin: 10px 0; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #58a6ff; }
-        .index-name { font-weight: bold; color: #8b949e; }
-        .index-price { font-size: 18px; font-weight: bold; color: #3fb950; font-family: monospace; }
-        .indicator-box { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .ind-card { background: #1c2128; padding: 10px; border-radius: 8px; border: 1px solid #444; }
-        .ind-name { font-size: 11px; color: #8b949e; display: block; margin-bottom: 5px; text-transform: uppercase; }
-        .ind-val { font-weight: bold; font-size: 13px; }
-        #signal-box { margin-top: 20px; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; background: #21262d; border: 1px dashed #444; }
-        .status { font-size: 12px; margin-top: 15px; color: #8b949e; }
+        body { background-color: #0d1117; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 15px; margin: 0; }
+        .container { max-width: 450px; margin: auto; background: #161b22; padding: 20px; border-radius: 20px; border: 1px solid #30363d; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { color: #58a6ff; margin-bottom: 5px; letter-spacing: 1px; }
+        .user-tag { font-size: 12px; color: #8b949e; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
+        
+        .market-card { background: #21262d; margin: 12px 0; padding: 18px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 6px solid #58a6ff; transition: 0.3s; }
+        .index-name { font-weight: bold; color: #c9d1d9; font-size: 16px; }
+        .index-price { font-size: 20px; font-weight: bold; color: #3fb950; font-family: 'Courier New', Courier, monospace; }
+
+        .indicator-box { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .ind-card { background: #1c2128; padding: 12px; border-radius: 10px; border: 1px solid #30363d; }
+        .ind-name { font-size: 11px; color: #8b949e; display: block; margin-bottom: 6px; font-weight: bold; }
+        .ind-val { font-weight: bold; font-size: 14px; text-transform: uppercase; }
+
+        #signal-box { margin-top: 25px; padding: 20px; border-radius: 15px; background: #21262d; border: 2px dashed #30363d; position: relative; }
+        .sig-label { font-size: 11px; color: #8b949e; display: block; margin-bottom: 10px; letter-spacing: 1px; }
+        #main-signal { font-size: 22px; font-weight: 900; }
+
+        .status { font-size: 11px; margin-top: 20px; color: #8b949e; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .dot { height: 8px; width: 8px; background-color: #3fb950; border-radius: 50%; display: inline-block; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2 style="color: #58a6ff; margin-bottom: 5px;">🚀 AI PRO TERMINAL</h2>
-    <p style="font-size: 12px; color: #8b949e; margin-bottom: 20px;">Kamal Trader Dashboard</p>
+    <h2>🚀 AI PRO TERMINAL</h2>
+    <div class="user-tag">Kamal Trader Dashboard</div>
 
     <div class="market-card" style="border-left-color: #3fb950;">
         <span class="index-name">NIFTY 50</span>
@@ -46,11 +55,14 @@
     </div>
 
     <div id="signal-box">
-        <span style="font-size: 12px; color: #8b949e; display: block;">FINAL TRADE SIGNAL</span>
-        <div id="main-signal">WAITING...</div>
+        <span class="sig-label">FINAL TRADE SIGNAL</span>
+        <div id="main-signal">WAITING FOR DATA...</div>
     </div>
 
-    <div class="status" id="update-time">Connecting to Render Bridge...</div>
+    <div class="status">
+        <span class="dot" id="status-dot"></span>
+        <span id="update-time">Connecting to Bridge...</span>
+    </div>
 </div>
 
 <script>
@@ -62,51 +74,60 @@
             const responseData = await res.json();
             const data = responseData.data;
 
-            // Nifty Data
-            const nifty = data["NSE_INDEX:Nifty 50"].last_price;
+            // 1. Nifty Update
+            const niftyObj = data["NSE_INDEX:Nifty 50"];
+            const nifty = niftyObj ? niftyObj.last_price : 0;
             document.getElementById('nifty-price').innerText = nifty.toFixed(2);
 
-            // Sensex Data (Checking both possible keys)
-            const sensexData = data["NSE_INDEX:SENSEX"] || data["BSE_INDEX:SENSEX"];
-            const sensex = sensexData ? sensexData.last_price : 0;
-            document.getElementById('sensex-price').innerText = sensex.toFixed(2);
+            // 2. Sensex Fix Logic (Checking multiple keys for safety)
+            let sensex = 0;
+            const sData = data["BSE_INDEX:SENSEX"] || data["NSE_INDEX:SENSEX"] || data["BSE_INDEX|SENSEX"];
+            if (sData) {
+                sensex = sData.last_price;
+            }
+            document.getElementById('sensex-price').innerText = sensex > 0 ? sensex.toFixed(2) : "Fetching...";
 
-            // Indicators Logic (Based on Nifty Price Action)
+            // 3. Indicator & Signal Logic (Based on Trend)
             const macdEl = document.getElementById('macd-status');
             const ichiEl = document.getElementById('ichi-status');
             const sigEl = document.getElementById('main-signal');
+            const dotEl = document.getElementById('status-dot');
 
-            // Simple Logic for Example
-            if (nifty > 24050) {
+            // Example Strategy: Bullish if Nifty above 24055
+            if (nifty > 24055) {
                 macdEl.innerText = "BULLISH CROSS";
                 macdEl.style.color = "#3fb950";
                 ichiEl.innerText = "ABOVE CLOUD";
                 ichiEl.style.color = "#3fb950";
-                sigEl.innerText = "🚀 STRONG BUY";
+                sigEl.innerHTML = "🚀 STRONG BUY";
                 sigEl.style.color = "#3fb950";
-            } else {
+                dotEl.style.backgroundColor = "#3fb950";
+            } else if (nifty > 0 && nifty <= 24055) {
                 macdEl.innerText = "BEARISH ZONE";
                 macdEl.style.color = "#f85149";
                 ichiEl.innerText = "BELOW CLOUD";
                 ichiEl.style.color = "#f85149";
-                sigEl.innerText = "🔻 SELL / WAIT";
+                sigEl.innerHTML = "🔻 SELL / WAIT";
                 sigEl.style.color = "#f85149";
+                dotEl.style.backgroundColor = "#f85149";
             }
 
-            document.getElementById('update-time').innerText = "✅ Live | Last Sync: " + new Date().toLocaleTimeString();
+            document.getElementById('update-time').innerText = "Live | Sync: " + new Date().toLocaleTimeString();
         } catch (error) {
-            console.error(error);
-            document.getElementById('update-time').innerText = "❌ Bridge Error - Retrying...";
+            console.error("Fetch Error:", error);
+            document.getElementById('update-time').innerText = "Bridge Error - Retrying...";
+            document.getElementById('status-dot').style.backgroundColor = "#8b949e";
         }
     }
 
-    // Refresh every 5 seconds
+    // Interval set to 5 seconds
     setInterval(updateDashboard, 5000);
     updateDashboard();
 </script>
 
 </body>
 </html>
+
 
 
 
