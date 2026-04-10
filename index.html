@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Pro Terminal - Kamal Trader</title>
+    <style>
+        body { background-color: #0d1117; color: #ffffff; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; padding: 20px; }
+        .container { max-width: 500px; margin: auto; background: #161b22; padding: 20px; border-radius: 15px; border: 1px solid #30363d; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { color: #58a6ff; font-size: 24px; margin-bottom: 20px; }
+        .market-card { background: #21262d; margin: 10px 0; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #238636; }
+        .index-name { font-size: 18px; font-weight: bold; }
+        .index-price { font-size: 20px; color: #3fb950; font-family: monospace; }
+        .status { font-size: 12px; color: #8b949e; margin-top: 20px; }
+        .loading { color: #e3b341; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🚀 AI PRO TERMINAL</h1>
+        
+        <div class="market-card">
+            <span class="index-name">NIFTY 50</span>
+            <span id="nifty-price" class="index-price">Loading...</span>
+        </div>
+
+        <div class="market-card">
+            <span class="index-name">SENSEX</span>
+            <span id="sensex-price" class="index-price">Loading...</span>
+        </div>
+
+        <div class="status" id="last-update">Bridge Status: Connecting...</div>
+    </div>
+
+    <script>
+        const BRIDGE_URL = "https://ai-trminal.onrender.com/market-data";
+
+        async function updateMarketData() {
+            try {
+                const response = await fetch(BRIDGE_URL);
+                const data = await response.json();
+                
+                // Nifty Data Update
+                const nifty = data.data["NSE_INDEX:Nifty 50"].last_price;
+                document.getElementById('nifty-price').innerText = nifty.toFixed(2);
+                
+                // Sensex Data Update
+                const sensex = data.data["NSE_INDEX:SENSEX"].last_price;
+                document.getElementById('sensex-price').innerText = sensex.toFixed(2);
+                
+                document.getElementById('last-update').innerHTML = "✅ Bridge Live | Last Update: " + new Date().toLocaleTimeString();
+                document.getElementById('last-update').style.color = "#3fb950";
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                document.getElementById('last-update').innerHTML = "❌ Bridge Error - Checking Token...";
+                document.getElementById('last-update').style.color = "#f85149";
+            }
+        }
+
+        // Har 5 second mein auto-update
+        setInterval(updateMarketData, 5000);
+        updateMarketData();
+    </script>
+</body>
+</html>
