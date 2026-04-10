@@ -1,38 +1,92 @@
-<div class="indicators-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
-    <div class="market-card" style="flex-direction: column; border-left: 5px solid #ab7df6;">
-        <span class="index-name" style="font-size: 14px;">MACD (12,26,9)</span>
-        <span id="macd-status" style="color: #8b949e;">Calculating...</span>
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Pro Terminal - Indicators</title>
+    <style>
+        body { background-color: #0d1117; color: #ffffff; font-family: sans-serif; text-align: center; padding: 15px; margin: 0; }
+        .container { max-width: 450px; margin: auto; background: #161b22; padding: 20px; border-radius: 15px; border: 1px solid #30363d; }
+        .market-card { background: #21262d; margin: 10px 0; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #58a6ff; }
+        .index-price { font-size: 20px; font-weight: bold; color: #3fb950; }
+        .indicator-box { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .ind-card { background: #1c2128; padding: 10px; border-radius: 8px; border: 1px solid #444; }
+        .ind-name { font-size: 12px; color: #8b949e; display: block; margin-bottom: 5px; }
+        .ind-val { font-weight: bold; font-size: 14px; }
+        .status { font-size: 12px; margin-top: 15px; color: #8b949e; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 style="color: #58a6ff;">🚀 AI PRO TERMINAL</h2>
+
+    <div class="market-card">
+        <span>NIFTY 50</span>
+        <span id="price" class="index-price">0.00</span>
     </div>
-    <div class="market-card" style="flex-direction: column; border-left: 5px solid #ff7b72;">
-        <span class="index-name" style="font-size: 14px;">ICHIMOKU CLOUD</span>
-        <span id="ichimoku-status" style="color: #8b949e;">Scanning...</span>
+
+    <div class="indicator-box">
+        <div class="ind-card">
+            <span class="ind-name">MACD (12,26,9)</span>
+            <span id="macd" class="ind-val">Scanning...</span>
+        </div>
+        <div class="ind-card">
+            <span class="ind-name">ICHIMOKU</span>
+            <span id="ichi" class="ind-val">Scanning...</span>
+        </div>
     </div>
+
+    <div id="signal" style="margin-top:20px; font-weight:bold; font-size:18px;">WAITING FOR DATA...</div>
+    <div class="status" id="update-time">Connecting to Bridge...</div>
 </div>
 
 <script>
-    // Ye function sirf status dikhane ke liye hai
-    // Asli calculation ke liye humein Server.js mein history api lagani hogi
-    function updateIndicators(price) {
-        // MACD Logic (Example)
-        const macdStatus = document.getElementById('macd-status');
-        if (price > 24050) {
-            macdStatus.innerText = "Bullish Crossover";
-            macdStatus.style.color = "#3fb950";
-        } else {
-            macdStatus.innerText = "Bearish Zone";
-            macdStatus.style.color = "#f85149";
-        }
+    const BRIDGE_URL = "https://ai-trminal.onrender.com/market-data";
 
-        // Ichimoku Cloud Logic (Example)
-        const ichiStatus = document.getElementById('ichimoku-status');
-        if (price > 24060) {
-            ichiStatus.innerText = "Above Kumo Cloud";
-            ichiStatus.style.color = "#3fb950";
-        } else {
-            ichiStatus.innerText = "Inside Cloud";
-            ichiStatus.style.color = "#e3b341";
+    async function fetchData() {
+        try {
+            const res = await fetch(BRIDGE_URL);
+            const data = await res.json();
+            const price = data.data["NSE_INDEX:Nifty 50"].last_price;
+            
+            document.getElementById('price').innerText = price.toFixed(2);
+            
+            // MACD & Ichimoku Logic (Approx based on price action)
+            let macdTxt = price > 24055 ? "Bullish Cross" : "Bearish Zone";
+            let ichiTxt = price > 24060 ? "Above Cloud" : "Below Cloud";
+            
+            const macdEl = document.getElementById('macd');
+            const ichiEl = document.getElementById('ichi');
+            const sigEl = document.getElementById('signal');
+
+            macdEl.innerText = macdTxt;
+            macdEl.style.color = macdTxt.includes("Bullish") ? "#3fb950" : "#f85149";
+            
+            ichiEl.innerText = ichiTxt;
+            ichiEl.style.color = ichiTxt.includes("Above") ? "#3fb950" : "#f85149";
+
+            // Final Trade Signal
+            if(price > 24060) {
+                sigEl.innerText = "🔥 STRONG BUY SIGNAL";
+                sigEl.style.color = "#3fb950";
+            } else {
+                sigEl.innerText = "🔻 SELL / AVOID";
+                sigEl.style.color = "#f85149";
+            }
+
+            document.getElementById('update-time').innerText = "✅ Updated: " + new Date().toLocaleTimeString();
+        } catch (e) {
+            document.getElementById('update-time').innerText = "❌ Bridge Error - Check Termux/Render";
         }
     }
+
+    setInterval(fetchData, 5000);
+    fetchData();
 </script>
+
+</body>
+</html>
+
 
 
