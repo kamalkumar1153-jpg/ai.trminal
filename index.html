@@ -3,130 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Pro Terminal - Kamal Trader</title>
+    <title>AI Pro Terminal - Ichimoku Chart</title>
     <style>
-        body { background-color: #0d1117; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 15px; margin: 0; }
-        .container { max-width: 450px; margin: auto; background: #161b22; padding: 20px; border-radius: 20px; border: 1px solid #30363d; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h2 { color: #58a6ff; margin-bottom: 5px; letter-spacing: 1px; }
-        .user-tag { font-size: 12px; color: #8b949e; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
+        body { background-color: #0d1117; color: #ffffff; font-family: sans-serif; text-align: center; padding: 10px; margin: 0; }
+        .container { max-width: 600px; margin: auto; background: #161b22; padding: 15px; border-radius: 20px; border: 1px solid #30363d; }
+        .market-card { background: #21262d; margin: 10px 0; padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #58a6ff; }
+        .price { font-size: 18px; font-weight: bold; color: #3fb950; }
         
-        .market-card { background: #21262d; margin: 12px 0; padding: 18px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 6px solid #58a6ff; transition: 0.3s; }
-        .index-name { font-weight: bold; color: #c9d1d9; font-size: 16px; }
-        .index-price { font-size: 20px; font-weight: bold; color: #3fb950; font-family: 'Courier New', Courier, monospace; }
-
-        .indicator-box { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-        .ind-card { background: #1c2128; padding: 12px; border-radius: 10px; border: 1px solid #30363d; }
-        .ind-name { font-size: 11px; color: #8b949e; display: block; margin-bottom: 6px; font-weight: bold; }
-        .ind-val { font-weight: bold; font-size: 14px; text-transform: uppercase; }
-
-        #signal-box { margin-top: 25px; padding: 20px; border-radius: 15px; background: #21262d; border: 2px dashed #30363d; position: relative; }
-        .sig-label { font-size: 11px; color: #8b949e; display: block; margin-bottom: 10px; letter-spacing: 1px; }
-        #main-signal { font-size: 22px; font-weight: 900; }
-
-        .status { font-size: 11px; margin-top: 20px; color: #8b949e; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .dot { height: 8px; width: 8px; background-color: #3fb950; border-radius: 50%; display: inline-block; }
+        /* Chart Styling */
+        .chart-container { height: 350px; margin: 15px 0; border-radius: 12px; overflow: hidden; border: 1px solid #30363d; }
+        
+        #signal-box { font-size: 18px; font-weight: bold; padding: 10px; border-radius: 8px; background: #21262d; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>🚀 AI PRO TERMINAL</h2>
-    <div class="user-tag">Kamal Trader Dashboard</div>
-
-    <div class="market-card" style="border-left-color: #3fb950;">
-        <span class="index-name">NIFTY 50</span>
-        <span id="nifty-price" class="index-price">0.00</span>
-    </div>
-
-    <div class="market-card" style="border-left-color: #ff7b72;">
-        <span class="index-name">SENSEX</span>
-        <span id="sensex-price" class="index-price">0.00</span>
-    </div>
-
-    <div class="indicator-box">
-        <div class="ind-card">
-            <span class="ind-name">MACD (12,26,9)</span>
-            <span id="macd-status" class="ind-val">Scanning...</span>
+    <h2 style="color: #58a6ff; margin: 5px 0;">🚀 AI PRO TERMINAL</h2>
+    
+    <div style="display: flex; gap: 10px;">
+        <div class="market-card" style="flex: 1; border-left-color: #3fb950;">
+            <span style="font-size: 12px;">NIFTY</span>
+            <span id="nifty-price" class="price">0.00</span>
         </div>
-        <div class="ind-card">
-            <span class="ind-name">ICHIMOKU CLOUD</span>
-            <span id="ichi-status" class="ind-val">Scanning...</span>
+        <div class="market-card" style="flex: 1; border-left-color: #ff7b72;">
+            <span style="font-size: 12px;">SENSEX</span>
+            <span id="sensex-price" class="price">0.00</span>
         </div>
     </div>
 
-    <div id="signal-box">
-        <span class="sig-label">FINAL TRADE SIGNAL</span>
-        <div id="main-signal">WAITING FOR DATA...</div>
-    </div>
+    <div class="chart-container">
+        <div class="tradingview-widget-container" style="height:100%;width:100%">
+          <div id="tradingview_ichimoku" style="height:100%;width:100%"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+          <script type="text/javascript">
+          new TradingView.widget({
+            "autosize": true,
+            "symbol": "NSE:NIFTY",
+            "interval": "15",
+            "timezone": "Asia/Kolkata",
+            "theme": "dark",
+            "style": "1",
+            "locale": "in",
+            "toolbar_bg": "#f1f3f6",
+            "enable_publishing": false,
+            "hide_top_toolbar": true,
+            "save_image": false,
+            "container_id": "tradingview_ichimoku",
+            "studies": [
+              "IchimokuCloud@tv-basicstudies"
+            ]
+          });
+          </script>
+        </div>
+        </div>
 
-    <div class="status">
-        <span class="dot" id="status-dot"></span>
-        <span id="update-time">Connecting to Bridge...</span>
-    </div>
+    <div id="signal-box">SCANNING TREND...</div>
+    
+    <div id="update-time" style="font-size: 10px; color: #8b949e;">Live Syncing...</div>
 </div>
 
 <script>
     const BRIDGE_URL = "https://ai-trminal.onrender.com/market-data";
 
-    async function updateDashboard() {
+    async function updateData() {
         try {
             const res = await fetch(BRIDGE_URL);
-            const responseData = await res.json();
-            const data = responseData.data;
+            const data = await res.json();
+            const nifty = data.data["NSE_INDEX:Nifty 50"].last_price;
+            const sensex = (data.data["BSE_INDEX:SENSEX"] || data.data["NSE_INDEX:SENSEX"]).last_price;
 
-            // 1. Nifty Update
-            const niftyObj = data["NSE_INDEX:Nifty 50"];
-            const nifty = niftyObj ? niftyObj.last_price : 0;
             document.getElementById('nifty-price').innerText = nifty.toFixed(2);
+            document.getElementById('sensex-price').innerText = sensex.toFixed(2);
 
-            // 2. Sensex Fix Logic (Checking multiple keys for safety)
-            let sensex = 0;
-            const sData = data["BSE_INDEX:SENSEX"] || data["NSE_INDEX:SENSEX"] || data["BSE_INDEX|SENSEX"];
-            if (sData) {
-                sensex = sData.last_price;
-            }
-            document.getElementById('sensex-price').innerText = sensex > 0 ? sensex.toFixed(2) : "Fetching...";
-
-            // 3. Indicator & Signal Logic (Based on Trend)
-            const macdEl = document.getElementById('macd-status');
-            const ichiEl = document.getElementById('ichi-status');
-            const sigEl = document.getElementById('main-signal');
-            const dotEl = document.getElementById('status-dot');
-
-            // Example Strategy: Bullish if Nifty above 24055
-            if (nifty > 24055) {
-                macdEl.innerText = "BULLISH CROSS";
-                macdEl.style.color = "#3fb950";
-                ichiEl.innerText = "ABOVE CLOUD";
-                ichiEl.style.color = "#3fb950";
-                sigEl.innerHTML = "🚀 STRONG BUY";
+            const sigEl = document.getElementById('signal-box');
+            if(nifty > 24055) {
+                sigEl.innerText = "🚀 BULLISH TREND";
                 sigEl.style.color = "#3fb950";
-                dotEl.style.backgroundColor = "#3fb950";
-            } else if (nifty > 0 && nifty <= 24055) {
-                macdEl.innerText = "BEARISH ZONE";
-                macdEl.style.color = "#f85149";
-                ichiEl.innerText = "BELOW CLOUD";
-                ichiEl.style.color = "#f85149";
-                sigEl.innerHTML = "🔻 SELL / WAIT";
+            } else {
+                sigEl.innerText = "🔻 BEARISH TREND";
                 sigEl.style.color = "#f85149";
-                dotEl.style.backgroundColor = "#f85149";
             }
-
-            document.getElementById('update-time').innerText = "Live | Sync: " + new Date().toLocaleTimeString();
-        } catch (error) {
-            console.error("Fetch Error:", error);
-            document.getElementById('update-time').innerText = "Bridge Error - Retrying...";
-            document.getElementById('status-dot').style.backgroundColor = "#8b949e";
+            document.getElementById('update-time').innerText = "Last Update: " + new Date().toLocaleTimeString();
+        } catch (e) {
+            console.log("Error fetching bridge data");
         }
     }
 
-    // Interval set to 5 seconds
-    setInterval(updateDashboard, 5000);
-    updateDashboard();
+    setInterval(updateData, 5000);
+    updateData();
 </script>
 
 </body>
 </html>
+
 
 
 
