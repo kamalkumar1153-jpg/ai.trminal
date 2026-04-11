@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Pro Expert - Kamal Trader</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#238636">
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+      }
+    </script>
+
     <style>
         body { background-color: #0d1117; color: #ffffff; font-family: sans-serif; text-align: center; padding: 10px; margin: 0; }
         .container { max-width: 450px; margin: auto; background: #161b22; padding: 15px; border-radius: 20px; border: 1px solid #30363d; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
@@ -17,12 +26,11 @@
         .market-card { background: #21262d; padding: 10px; border-radius: 12px; border-left: 5px solid #58a6ff; text-align: left; }
         .price { font-size: 15px; font-weight: bold; color: #3fb950; display: block; margin-top: 5px; }
 
-        /* Indicators & Pivot Grid */
+        .pivot-summary { background: #21262d; padding: 10px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-around; font-size: 11px; }
+
         .indicator-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
         .ind-item { background: #1c2128; padding: 8px; border-radius: 10px; border: 1px solid #30363d; font-size: 10px; }
         .ind-status { display: block; font-weight: bold; margin-top: 4px; font-size: 12px; }
-        
-        .pivot-summary { background: #21262d; padding: 10px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-around; font-size: 11px; }
 
         #main-signal { font-size: 18px; font-weight: 900; margin: 10px 0; padding: 12px; background: #21262d; border-radius: 12px; border: 2px dashed #444; }
         .token-box { margin-top: 15px; padding: 12px; background: #1c2128; border-radius: 12px; }
@@ -33,7 +41,7 @@
 <body>
 
 <div class="container">
-    <h3 style="color: #58a6ff; margin-bottom: 5px;">🚀 AI PRO EXPERT</h3>
+    <h3 style="color: #58a6ff; margin-bottom: 5px;">🚀 AI PRO EXPERT APP</h3>
     
     <div class="gauge-container">
         <div class="gauge-bg"></div>
@@ -62,7 +70,7 @@
 
     <div class="token-box">
         <input type="password" id="token-input" placeholder="Paste Upstox Access Token">
-        <button onclick="saveToken()">CONNECT TERMINAL</button>
+        <button onclick="saveToken()">CONNECT & INSTALL</button>
     </div>
 
     <div id="update-time" style="font-size: 10px; color: #8b949e; margin-top: 10px;">Ready to trade</div>
@@ -82,7 +90,7 @@
         const token = document.getElementById('token-input').value;
         if(token) {
             localStorage.setItem('upstox_token', token);
-            speak("सभी इंडिकेटर्स और पिवट पॉइंट्स लोड हो गए हैं");
+            speak("एप्लीकेशन एक्टिवेट हो गई है");
             updateTerminal();
         }
     }
@@ -100,42 +108,32 @@
             document.getElementById('nifty-price').innerText = nifty.toFixed(2);
             document.getElementById('sensex-price').innerText = sensex.toFixed(2);
 
-            // Pivot Calculations
             const pp = nifty; 
-            const r1 = nifty + 45;
-            const s1 = nifty - 45;
             document.getElementById('pp').innerText = pp.toFixed(0);
-            document.getElementById('r1').innerText = r1.toFixed(0);
-            document.getElementById('s1').innerText = s1.toFixed(0);
+            document.getElementById('r1').innerText = (nifty + 45).toFixed(0);
+            document.getElementById('s1').innerText = (nifty - 45).toFixed(0);
 
-            // Meter & Pivot Trend
             const needle = document.getElementById('needle');
-            const pTrend = document.getElementById('pivot-trend');
-            const diff = nifty - 24055; // Base level
-            
+            const diff = nifty - 24055;
             needle.style.transform = `rotate(${Math.min(Math.max(diff * 1.2, -90), 90)}deg)`;
-            
-            if(nifty > pp) {
-                pTrend.innerText = "ABOVE PP"; pTrend.style.color = "#3fb950";
-            } else {
-                pTrend.innerText = "BELOW PP"; pTrend.style.color = "#f85149";
-            }
 
-            // Signal Logic
             const sigEl = document.getElementById('main-signal');
             const macdEl = document.getElementById('macd-val');
             const ichiEl = document.getElementById('ichi-val');
+            const pTrend = document.getElementById('pivot-trend');
 
             if (nifty > 24055) {
                 macdEl.innerText = "BULLISH"; macdEl.style.color = "#3fb950";
                 ichiEl.innerText = "ABOVE CLOUD"; ichiEl.style.color = "#3fb950";
+                pTrend.innerText = "ABOVE PP"; pTrend.style.color = "#3fb950";
                 sigEl.innerText = "🚀 STRONG BUY"; sigEl.style.color = "#3fb950";
-                if(lastSignal !== "BUY") { speak("निफ्टी पिवट के ऊपर है, खरीदारी का मौका है"); lastSignal = "BUY"; }
+                if(lastSignal !== "BUY") { speak("खरीदारी का सिग्नल है"); lastSignal = "BUY"; }
             } else {
                 macdEl.innerText = "BEARISH"; macdEl.style.color = "#f85149";
                 ichiEl.innerText = "BELOW CLOUD"; ichiEl.style.color = "#f85149";
+                pTrend.innerText = "BELOW PP"; pTrend.style.color = "#f85149";
                 sigEl.innerText = "🔻 SELL / WAIT"; sigEl.style.color = "#f85149";
-                if(lastSignal !== "SELL") { speak("सावधान, निफ्टी पिवट के नीचे फिसल गया है"); lastSignal = "SELL"; }
+                if(lastSignal !== "SELL") { speak("बिकवाली का दबाव है"); lastSignal = "SELL"; }
             }
 
             document.getElementById('update-time').innerText = "Live: " + new Date().toLocaleTimeString();
@@ -148,6 +146,7 @@
 
 </body>
 </html>
+
 
 
 
