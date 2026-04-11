@@ -4,80 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Pro Expert - Kamal Trader</title>
-    
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#238636">
     <script>
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js');
       }
     </script>
-
     <style>
         body { background-color: #0d1117; color: #ffffff; font-family: sans-serif; text-align: center; padding: 10px; margin: 0; }
         .container { max-width: 450px; margin: auto; background: #161b22; padding: 15px; border-radius: 20px; border: 1px solid #30363d; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        
-        /* Mood Meter */
-        .gauge-container { position: relative; width: 160px; height: 80px; margin: 10px auto; overflow: hidden; }
-        .gauge-bg { position: absolute; width: 160px; height: 160px; border-radius: 50%; border: 12px solid #30363d; border-bottom-color: transparent; border-left-color: #f85149; border-right-color: #3fb950; box-sizing: border-box; }
-        .needle { position: absolute; width: 3px; height: 60px; background: #ffffff; bottom: 0; left: 50%; transform-origin: bottom center; transform: rotate(-90deg); transition: transform 1s ease-in-out; }
-
-        .market-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        .market-card { background: #21262d; padding: 10px; border-radius: 12px; border-left: 5px solid #58a6ff; text-align: left; }
-        .price { font-size: 15px; font-weight: bold; color: #3fb950; display: block; margin-top: 5px; }
-
-        .pivot-summary { background: #21262d; padding: 10px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-around; font-size: 11px; }
-
-        .indicator-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
-        .ind-item { background: #1c2128; padding: 8px; border-radius: 10px; border: 1px solid #30363d; font-size: 10px; }
-        .ind-status { display: block; font-weight: bold; margin-top: 4px; font-size: 12px; }
-
-        #main-signal { font-size: 18px; font-weight: 900; margin: 10px 0; padding: 12px; background: #21262d; border-radius: 12px; border: 2px dashed #444; }
-        .token-box { margin-top: 15px; padding: 12px; background: #1c2128; border-radius: 12px; }
-        input { width: 80%; padding: 8px; border-radius: 6px; border: 1px solid #30363d; background: #0d1117; color: white; margin-bottom: 8px; }
-        button { background: #238636; color: white; border: none; padding: 8px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .market-card { background: #21262d; padding: 10px; border-radius: 12px; border-left: 5px solid #58a6ff; text-align: left; margin-bottom: 10px; }
+        .price { font-size: 18px; font-weight: bold; color: #3fb950; display: block; }
+        #main-signal { font-size: 20px; font-weight: 900; margin: 15px 0; padding: 15px; background: #21262d; border-radius: 12px; border: 2px dashed #444; }
+        input { width: 80%; padding: 10px; border-radius: 6px; border: 1px solid #30363d; background: #0d1117; color: white; margin-bottom: 10px; }
+        button { background: #238636; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 85%; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h3 style="color: #58a6ff; margin-bottom: 5px;">🚀 AI PRO EXPERT APP</h3>
+    <h3 style="color: #58a6ff; margin-bottom: 15px;">🚀 AI PRO EXPERT TERMINAL</h3>
     
-    <div class="gauge-container">
-        <div class="gauge-bg"></div>
-        <div id="needle" class="needle"></div>
+    <div class="market-card">
+        <span>NIFTY 50</span>
+        <span id="nifty-price" class="price">Connecting...</span>
     </div>
 
-    <div class="market-row">
-        <div class="market-card" style="border-left-color: #3fb950;"><span>NIFTY 50</span><span id="nifty-price" class="price">0.00</span></div>
-        <div class="market-card" style="border-left-color: #ff7b72;"><span>SENSEX</span><span id="sensex-price" class="price">0.00</span></div>
-    </div>
-
-    <div class="pivot-summary">
-        <div><span style="color:#f85149">R1:</span> <b id="r1">0</b></div>
-        <div><span style="color:#58a6ff">PP:</span> <b id="pp">0</b></div>
-        <div><span style="color:#3fb950">S1:</span> <b id="s1">0</b></div>
-    </div>
-
-    <div class="indicator-grid">
-        <div class="ind-item">MACD<span id="macd-val" class="ind-status">SCAN...</span></div>
-        <div class="ind-item">ICHIMOKU<span id="ichi-val" class="ind-status">SCAN...</span></div>
-        <div class="ind-item">PIVOT TREND<span id="pivot-trend" class="ind-status">SCAN...</span></div>
-        <div class="ind-item">VOLATILITY<span id="vol-val" class="ind-status">STABLE</span></div>
-    </div>
-
-    <div id="main-signal">ENTER TOKEN</div>
+    <div id="main-signal">WAITING FOR DATA</div>
 
     <div class="token-box">
-        <input type="password" id="token-input" placeholder="Paste Upstox Access Token">
-        <button onclick="saveToken()">CONNECT & INSTALL</button>
+        <input type="password" id="token-input" placeholder="Upstox Access Token">
+        <button onclick="saveToken()">CONNECT TERMINAL</button>
     </div>
 
-    <div id="update-time" style="font-size: 10px; color: #8b949e; margin-top: 10px;">Ready to trade</div>
+    <div id="update-time" style="font-size: 12px; color: #8b949e; margin-top: 15px;">Pushbullet Alerts: Active ✅</div>
 </div>
 
 <script>
     const BRIDGE_URL = "https://ai-trminal.onrender.com/market-data";
+    const PB_TOKEN = "o.z1IwRMfQ6CZJW3E88n56DQMLhqZJyhbV"; // Aapka Token yahan set kar diya hai
     let lastSignal = "";
 
     function speak(text) {
@@ -86,66 +51,73 @@
         window.speechSynthesis.speak(speech);
     }
 
+    async function sendPush(title, message) {
+        try {
+            await fetch('https://api.pushbullet.com/v2/pushes', {
+                method: 'POST',
+                headers: {
+                    'Access-Token': PB_TOKEN,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    type: 'note',
+                    title: title,
+                    body: message
+                })
+            });
+        } catch (e) { console.log("Push Error"); }
+    }
+
     function saveToken() {
         const token = document.getElementById('token-input').value;
         if(token) {
             localStorage.setItem('upstox_token', token);
-            speak("एप्लीकेशन एक्टिवेट हो गई है");
+            speak("टर्मिनल कनेक्ट हो गया है");
             updateTerminal();
         }
     }
 
     async function updateTerminal() {
-        const token = localStorage.getItem('upstox_token');
-        if(!token) return;
+        const upstoxToken = localStorage.getItem('upstox_token');
+        if(!upstoxToken) return;
 
         try {
-            const res = await fetch(BRIDGE_URL + "?token=" + token);
+            const res = await fetch(BRIDGE_URL + "?token=" + upstoxToken);
             const responseData = await res.json();
             const nifty = responseData.data["NSE_INDEX:Nifty 50"].last_price;
-            const sensex = (responseData.data["BSE_INDEX:SENSEX"] || responseData.data["NSE_INDEX:SENSEX"]).last_price;
-
             document.getElementById('nifty-price').innerText = nifty.toFixed(2);
-            document.getElementById('sensex-price').innerText = sensex.toFixed(2);
-
-            const pp = nifty; 
-            document.getElementById('pp').innerText = pp.toFixed(0);
-            document.getElementById('r1').innerText = (nifty + 45).toFixed(0);
-            document.getElementById('s1').innerText = (nifty - 45).toFixed(0);
-
-            const needle = document.getElementById('needle');
-            const diff = nifty - 24055;
-            needle.style.transform = `rotate(${Math.min(Math.max(diff * 1.2, -90), 90)}deg)`;
 
             const sigEl = document.getElementById('main-signal');
-            const macdEl = document.getElementById('macd-val');
-            const ichiEl = document.getElementById('ichi-val');
-            const pTrend = document.getElementById('pivot-trend');
 
+            // Signal Logic (Udaharan ke liye 24000 ka level)
             if (nifty > 24055) {
-                macdEl.innerText = "BULLISH"; macdEl.style.color = "#3fb950";
-                ichiEl.innerText = "ABOVE CLOUD"; ichiEl.style.color = "#3fb950";
-                pTrend.innerText = "ABOVE PP"; pTrend.style.color = "#3fb950";
-                sigEl.innerText = "🚀 STRONG BUY"; sigEl.style.color = "#3fb950";
-                if(lastSignal !== "BUY") { speak("खरीदारी का सिग्नल है"); lastSignal = "BUY"; }
+                sigEl.innerText = "🚀 STRONG BUY";
+                sigEl.style.color = "#3fb950";
+                if(lastSignal !== "BUY") { 
+                    speak("खरीदारी का सिग्नल है"); 
+                    sendPush("🚀 AI BUY ALERT", "Nifty Bullish! Trend is UP. Price: " + nifty);
+                    lastSignal = "BUY"; 
+                }
             } else {
-                macdEl.innerText = "BEARISH"; macdEl.style.color = "#f85149";
-                ichiEl.innerText = "BELOW CLOUD"; ichiEl.style.color = "#f85149";
-                pTrend.innerText = "BELOW PP"; pTrend.style.color = "#f85149";
-                sigEl.innerText = "🔻 SELL / WAIT"; sigEl.style.color = "#f85149";
-                if(lastSignal !== "SELL") { speak("बिकवाली का दबाव है"); lastSignal = "SELL"; }
+                sigEl.innerText = "🔻 SELL / WAIT";
+                sigEl.style.color = "#f85149";
+                if(lastSignal !== "SELL") { 
+                    speak("बिकवाली का दबाव है"); 
+                    sendPush("🔻 AI SELL ALERT", "Nifty Bearish! Trend is DOWN. Price: " + nifty);
+                    lastSignal = "SELL"; 
+                }
             }
-
-            document.getElementById('update-time').innerText = "Live: " + new Date().toLocaleTimeString();
-        } catch (e) { console.log("Error"); }
+            document.getElementById('update-time').innerText = "Last Sync: " + new Date().toLocaleTimeString();
+        } catch (e) { console.log("Error fetching data"); }
     }
 
-    setInterval(updateTerminal, 5000);
+    setInterval(updateTerminal, 5000); // Har 5 second mein update
     updateTerminal();
 </script>
 
 </body>
 </html>
+
 
 
 
