@@ -3,28 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Pro Terminal - Kamal Trader</title>
+    <title>AI Pro Terminal - Expert Edition</title>
     <style>
         body { background-color: #0d1117; color: #ffffff; font-family: sans-serif; text-align: center; padding: 10px; margin: 0; }
         .container { max-width: 450px; margin: auto; background: #161b22; padding: 15px; border-radius: 20px; border: 1px solid #30363d; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        /* Meter Styling */
+        .gauge-container { position: relative; width: 200px; height: 100px; margin: 20px auto; overflow: hidden; }
+        .gauge-bg { position: absolute; width: 200px; height: 200px; border-radius: 50%; border: 15px solid #30363d; border-bottom-color: transparent; border-left-color: #f85149; border-right-color: #3fb950; box-sizing: border-box; }
+        .needle { position: absolute; width: 4px; height: 80px; background: #ffffff; bottom: 0; left: 50%; transform-origin: bottom center; transform: rotate(-90deg); transition: transform 1s ease-in-out; border-radius: 4px; }
+        .gauge-labels { display: flex; justify-content: space-between; width: 220px; margin: 0 auto; font-size: 10px; color: #8b949e; }
+
         .market-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .market-card { background: #21262d; padding: 12px; border-radius: 12px; border-left: 5px solid #58a6ff; text-align: left; }
         .price { font-size: 16px; font-weight: bold; color: #3fb950; display: block; margin-top: 5px; }
-        .pivot-section { background: #1c2128; padding: 12px; border-radius: 12px; border: 1px solid #30363d; margin-top: 10px; }
-        .pivot-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
-        .p-item { background: #0d1117; padding: 8px; border-radius: 6px; font-size: 12px; border: 1px solid #21262d; }
         #main-signal { font-size: 20px; font-weight: 900; margin: 15px 0; padding: 12px; background: #21262d; border-radius: 12px; border: 2px dashed #444; }
-        
-        /* Token Login Style */
-        .token-box { margin-top: 20px; padding: 15px; background: #1c2128; border-radius: 12px; border: 1px solid #30363d; }
-        input { width: 80%; padding: 10px; border-radius: 6px; border: 1px solid #30363d; background: #0d1117; color: white; margin-bottom: 10px; font-size: 12px; }
+        .token-box { margin-top: 20px; padding: 15px; background: #1c2128; border-radius: 12px; }
+        input { width: 80%; padding: 10px; border-radius: 6px; border: 1px solid #30363d; background: #0d1117; color: white; margin-bottom: 10px; }
         button { background: #238636; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h3 style="color: #58a6ff; margin-bottom: 15px;">🚀 AI PRO TERMINAL</h3>
+    <h3 style="color: #58a6ff; margin-bottom: 5px;">🚀 AI PRO Expert Terminal</h3>
+    
+    <div style="font-size: 12px; color: #c9d1d9; font-weight: bold;">MARKET MOOD METER</div>
+    <div class="gauge-container">
+        <div class="gauge-bg"></div>
+        <div id="needle" class="needle"></div>
+    </div>
+    <div class="gauge-labels">
+        <span>FEAR</span>
+        <span>NEUTRAL</span>
+        <span>GREED</span>
+    </div>
 
     <div class="market-row">
         <div class="market-card" style="border-left-color: #3fb950;">
@@ -37,36 +50,31 @@
         </div>
     </div>
 
-    <div class="pivot-section">
-        <span style="font-size: 12px; font-weight: bold; color: #c9d1d9;">NIFTY PIVOT LEVELS</span>
-        <div class="pivot-grid">
-            <div class="p-item"><span style="color:#8b949e; font-size:9px;">R1</span><br><span id="r1">0</span></div>
-            <div class="p-item" style="background:#21262d;"><span style="color:#8b949e; font-size:9px;">PIVOT</span><br><span id="pp">0</span></div>
-            <div class="p-item"><span style="color:#8b949e; font-size:9px;">S1</span><br><span id="s1">0</span></div>
-            <div class="p-item" style="grid-column: span 3;"><span style="color:#8b949e; font-size:10px;">CANDLE PATTERN</span><br><span id="pattern" style="color:#f1e05a">WAITING...</span></div>
-        </div>
-    </div>
-
-    <div id="main-signal">ENTER TOKEN</div>
+    <div id="main-signal">CONNECTING...</div>
 
     <div class="token-box">
-        <input type="password" id="token-input" placeholder="Paste Upstox Access Token Here">
-        <br>
+        <input type="password" id="token-input" placeholder="Paste Upstox Access Token">
         <button onclick="saveToken()">UPDATE BRIDGE</button>
     </div>
 
-    <div id="update-time" style="font-size: 10px; color: #8b949e; margin-top: 15px;">Bridge Status: Disconnected</div>
+    <div id="update-time" style="font-size: 10px; color: #8b949e; margin-top: 15px;">Awaaz check karne ke liye screen par touch karein</div>
 </div>
 
 <script>
     const BRIDGE_URL = "https://ai-trminal.onrender.com/market-data";
-    let lastPrice = 0;
+    let lastSignal = "";
+
+    function speak(text) {
+        const speech = new SpeechSynthesisUtterance(text);
+        speech.lang = 'hi-IN';
+        window.speechSynthesis.speak(speech);
+    }
 
     function saveToken() {
         const token = document.getElementById('token-input').value;
         if(token) {
             localStorage.setItem('upstox_token', token);
-            alert("Token Saved! Connecting to Bridge...");
+            speak("मीटर एक्टिवेट हो गया है");
             updateTerminal();
         }
     }
@@ -78,37 +86,38 @@
         try {
             const res = await fetch(BRIDGE_URL + "?token=" + token);
             const responseData = await res.json();
-            const data = responseData.data;
-
-            const nifty = data["NSE_INDEX:Nifty 50"].last_price;
-            const sensex = (data["BSE_INDEX:SENSEX"] || data["NSE_INDEX:SENSEX"]).last_price;
+            const nifty = responseData.data["NSE_INDEX:Nifty 50"].last_price;
+            const sensex = (responseData.data["BSE_INDEX:SENSEX"] || responseData.data["NSE_INDEX:SENSEX"]).last_price;
 
             document.getElementById('nifty-price').innerText = nifty.toFixed(2);
             document.getElementById('sensex-price').innerText = sensex.toFixed(2);
 
-            // Pivots
-            document.getElementById('pp').innerText = nifty.toFixed(0);
-            document.getElementById('r1').innerText = (nifty + 50).toFixed(0);
-            document.getElementById('s1').innerText = (nifty - 50).toFixed(0);
+            // Meter Logic (Nifty 24055 base)
+            const needle = document.getElementById('needle');
+            const diff = nifty - 24055;
+            let angle = 0; // -90 (Fear) to 90 (Greed)
+            
+            if(diff > 50) angle = 70;
+            else if(diff > 10) angle = 30;
+            else if(diff < -50) angle = -70;
+            else if(diff < -10) angle = -30;
+            else angle = 0;
 
-            // Pattern Logic
-            if(lastPrice > 0) {
-                const diff = nifty - lastPrice;
-                const pattEl = document.getElementById('pattern');
-                if(diff > 2) { pattEl.innerText = "📈 BULLISH MOMENTUM"; pattEl.style.color = "#3fb950"; }
-                else if(diff < -2) { pattEl.innerText = "📉 BEARISH PRESSURE"; pattEl.style.color = "#f85149"; }
-            }
+            needle.style.transform = `rotate(${angle}deg)`;
 
-            // Signal
+            // Signal & Voice
             const sigEl = document.getElementById('main-signal');
-            if(nifty > 24055) { sigEl.innerText = "🚀 STRONG BUY"; sigEl.style.color = "#3fb950"; }
-            else { sigEl.innerText = "🔻 SELL / WAIT"; sigEl.style.color = "#f85149"; }
+            let currentSignal = (nifty > 24055) ? "BULLISH" : "BEARISH";
+            
+            if(currentSignal !== lastSignal && lastSignal !== "") {
+                speak(currentSignal === "BULLISH" ? "मार्केट में खरीदारी का मूड है" : "मार्केट में बिकवाली का प्रेशर है");
+            }
+            lastSignal = currentSignal;
+            sigEl.innerText = currentSignal === "BULLISH" ? "🚀 STRONG BUY" : "🔻 SELL / WAIT";
+            sigEl.style.color = currentSignal === "BULLISH" ? "#3fb950" : "#f85149";
 
-            lastPrice = nifty;
             document.getElementById('update-time').innerText = "Live: " + new Date().toLocaleTimeString();
-        } catch (e) {
-            document.getElementById('update-time').innerText = "Bridge Error - Token Expired?";
-        }
+        } catch (e) { console.log("Error"); }
     }
 
     setInterval(updateTerminal, 5000);
@@ -117,6 +126,7 @@
 
 </body>
 </html>
+
 
 
 
