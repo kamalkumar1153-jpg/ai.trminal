@@ -14,8 +14,8 @@ const db = admin.database();
 const ref = db.ref("market_data");
 
 // 2. UPSTOX CREDENTIALS (Yahan apni asli details bharein)
-const API_KEY = " c6e93739-0e7f-4c2e-9a35-8e0e44ea015a"; 
-const API_SECRET = " 13pgvjdvul"; 
+const API_KEY = "c6e93739-0e7f-4c2e-9a35-8e0e44ea015a"; 
+const API_SECRET = "13pgvjdvul"; 
 const REDIRECT_URI = "https://ai-trminal-1.onrender.com/callback"; 
 
 let accessToken = "";
