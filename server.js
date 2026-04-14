@@ -4,7 +4,7 @@ const admin = require('firebase-admin');
 
 const app = express();
 
-// 1. FIREBASE CONNECTION
+// 1. FIREBASE SETUP
 const serviceAccount = require("./serviceAccountKey.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -13,57 +13,75 @@ admin.initializeApp({
 const db = admin.database();
 const ref = db.ref("market_data");
 
-// 2. UPSTOX CREDENTIALS (Apni details yahan dalein)
-const API_KEY = "c6e93739-0e7f-4c2e-9a35-8e0e44ea015a";
-const API_SECRET = " 13pgvjdvul";
+// 2. UPSTOX CREDENTIALS (Yahan apni asli details bharein)
+const API_KEY = " c6e93739-0e7f-4c2e-9a35-8e0e44ea015a"; 
+const API_SECRET = " 13pgvjdvul"; 
 const REDIRECT_URI = "https://ai-trminal-1.onrender.com/callback"; 
 
 let accessToken = "";
 
-// 3. ROUTES
-app.get('/', (req, res) => {
-    res.send("Server is Running! Please go to /login to start.");
-});
-
+// 3. LOGIN ROUTES (Ye code hi login karwayega)
 app.get('/login', (req, res) => {
+    // Ye link aapko Upstox ke login page par le jayega
     const url = `https://api.upstox.com/v2/login/authorization/dialog?response_type=code&client_id=${API_KEY}&redirect_uri=${REDIRECT_URI}`;
     res.redirect(url);
 });
 
 app.get('/callback', async (req, res) => {
-    const code = req.query.code;
+    const code = req.query.code; // Upstox se milne wala temporary code
     try {
+        // Code ko Access Token mein badalna
         const response = await axios.post('https://api.upstox.com/v2/login/authorization/token', 
         new URLSearchParams({
-            code: code, client_id: API_KEY, client_secret: API_SECRET,
-            redirect_uri: REDIRECT_URI, grant_type: 'authorization_code'
+            code: code,
+            client_id: API_KEY,
+            client_secret: API_SECRET,
+            redirect_uri: REDIRECT_URI,
+            grant_type: 'authorization_code'
         }));
+
         accessToken = response.data.access_token;
-        res.send("<h1>Login Successful!</h1> Terminal Live ho gaya hai.");
-        startFetching();
-    } catch (e) { res.send("Login Error: " + e.message); }
+        res.send("<h1>Login Successful!</h1><p>Ab aapka terminal live data fetch kar raha hai.</p>");
+        
+        // Data fetch karna shuru karein
+        startFetching(); 
+    } catch (e) {
+        res.status(500).send("Login Failed: " + (e.response?.data?.errors[0]?.message || e.message));
+    }
 });
 
+// 4. DATA FETCHING ENGINE
 async function startFetching() {
+    console.log("Fetching Started...");
     setInterval(async () => {
-        if(!accessToken) return;
+        if (!accessToken) return;
         try {
-            const quotes = await axios.get('https://api.upstox.com/v2/market-quote/quotes?symbol=NSE_INDEX|Nifty 50,BSE_INDEX|SENSEX', {
-                headers: { 'Authorization': `Bearer ${accessToken}` }
+            const quoteUrl = 'https://api.upstox.com/v2/market-quote/quotes?symbol=NSE_INDEX|Nifty 50,BSE_INDEX|SENSEX';
+            const response = await axios.get(quoteUrl, {
+                headers: { 'Authorization': `Bearer ${accessToken}`, 'Accept': 'application/json' }
             });
-            const nifty = quotes.data.data['NSE_INDEX:Nifty 50'].last_price;
-            const sensex = quotes.data.data['BSE_INDEX:SENSEX'].last_price;
-            
-            await ref.set({
-                nifty: nifty,
-                sensex: sensex,
+
+            const data = response.data.data;
+            const payload = {
+                nifty: data['NSE_INDEX:Nifty 50'].last_price,
+                sensex: data['BSE_INDEX:SENSEX'].last_price,
                 timestamp: new Date().toLocaleTimeString()
-            });
-        } catch (e) { console.log("Fetch Error:", e.message); }
-    }, 5000);
+            };
+
+            // Firebase mein data bhej rahe hain
+            await ref.update(payload);
+            console.log("Data Sent to Firebase:", payload.nifty);
+        } catch (error) {
+            console.error("Fetch Error:", error.message);
+        }
+    }, 5000); // Har 5 second mein update
 }
 
-app.listen(process.env.PORT || 3000);
+app.get('/', (req, res) => res.send("Server is Online! Go to /login to start."));
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
 
 
 
