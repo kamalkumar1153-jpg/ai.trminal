@@ -8,7 +8,15 @@ app.use(cors());
 app.use(express.json());
 
 // Firebase Setup
-const serviceAccount = require("./serviceAccountKey.json"); 
+const serviceAccount = require("./var admin = require("firebase-admin");
+
+var serviceAccount = require("path/to/serviceAccountKey.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://ai-pro-terminal-default-rtdb.firebaseio.com"
+});
+ "); 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://ai-pro-terminal-default-rtdb.firebaseio.com"
