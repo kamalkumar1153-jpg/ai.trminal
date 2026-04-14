@@ -1,162 +1,145 @@
-
 <!DOCTYPE html>
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Pro Expert - Kamal Trader</title>
-    <link rel="manifest" href="manifest.json">
-    <script>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js');
-      }
-    </script>
+    <title>AI PRO EXPERT TERMINAL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0d1117; color: #ffffff; font-family: sans-serif; text-align: center; padding: 10px; margin: 0; }
-        .container { max-width: 450px; margin: auto; background: #161b22; padding: 15px; border-radius: 20px; border: 1px solid #30363d; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .market-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        .market-card { background: #21262d; padding: 10px; border-radius: 12px; border-left: 5px solid #58a6ff; text-align: left; }
-        .price { font-size: 15px; font-weight: bold; color: #3fb950; display: block; margin-top: 5px; }
-        
-        .indicator-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
-        .ind-item { background: #1c2128; padding: 8px; border-radius: 10px; border: 1px solid #30363d; font-size: 10px; text-align: left; }
-        .ind-status { display: block; font-weight: bold; margin-top: 4px; font-size: 12px; }
-
-        .pivot-bar { background: #21262d; padding: 10px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-around; font-size: 11px; }
-        #main-signal { font-size: 18px; font-weight: 900; margin: 10px 0; padding: 12px; background: #21262d; border-radius: 12px; border: 2px dashed #444; }
-        button { background: #238636; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px;}
-        input { width: 90%; padding: 10px; border-radius: 6px; border: 1px solid #30363d; background: #0d1117; color: white; margin-bottom: 8px; }
+        body { background-color: #0d1117; color: #c9d1d9; font-family: sans-serif; }
+        .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; }
+        .signal-box { border: 2px dashed #30363d; border-radius: 8px; padding: 15px; text-align: center; }
     </style>
 </head>
-<body>
+<body class="p-4">
 
-<div class="container">
-    <h3 style="color: #58a6ff; margin-bottom: 5px;">🚀 AI PRO EXPERT TERMINAL</h3>
-    
-    <div class="market-row">
-        <div class="market-card" style="border-left-color: #3fb950;"><span>NIFTY 50</span><span id="nifty-price" class="price">0.00</span></div>
-        <div class="market-card" style="border-left-color: #ff7b72;"><span>SENSEX</span><span id="sensex-price" class="price">0.00</span></div>
+    <div class="text-center mb-6">
+        <h1 class="text-2xl font-bold text-blue-400">🚀 AI PRO EXPERT TERMINAL</h1>
+        <p class="text-xs text-gray-500">Timeframe: 15M | Prediction Mode</p>
     </div>
 
-    <div class="pivot-bar">
-        <div><span style="color:#f85149">R1:</span> <b id="r1">0</b></div>
-        <div><span style="color:#58a6ff">PP:</span> <b id="pp">0</b></div>
-        <div><span style="color:#3fb950">S1:</span> <b id="s1">0</b></div>
+    <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="card p-4">
+            <p class="text-sm text-gray-400">NIFTY 50</p>
+            <h2 id="nifty-price" class="text-xl font-bold text-green-400">0.00</h2>
+        </div>
+        <div class="card p-4">
+            <p class="text-sm text-gray-400">SENSEX</p>
+            <h2 id="sensex-price" class="text-xl font-bold text-green-400">0.00</h2>
+        </div>
     </div>
 
-    <div class="indicator-grid">
-        <div class="ind-item">MACD SIGNAL<span id="macd-val" class="ind-status">SCANNING...</span></div>
-        <div class="ind-item">ICHIMOKU CLOUD<span id="ichi-val" class="ind-status">SCANNING...</span></div>
-        <div class="ind-item">PIVOT TREND<span id="piv-val" class="ind-status">SCANNING...</span></div>
-        <div class="ind-item">VOLATILITY<span id="vol-val" class="ind-status">STABLE</span></div>
+    <div class="grid grid-cols-2 gap-2 mb-6 text-xs">
+        <div class="card p-3">
+            <p class="text-gray-500">RSI (15M)</p>
+            <p id="vol-val" class="font-bold text-blue-300">RSI: 50.00</p>
+        </div>
+        <div class="card p-3">
+            <p class="text-gray-500">15M RANGE</p>
+            <p id="range-val" class="font-bold">H: -- | L: --</p>
+        </div>
     </div>
 
-    <div id="main-signal">CONNECT UPSTOX</div>
-
-    <div class="token-box">
-        <input type="password" id="token-input" placeholder="Paste Upstox Access Token">
-        <button onclick="saveToken()">ACTIVATE TERMINAL</button>
+    <div class="signal-box mb-6">
+        <h3 id="main-signal" class="text-lg font-black tracking-widest text-gray-400">INITIALIZING...</h3>
     </div>
 
-    <div id="update-time" style="font-size: 10px; color: #8b949e; margin-top: 10px;">Pushbullet: Active ✅</div>
-</div>
+    <button onclick="startTerminal()" class="w-full py-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-all">
+        ACTIVATE TERMINAL
+    </button>
 
-<script>
-    const BRIDGE_URL = "https://ai-trminal.onrender.com/market-data";
-    const PB_TOKEN = "o.z1IwRMfQ6CZJW3E88n56DQMLhqZJyhbV"; 
-    let lastSignal = "";
+    <p class="text-center text-[10px] text-gray-600 mt-4" id="sync-time">Last Sync: --:--:--</p>
 
-    function speak(text) {
-        const speech = new SpeechSynthesisUtterance(text);
-        speech.lang = 'hi-IN';
-        window.speechSynthesis.speak(speech);
-    }
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    async function sendPush(title, message) {
-        try {
-            await fetch('https://api.pushbullet.com/v2/pushes', {
-                method: 'POST',
-                headers: { 'Access-Token': PB_TOKEN, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type: 'note', title: title, body: message })
-            });
-        } catch (e) { console.log("Push Error"); }
-    }
+        // --- APNA FIREBASE CONFIG YAHAN CHECK KAREIN ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCI3Ovxpev0wIUw9mt95_7AWf8-LP1TwAk",
+            authDomain: "ai-pro-terminal.firebaseapp.com",
+            databaseURL: "https://ai-pro-terminal-default-rtdb.firebaseio.com",
+            projectId: "ai-pro-terminal",
+            storageBucket: "ai-pro-terminal.firebasestorage.app",
+            messagingSenderId: "802644474287",
+            appId: "1:802644474287:web:ae40f8ce6550684fce175a"
+        };
 
-    function saveToken() {
-        const token = document.getElementById('token-input').value;
-        if(token) {
-            localStorage.setItem('upstox_token', token);
-            speak("एप्लीकेशन एक्टिवेट हो गई है");
-            updateTerminal();
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const marketRef = ref(db, 'market_data');
+
+        let lastSignal = "";
+
+        // Voice Function
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const speech = new SpeechSynthesisUtterance(text);
+            speech.lang = 'hi-IN';
+            window.speechSynthesis.speak(speech);
         }
-    }
 
-    async function updateTerminal() {
-        const upstoxToken = localStorage.getItem('upstox_token');
-        if(!upstoxToken) return;
+        // Global function for Button
+        window.startTerminal = () => {
+            speak("टर्मिनल सक्रिय हो गया है");
+            console.log("Terminal Activated");
+        };
 
-        try {
-            const res = await fetch(BRIDGE_URL + "?token=" + upstoxToken);
-            const responseData = await res.json();
-            
-            const nifty = responseData.data["NSE_INDEX:Nifty 50"].last_price;
-            const sensex = (responseData.data["BSE_INDEX:SENSEX"] || responseData.data["NSE_INDEX:SENSEX"]).last_price;
+        // Real-time Listener
+        onValue(marketRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                updateUI(data);
+            }
+        });
 
+        function updateUI(data) {
+            const nifty = data.nifty || 0;
+            const sensex = data.sensex || 0;
+            const rsi = data.rsi15m || 50;
+            const h15 = data.high15m || 0;
+            const l15 = data.low15m || 0;
+
+            // Update Prices
             document.getElementById('nifty-price').innerText = nifty.toFixed(2);
             document.getElementById('sensex-price').innerText = sensex.toFixed(2);
+            document.getElementById('vol-val').innerText = `RSI: ${rsi.toFixed(2)}`;
+            document.getElementById('range-val').innerText = `H: ${h15} | L: ${l15}`;
+            document.getElementById('sync-time').innerText = `Last Sync: ${data.timestamp}`;
 
-            // Pivot Calculations (Standard)
-            const pp = nifty; 
-            const r1 = nifty + 42;
-            const s1 = nifty - 42;
-            document.getElementById('pp').innerText = pp.toFixed(0);
-            document.getElementById('r1').innerText = r1.toFixed(0);
-            document.getElementById('s1').innerText = s1.toFixed(0);
-
-            // Indicator Logic
+            // PREDICTION & SIGNAL LOGIC
             const sigEl = document.getElementById('main-signal');
-            const macdEl = document.getElementById('macd-val');
-            const ichiEl = document.getElementById('ichi-val');
-            const pivEl = document.getElementById('piv-val');
+            let currentSignal = "";
 
-            let signalStatus = "";
-
-            if (nifty > 24055) { // Udaharan Bullish Level
-                macdEl.innerText = "BULLISH 🟢"; macdEl.style.color = "#3fb950";
-                ichiEl.innerText = "ABOVE CLOUD ☁️"; ichiEl.style.color = "#3fb950";
-                pivEl.innerText = "ABOVE PP 📈"; pivEl.style.color = "#3fb950";
-                sigEl.innerText = "🚀 STRONG BUY"; sigEl.style.color = "#3fb950";
-                signalStatus = "BUY";
+            if (rsi > 70) {
+                currentSignal = "⚠️ PREDICTION: DOWN (OVERBOUGHT)";
+                sigEl.className = "text-lg font-black tracking-widest text-red-500";
+            } else if (rsi < 30) {
+                currentSignal = "🚀 PREDICTION: UP (OVERSOLD)";
+                sigEl.className = "text-lg font-black tracking-widest text-green-500";
+            } else if (nifty > h15 && h15 > 0) {
+                currentSignal = "🔥 TREND: STRONG UP";
+                sigEl.className = "text-lg font-black tracking-widest text-green-400";
+            } else if (nifty < l15 && l15 > 0) {
+                currentSignal = "🔻 TREND: STRONG DOWN";
+                sigEl.className = "text-lg font-black tracking-widest text-red-400";
             } else {
-                macdEl.innerText = "BEARISH 🔴"; macdEl.style.color = "#f85149";
-                ichiEl.innerText = "BELOW CLOUD ☁️"; ichiEl.style.color = "#f85149";
-                pivEl.innerText = "BELOW PP 📉"; pivEl.style.color = "#f85149";
-                sigEl.innerText = "🔻 SELL / WAIT"; sigEl.style.color = "#f85149";
-                signalStatus = "SELL";
+                currentSignal = "↔️ SIDEWAYS / WAIT";
+                sigEl.className = "text-lg font-black tracking-widest text-gray-500";
             }
 
-            // Voice & Pushbullet Alerts
-            if (signalStatus !== lastSignal) {
-                if (signalStatus === "BUY") {
-                    speak("निफ्टी और सेंसेक्स में खरीदारी का सिग्नल है। इंडिकेटर्स बुलिश हैं।");
-                    sendPush("🚀 AI PRO: BUY SIGNAL", `Nifty: ${nifty} | MACD, Ichimoku & Pivot are BULLISH.`);
-                } else {
-                    speak("बाजार में बिकवाली का दबाव है। इंडिकेटर्स बेयरिश हैं।");
-                    sendPush("🔻 AI PRO: SELL SIGNAL", `Nifty: ${nifty} | MACD, Ichimoku & Pivot are BEARISH.`);
-                }
-                lastSignal = signalStatus;
+            sigEl.innerText = currentSignal;
+
+            // Speak only when signal changes
+            if (currentSignal !== lastSignal) {
+                speak(currentSignal);
+                lastSignal = currentSignal;
             }
-
-            document.getElementById('update-time').innerText = "Last Sync: " + new Date().toLocaleTimeString();
-        } catch (e) { console.log("Data Sync Error"); }
-    }
-
-    setInterval(updateTerminal, 5000);
-    updateTerminal();
-</script>
-
+        }
+    </script>
 </body>
 </html>
+
 
 
 
