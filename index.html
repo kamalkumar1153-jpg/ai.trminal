@@ -12,10 +12,9 @@
     </style>
 </head>
 <body class="p-4">
-
     <div class="text-center mb-6">
         <h1 class="text-2xl font-bold text-blue-400">🚀 AI PRO EXPERT TERMINAL</h1>
-        <p class="text-xs text-gray-500">Timeframe: 15M | Prediction Mode</p>
+        <p class="text-xs text-gray-500">Live Data Sync: Enabled</p>
     </div>
 
     <div class="grid grid-cols-2 gap-4 mb-6">
@@ -29,23 +28,12 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-2 gap-2 mb-6 text-xs">
-        <div class="card p-3">
-            <p class="text-gray-500">RSI (15M)</p>
-            <p id="vol-val" class="font-bold text-blue-300">RSI: 50.00</p>
-        </div>
-        <div class="card p-3">
-            <p class="text-gray-500">15M RANGE</p>
-            <p id="range-val" class="font-bold">H: -- | L: --</p>
-        </div>
-    </div>
-
     <div class="signal-box mb-6">
-        <h3 id="main-signal" class="text-lg font-black tracking-widest text-gray-400">INITIALIZING...</h3>
+        <h3 id="main-signal" class="text-lg font-black tracking-widest text-gray-400">WAITING FOR DATA...</h3>
     </div>
 
-    <button onclick="startTerminal()" class="w-full py-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-all">
-        ACTIVATE TERMINAL
+    <button onclick="activateTerminal()" class="w-full py-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-all shadow-lg">
+        ACTIVATE TERMINAL (VOICE ON)
     </button>
 
     <p class="text-center text-[10px] text-gray-600 mt-4" id="sync-time">Last Sync: --:--:--</p>
@@ -54,7 +42,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // --- APNA FIREBASE CONFIG YAHAN CHECK KAREIN ---
         const firebaseConfig = {
             apiKey: "AIzaSyCI3Ovxpev0wIUw9mt95_7AWf8-LP1TwAk",
             authDomain: "ai-pro-terminal.firebaseapp.com",
@@ -69,9 +56,6 @@
         const db = getDatabase(app);
         const marketRef = ref(db, 'market_data');
 
-        let lastSignal = "";
-
-        // Voice Function
         function speak(text) {
             window.speechSynthesis.cancel();
             const speech = new SpeechSynthesisUtterance(text);
@@ -79,66 +63,24 @@
             window.speechSynthesis.speak(speech);
         }
 
-        // Global function for Button
-        window.startTerminal = () => {
-            speak("टर्मिनल सक्रिय हो गया है");
-            console.log("Terminal Activated");
+        window.activateTerminal = () => {
+            speak("टर्मिनल सक्रिय हो गया है। लाइव डेटा का इंतज़ार है।");
         };
 
-        // Real-time Listener
         onValue(marketRef, (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                updateUI(data);
+                document.getElementById('nifty-price').innerText = data.nifty.toLocaleString('en-IN');
+                document.getElementById('sensex-price').innerText = data.sensex.toLocaleString('en-IN');
+                document.getElementById('sync-time').innerText = `Last Sync: ${data.timestamp}`;
+                document.getElementById('main-signal').innerText = "🔥 TERMINAL IS LIVE";
+                document.getElementById('main-signal').className = "text-lg font-black tracking-widest text-green-500";
             }
         });
-
-        function updateUI(data) {
-            const nifty = data.nifty || 0;
-            const sensex = data.sensex || 0;
-            const rsi = data.rsi15m || 50;
-            const h15 = data.high15m || 0;
-            const l15 = data.low15m || 0;
-
-            // Update Prices
-            document.getElementById('nifty-price').innerText = nifty.toFixed(2);
-            document.getElementById('sensex-price').innerText = sensex.toFixed(2);
-            document.getElementById('vol-val').innerText = `RSI: ${rsi.toFixed(2)}`;
-            document.getElementById('range-val').innerText = `H: ${h15} | L: ${l15}`;
-            document.getElementById('sync-time').innerText = `Last Sync: ${data.timestamp}`;
-
-            // PREDICTION & SIGNAL LOGIC
-            const sigEl = document.getElementById('main-signal');
-            let currentSignal = "";
-
-            if (rsi > 70) {
-                currentSignal = "⚠️ PREDICTION: DOWN (OVERBOUGHT)";
-                sigEl.className = "text-lg font-black tracking-widest text-red-500";
-            } else if (rsi < 30) {
-                currentSignal = "🚀 PREDICTION: UP (OVERSOLD)";
-                sigEl.className = "text-lg font-black tracking-widest text-green-500";
-            } else if (nifty > h15 && h15 > 0) {
-                currentSignal = "🔥 TREND: STRONG UP";
-                sigEl.className = "text-lg font-black tracking-widest text-green-400";
-            } else if (nifty < l15 && l15 > 0) {
-                currentSignal = "🔻 TREND: STRONG DOWN";
-                sigEl.className = "text-lg font-black tracking-widest text-red-400";
-            } else {
-                currentSignal = "↔️ SIDEWAYS / WAIT";
-                sigEl.className = "text-lg font-black tracking-widest text-gray-500";
-            }
-
-            sigEl.innerText = currentSignal;
-
-            // Speak only when signal changes
-            if (currentSignal !== lastSignal) {
-                speak(currentSignal);
-                lastSignal = currentSignal;
-            }
-        }
     </script>
 </body>
 </html>
+
 
 
 
