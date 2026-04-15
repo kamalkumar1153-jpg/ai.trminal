@@ -4,33 +4,36 @@ const admin = require('firebase-admin');
 
 const app = express();
 
-// 1. FIREBASE SETUP
-const serviceAccount = require("./serviceAccountKey.json");
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://ai-pro-terminal-default-rtdb.firebaseio.com"
-});
+// 1. FIREBASE SETUP (Bina JSON file ke)
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: "ai-pro-terminal",
+      clientEmail: "firebase-adminsdk-fbsvc@ai-pro-terminal.iam.gserviceaccount.com",
+      // Private key hum Render ke dashboard se denge
+      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+    }),
+    databaseURL: "https://ai-pro-terminal-default-rtdb.firebaseio.com"
+  });
+}
 const db = admin.database();
 const ref = db.ref("market_data");
 
-// 2. UPSTOX CREDENTIALS (Yahan apni asli details bharein)
+// 2. UPSTOX CREDENTIALS
 const API_KEY = "c6e93739-0e7f-4c2e-9a35-8e0e44ea015a"; 
 const API_SECRET = "13pgvjdvul"; 
 const REDIRECT_URI = "https://ai-trminal-1.onrender.com/callback"; 
 
 let accessToken = "";
 
-// 3. LOGIN ROUTES (Ye code hi login karwayega)
 app.get('/login', (req, res) => {
-    // Ye link aapko Upstox ke login page par le jayega
     const url = `https://api.upstox.com/v2/login/authorization/dialog?response_type=code&client_id=${API_KEY}&redirect_uri=${REDIRECT_URI}`;
     res.redirect(url);
 });
 
 app.get('/callback', async (req, res) => {
-    const code = req.query.code; // Upstox se milne wala temporary code
+    const code = req.query.code;
     try {
-        // Code ko Access Token mein badalna
         const response = await axios.post('https://api.upstox.com/v2/login/authorization/token', 
         new URLSearchParams({
             code: code,
@@ -39,20 +42,15 @@ app.get('/callback', async (req, res) => {
             redirect_uri: REDIRECT_URI,
             grant_type: 'authorization_code'
         }));
-
         accessToken = response.data.access_token;
-        res.send("<h1>Login Successful!</h1><p>Ab aapka terminal live data fetch kar raha hai.</p>");
-        
-        // Data fetch karna shuru karein
+        res.send("<h1>Login Successful!</h1><p>Terminal is now LIVE.</p>");
         startFetching(); 
     } catch (e) {
         res.status(500).send("Login Failed: " + (e.response?.data?.errors[0]?.message || e.message));
     }
 });
 
-// 4. DATA FETCHING ENGINE
 async function startFetching() {
-    console.log("Fetching Started...");
     setInterval(async () => {
         if (!accessToken) return;
         try {
@@ -60,27 +58,24 @@ async function startFetching() {
             const response = await axios.get(quoteUrl, {
                 headers: { 'Authorization': `Bearer ${accessToken}`, 'Accept': 'application/json' }
             });
-
             const data = response.data.data;
             const payload = {
                 nifty: data['NSE_INDEX:Nifty 50'].last_price,
                 sensex: data['BSE_INDEX:SENSEX'].last_price,
-                timestamp: new Date().toLocaleTimeString()
+                timestamp: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })
             };
-
-            // Firebase mein data bhej rahe hain
             await ref.update(payload);
-            console.log("Data Sent to Firebase:", payload.nifty);
+            console.log("Live Price Update:", payload.nifty);
         } catch (error) {
-            console.error("Fetch Error:", error.message);
+            console.error("Error:", error.message);
         }
-    }, 5000); // Har 5 second mein update
+    }, 5000);
 }
 
-app.get('/', (req, res) => res.send("Server is Online! Go to /login to start."));
-
+app.get('/', (req, res) => res.send("Server is Online!"));
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Running on ${PORT}`));
+
 
 
 
