@@ -13,7 +13,7 @@ if (!admin.apps.length) {
             // Ye key Render dashboard ke Environment Variables se aayegi
             privateKey: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : ""
         }),
-        databaseURL: "https://ai-pro-terminal-default-rtdb.firebaseio.com"/
+        databaseURL: https://ai-pro-terminal-default-rtdb.firebaseio.com/
     });
 }
 const db = admin.database();
