@@ -80,10 +80,11 @@ app.get('/callback', async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 10000; // Render hamesha 10000 port mangta hai
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
 
 
 
