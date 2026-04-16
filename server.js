@@ -18,7 +18,11 @@ if (!admin.apps.length) {
 }
 const db = admin.database();
 const ref = db.ref("market_data");
+ref.update({ manual_test: "Testing Firebase Write", time: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' }) });
 
+// Ye bhi purana hai, ise bhi rehne dein
+const API_KEY = "c6e93739-0e7f-4c2e-9a35-8e0e44ea015a";
+// ... baki saara code niche ...
 // --- 2. UPSTOX CREDENTIALS ---
 const API_KEY = "c6e93739-0e7f-4c2e-9a35-8e0e44ea015a"; 
 const API_SECRET = "13pgvjdvul"; 
