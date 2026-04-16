@@ -5,15 +5,25 @@ const admin = require('firebase-admin');
 const app = express();
 
 // --- FIREBASE INITIALIZATION ---
+// --- FIREBASE INITIALIZATION ---
 if (!admin.apps.length) {
     admin.initializeApp({
         credential: admin.credential.cert({
             projectId: "ai-pro-terminal",
             clientEmail: "firebase-adminsdk-fbsvc@ai-pro-terminal.iam.gserviceaccount.com",
-            // Render ki private key ka fix
+            // Ye line dhyan se copy karein
             privateKey: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : ""
         }),
-        databaseURL: "https://ai-pro-terminal-default-rtdb.firebaseio.com"
+        // IS URL KO DHAYAN SE DEKHEIN (us-central1 zaroori hai)
+        databaseURL: "https://ai-pro-terminal-default-rtdb.us-central1.firebasedatabase.app"
+    });
+}
+
+const db = admin.database();
+
+// ✅ Ye line check karegi ki connection hua ya nahi
+db.ref("status").set("Server Connected at " + new Date().toLocaleString('en-IN'));
+
     });
 }
 
