@@ -13,7 +13,7 @@ if (!admin.apps.length) {
             // Render ki private key ka fix
             privateKey: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : ""
         }),
-        databaseURL: "https://ai-pro-terminal-default-rtdb.us-central1.firebasedatabase.app"
+        databaseURL: "https://ai-pro-terminal-default-rtdb.firebaseio.com"
     });
 }
 
