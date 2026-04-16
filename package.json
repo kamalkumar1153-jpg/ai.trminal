@@ -1,19 +1,13 @@
 {
-  "name": "kamal-trader-backend",
+  "name": "ai-pro-terminal",
   "version": "1.0.0",
-  "description": "AI Pro Terminal Backend",
   "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
   "dependencies": {
     "express": "^4.18.2",
     "axios": "^1.4.0",
     "firebase-admin": "^11.10.1"
-  },
-  "engines": {
-    "node": ">=18.0.0"
   }
 }
+
 
 
