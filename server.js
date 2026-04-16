@@ -3,6 +3,17 @@ const axios = require('axios');
 const admin = require('firebase-admin');
 
 const app = express();
+if (!admin.apps.length) {
+    admin.initializeApp({
+        credential: admin.credential.cert({
+            projectId: "ai-pro-terminal",
+            clientEmail: "firebase-adminsdk-fbsvc@ai-pro-terminal.iam.gserviceaccount.com",
+            // Ye line dhyan se copy karein, ye Render ki key ko sahi se padhti hai
+            privateKey: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : ""
+        }),
+        databaseURL: "https://ai-pro-terminal-default-rtdb.us-central1.firebasedatabase.app"
+    });
+}
 
 // --- 1. FIREBASE SETUP (DIRECT CONFIG) ---
 if (!admin.apps.length) {
