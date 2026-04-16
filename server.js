@@ -3,38 +3,26 @@ const axios = require('axios');
 const admin = require('firebase-admin');
 
 const app = express();
+
+// --- SABSE ASAAN INITIALIZATION ---
 if (!admin.apps.length) {
     admin.initializeApp({
         credential: admin.credential.cert({
             projectId: "ai-pro-terminal",
             clientEmail: "firebase-adminsdk-fbsvc@ai-pro-terminal.iam.gserviceaccount.com",
-            // Ye line dhyan se copy karein, ye Render ki key ko sahi se padhti hai
-            privateKey: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : ""
+            // Ye line Render ki private key ko har haal mein fix kar degi
+            privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
         }),
         databaseURL: "https://ai-pro-terminal-default-rtdb.us-central1.firebasedatabase.app"
     });
 }
 
-// --- 1. FIREBASE SETUP (DIRECT CONFIG) ---
-if (!admin.apps.length) {
-    admin.initializeApp({
-        credential: admin.credential.cert({
-            projectId: "ai-pro-terminal",
-            clientEmail: "firebase-adminsdk-fbsvc@ai-pro-terminal.iam.gserviceaccount.com",
-            // Ye Render ke Environment Variable se aayega
-            privateKey: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : ""
-        }),
-        databaseURL: "https://ai-pro-terminal-default-rtdb.us-central1.firebasedatabase.app"
-    });
-}
 const db = admin.database();
 const ref = db.ref("market_data");
-ref.update({ manual_test: "Testing Firebase Write", time: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' }) });
 
-// Ye bhi purana hai, ise bhi rehne dein
-const API_KEY = "c6e93739-0e7f-4c2e-9a35-8e0e44ea015a";
-// ... baki saara code niche ...
-// --- 2. UPSTOX CREDENTIALS ---
+// ✅ Ye line check karegi ki connection hua ya nahi
+ref.child("server_status").set("Online - " + new Date().toLocaleTimeString());
+
 const API_KEY = "c6e93739-0e7f-4c2e-9a35-8e0e44ea015a"; 
 const API_SECRET = "13pgvjdvul"; 
 const REDIRECT_URI = "https://ai-trminal-1.onrender.com/callback"; 
@@ -51,49 +39,31 @@ app.get('/callback', async (req, res) => {
     try {
         const response = await axios.post('https://api.upstox.com/v2/login/authorization/token', 
         new URLSearchParams({
-            code: code,
-            client_id: API_KEY,
-            client_secret: API_SECRET,
-            redirect_uri: REDIRECT_URI,
-            grant_type: 'authorization_code'
+            code: code, client_id: API_KEY, client_secret: API_SECRET, redirect_uri: REDIRECT_URI, grant_type: 'authorization_code'
         }));
         accessToken = response.data.access_token;
-        res.send("<h1>Login Successful!</h1><p>Terminal is now LIVE. You can close this tab.</p>");
-        startFetching(); 
-    } catch (e) {
-        res.status(500).send("Login Failed: " + (e.response?.data?.errors[0]?.message || e.message));
-    }
+        res.send("<h1>Login Successful! Market data starting...</h1>");
+        
+        // Data khichna shuru karein
+        setInterval(async () => {
+            try {
+                const quoteUrl = 'https://api.upstox.com/v2/market-quote/quotes?symbol=NSE_INDEX|Nifty 50,BSE_INDEX|SENSEX';
+                const resQuote = await axios.get(quoteUrl, {
+                    headers: { 'Authorization': `Bearer ${accessToken}`, 'Accept': 'application/json' }
+                });
+                const d = resQuote.data.data;
+                await ref.update({
+                    nifty: d['NSE_INDEX:Nifty 50'].last_price,
+                    sensex: d['BSE_INDEX:SENSEX'].last_price,
+                    time: new Date().toLocaleTimeString('en-IN')
+                });
+            } catch (err) { console.log("Fetch Error: ", err.message); }
+        }, 5000);
+
+    } catch (e) { res.status(500).send("Login Failed"); }
 });
 
-async function startFetching() {
-    console.log("Data Fetching Started...");
-    setInterval(async () => {
-        if (!accessToken) return;
-        try {
-            const quoteUrl = 'https://api.upstox.com/v2/market-quote/quotes?symbol=NSE_INDEX|Nifty 50,BSE_INDEX|SENSEX';
-            const response = await axios.get(quoteUrl, {
-                headers: { 'Authorization': `Bearer ${accessToken}`, 'Accept': 'application/json' }
-            });
-
-            const data = response.data.data;
-            const payload = {
-                nifty: data['NSE_INDEX:Nifty 50'].last_price,
-                sensex: data['BSE_INDEX:SENSEX'].last_price,
-                timestamp: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })
-            };
-
-            await ref.update(payload);
-            console.log("Updated Firebase:", payload.nifty);
-        } catch (error) {
-            console.error("Fetch Error:", error.message);
-        }
-    }, 5000); 
-}
-
-app.get('/', (req, res) => res.send("AI Terminal Backend is Running!"));
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server live on port ${PORT}`));
+app.listen(process.env.PORT || 3000);
 
 
 
