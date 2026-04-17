@@ -1,85 +1,139 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI PRO EXPERT TERMINAL</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
     <style>
-        body { background-color: #0d1117; color: #c9d1d9; font-family: sans-serif; }
-        .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; }
-        .signal-box { border: 2px dashed #30363d; border-radius: 8px; padding: 15px; text-align: center; }
+        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; padding: 20px; }
+        .header { margin-bottom: 30px; }
+        .rocket { font-size: 40px; }
+        
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .card { background: #1e293b; padding: 20px; border-radius: 15px; border: 1px solid #334155; }
+        .label { font-size: 14px; color: #94a3b8; text-transform: uppercase; }
+        .price { font-size: 24px; font-weight: bold; margin-top: 10px; color: #2ecc71; }
+        
+        .signal-box { 
+            background: #1e293b; border: 2px dashed #475569; padding: 30px; 
+            border-radius: 15px; margin: 20px 0; font-size: 22px; font-weight: 800;
+            color: #f1f5f9; min-height: 50px; display: flex; align-items: center; justify-content: center;
+        }
+        
+        .btn-activate {
+            background-color: #059669; color: white; border: none; padding: 18px 30px;
+            font-size: 18px; border-radius: 12px; font-weight: bold; cursor: pointer;
+            width: 100%; transition: 0.3s; box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
+        }
+        .btn-activate:active { transform: scale(0.98); }
+        
+        .sync-info { font-size: 12px; color: #64748b; margin-top: 20px; }
+        .buy-signal { color: #2ecc71 !important; border-color: #2ecc71 !important; }
+        .sell-signal { color: #ef4444 !important; border-color: #ef4444 !important; }
     </style>
 </head>
-<body class="p-4">
-    <div class="text-center mb-6">
-        <h1 class="text-2xl font-bold text-blue-400">🚀 AI PRO EXPERT TERMINAL</h1>
-        <p class="text-xs text-gray-500">Live Data Sync: Enabled</p>
+<body>
+
+    <div class="header">
+        <div class="rocket">🚀</div>
+        <h1 style="margin: 5px 0; font-size: 24px;">AI PRO EXPERT TERMINAL</h1>
+        <p style="color: #64748b; font-size: 14px;">Live Data Sync: <span id="sync-status">Connected</span></p>
     </div>
 
-    <div class="grid grid-cols-2 gap-4 mb-6">
-        <div class="card p-4">
-            <p class="text-sm text-gray-400">NIFTY 50</p>
-            <h2 id="nifty-price" class="text-xl font-bold text-green-400">0.00</h2>
+    <div class="grid-container">
+        <div class="card">
+            <div class="label">NIFTY 50</div>
+            <div id="nifty-price" class="price">0.00</div>
         </div>
-        <div class="card p-4">
-            <p class="text-sm text-gray-400">SENSEX</p>
-            <h2 id="sensex-price" class="text-xl font-bold text-green-400">0.00</h2>
+        <div class="card">
+            <div class="label">SENSEX</div>
+            <div id="sensex-price" class="price">0.00</div>
         </div>
     </div>
 
-    <div class="signal-box mb-6">
-        <h3 id="main-signal" class="text-lg font-black tracking-widest text-gray-400">WAITING FOR DATA...</h3>
+    <div id="signal-display" class="signal-box">
+        WAITING FOR DATA...
     </div>
 
-    <button onclick="activateTerminal()" class="w-full py-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-all shadow-lg">
+    <button id="activateBtn" class="btn-activate">
         ACTIVATE TERMINAL (VOICE ON)
     </button>
 
-    <p class="text-center text-[10px] text-gray-600 mt-4" id="sync-time">Last Sync: --:--:--</p>
+    <div class="sync-info">
+        Last Sync: <span id="last-sync">--:--:--</span>
+    </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
+    <script>
+        // --- APNI FIREBASE CONFIG YAHAN DAALEIN ---
         const firebaseConfig = {
-            apiKey: "AIzaSyCI3Ovxpev0wIUw9mt95_7AWf8-LP1TwAk",
-            authDomain: "ai-pro-terminal.firebaseapp.com",
-            databaseURL: https://ai-pro-terminal-default-rtdb.us-central1.firebasedatabase.app
-            projectId: "ai-pro-terminal",
-            storageBucket: "ai-pro-terminal.firebasestorage.app",
-            messagingSenderId: "802644474287",
-            appId: "1:802644474287:web:ae40f8ce6550684fce175a"
+            databaseURL: "https://ai-pro-terminal-default-rtdb.us-central1.firebasedatabase.app"
         };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const marketRef = ref(db, 'market_data');
+        let lastSpokenSignal = "";
 
+        // Voice Function
         function speak(text) {
-            window.speechSynthesis.cancel();
-            const speech = new SpeechSynthesisUtterance(text);
-            speech.lang = 'hi-IN';
-            window.speechSynthesis.speak(speech);
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Purani awaaz roko
+                const msg = new SpeechSynthesisUtterance(text);
+                msg.lang = 'en-IN'; 
+                msg.rate = 0.9;
+                window.speechSynthesis.speak(msg);
+            }
         }
 
-        window.activateTerminal = () => {
-            speak("टर्मिनल सक्रिय हो गया है। लाइव डेटा का इंतज़ार है।");
-        };
+        // Button Click to enable Voice
+        const activateBtn = document.getElementById('activateBtn');
+        activateBtn.addEventListener('click', () => {
+            speak("Terminal Activated. AI Pro is watching the market.");
+            activateBtn.innerText = "TERMINAL ACTIVE 🔊";
+            activateBtn.style.backgroundColor = "#047857";
+        });
 
-        onValue(marketRef, (snapshot) => {
+        // Firebase Data Listener
+        db.ref("market_data").on("value", (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                document.getElementById('nifty-price').innerText = data.nifty.toLocaleString('en-IN');
-                document.getElementById('sensex-price').innerText = data.sensex.toLocaleString('en-IN');
-                document.getElementById('sync-time').innerText = `Last Sync: ${data.timestamp}`;
-                document.getElementById('main-signal').innerText = "🔥 TERMINAL IS LIVE";
-                document.getElementById('main-signal').className = "text-lg font-black tracking-widest text-green-500";
+                // Prices Update
+                document.getElementById('nifty-price').innerText = data.nifty || "0.00";
+                document.getElementById('sensex-price').innerText = data.sensex || "0.00";
+                document.getElementById('last-sync').innerText = data.last_sync || "--:--:--";
+
+                // Signal Update
+                const signalText = data.signal || "WAITING...";
+                const signalBox = document.getElementById('signal-display');
+                signalBox.innerText = signalText;
+
+                // Style & Voice Logic
+                if (signalText.includes("BUY")) {
+                    signalBox.className = "signal-box buy-signal";
+                    if(lastSpokenSignal !== signalText) {
+                        speak("Buy Signal Detected. Trend is Up.");
+                        lastSpokenSignal = signalText;
+                    }
+                } else if (signalText.includes("SELL")) {
+                    signalBox.className = "signal-box sell-signal";
+                    if(lastSpokenSignal !== signalText) {
+                        speak("Sell Signal Detected. Trend is Down.");
+                        lastSpokenSignal = signalText;
+                    }
+                } else {
+                    signalBox.className = "signal-box";
+                }
             }
+        }, (error) => {
+            console.error("Firebase Error: ", error);
+            document.getElementById('sync-status').innerText = "Disconnected";
         });
     </script>
 </body>
 </html>
+
 
 
 
