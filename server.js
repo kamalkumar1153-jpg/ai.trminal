@@ -1,7 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const admin = require('firebase-admin');
-const { MACD, RSI, IchimokuCloud } = require('technicalindicators');
+const { MACD, RSI } = require('technicalindicators');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -14,67 +14,92 @@ admin.initializeApp({
 });
 const db = admin.database();
 
-// Indicators ke liye data store
-let history = { close: [], high: [], low: [] };
+let history = { close: [] };
+
+// --- 1. TOKEN RECOVERY SYSTEM ---
+// Server start hote hi check karega ki kya koi purana token Firebase mein hai
+async function autoStart() {
+    console.log("Checking for saved token...");
+    const snapshot = await db.ref("auth/token").once("value");
+    const savedToken = snapshot.val();
+    
+    if (savedToken) {
+        console.log("Token found! Starting automation...");
+        setInterval(() => getMarketData(savedToken), 5000);
+    } else {
+        console.log("No token found. Please login via /login");
+    }
+}
+autoStart();
 
 async function getMarketData(accessToken) {
     try {
-        // 1. Get Live Data (LTP)
         const response = await axios.get('https://api.upstox.com/v2/market-quote/quotes?symbol=NSE_INDEX|Nifty%2050', {
             headers: { 'Authorization': `Bearer ${accessToken}`, 'Accept': 'application/json' }
         });
 
         const niftyPrice = response.data.data['NSE_INDEX:Nifty 50'].last_price;
-        
-        // 2. Historical Data (Fake data logic for calculation - As Upstox Free has limits)
-        // Note: Real trading mein hum yahan 100 candles fetch karte hain
-        // Abhi hum calculations ko current price se update kar rahe hain
-        updateHistory(niftyPrice);
+        history.close.push(niftyPrice);
+        if (history.close.length > 50) history.close.shift();
 
-        // 3. INDICATORS CALCULATION
-        const rsiValue = RSI.calculate({ values: history.close, period: 14 }).pop() || 50;
-        const macdData = MACD.calculate({ 
-            values: history.close, fastPeriod: 12, slowPeriod: 26, signalPeriod: 9 
-        }).pop() || { MACD: 0, signal: 0 };
-        
-        const ichimoku = IchimokuCloud.calculate({
-            high: history.high, low: history.low, conversionPeriod: 9, basePeriod: 26, spanPeriod: 52, displacement: 26
-        }).pop();
+        let signal = "ANALYZING...";
+        let rsiVal = 50;
 
-        // 4. MASTER SIGNAL LOGIC (Confirmations)
-        let finalSignal = "WAITING FOR CONFIRMATION...";
-        
-        const isBullish = rsiValue > 55 && macdData.MACD > macdData.signal && (ichimoku ? niftyPrice > ichimoku.spanA : true);
-        const isBearish = rsiValue < 45 && macdData.MACD < macdData.signal && (ichimoku ? niftyPrice < ichimoku.spanA : true);
+        if (history.close.length > 20) {
+            const rsiArr = RSI.calculate({ values: history.close, period: 14 });
+            rsiVal = rsiArr.length > 0 ? rsiArr[rsiArr.length - 1] : 50;
+            
+            const macdArr = MACD.calculate({ values: history.close, fastPeriod: 12, slowPeriod: 26, signalPeriod: 9 });
+            const lastMACD = macdArr.length > 0 ? macdArr[macdArr.length - 1] : { MACD: 0, signal: 0 };
 
-        if (isBullish) finalSignal = "🔥 STRONG BUY NIFTY (CONFIRMED)";
-        else if (isBearish) finalSignal = "❄️ STRONG SELL NIFTY (CONFIRMED)";
+            if (rsiVal > 55 && lastMACD.MACD > lastMACD.signal) signal = "🔥 STRONG BUY";
+            else if (rsiVal < 45 && lastMACD.MACD < lastMACD.signal) signal = "❄️ STRONG SELL";
+            else signal = "⏳ SIDEWAYS (WAIT)";
+        }
 
-        // 5. Update Firebase
         await db.ref("market_data").update({
             nifty: niftyPrice,
-            signal: finalSignal,
-            rsi: rsiValue.toFixed(2),
-            last_sync: new Date().toLocaleTimeString()
+            signal: signal,
+            rsi: rsiVal.toFixed(2),
+            status: "Connected ✅",
+            last_sync: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })
         });
-
     } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Token Expired or API Error");
+        await db.ref("market_data/status").set("Login Expired ❌");
     }
 }
 
-function updateHistory(price) {
-    history.close.push(price);
-    history.high.push(price + 2);
-    history.low.push(price - 2);
-    if (history.close.length > 100) {
-        history.close.shift();
-        history.high.shift();
-        history.low.shift();
-    }
-}
+// --- 2. LOGIN & TOKEN SAVING ---
+app.get('/login', (req, res) => {
+    const loginUrl = `https://api.upstox.com/v2/login/authorization/dialog?client_id=${process.env.API_KEY}&redirect_uri=${process.env.REDIRECT_URI}`;
+    res.redirect(loginUrl);
+});
 
-// ... Baki ka Login aur Server setup purana wala rahega ...
+app.get('/callback', async (req, res) => {
+    const { code } = req.query;
+    try {
+        const tokenResp = await axios.post('https://api.upstox.com/v2/login/authorization/token', 
+        new URLSearchParams({
+            code, client_id: process.env.API_KEY, client_secret: process.env.API_SECRET,
+            redirect_uri: process.env.REDIRECT_URI, grant_type: 'authorization_code'
+        }).toString(), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+
+        const accessToken = tokenResp.data.access_token;
+        
+        // TOKEN KO FIREBASE ME SAVE KAREIN (Memory)
+        await db.ref("auth/token").set(accessToken);
+        
+        setInterval(() => getMarketData(accessToken), 5000);
+        res.send("<h1>Login Successful! Terminal Memory Updated.</h1>");
+    } catch (err) {
+        res.send("Login Failed: " + err.message);
+    }
+});
+
+app.get('/', (req, res) => res.send('AI Pro Terminal is Running...'));
+app.listen(port);
+
 
 
 
