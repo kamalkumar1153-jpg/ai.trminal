@@ -3,46 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI PRO EXPERT TERMINAL V2</title>
+    <title>AI PRO TERMINAL - DUAL MONITOR</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
     <style>
         body { background-color: #0b0f1a; color: #e2e8f0; font-family: 'Inter', sans-serif; text-align: center; margin: 0; padding: 10px; }
         .container { max-width: 500px; margin: auto; }
-        .header { background: #1e293b; padding: 15px; border-radius: 15px; margin-bottom: 15px; border-bottom: 3px solid #3b82f6; }
+        .header { background: #1e293b; padding: 15px; border-radius: 15px; margin-bottom: 10px; border-bottom: 3px solid #3b82f6; }
         
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        /* Dual Price Grid */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
         .card { background: #161e2d; padding: 12px; border-radius: 12px; border: 1px solid #1e293b; }
-        .label { font-size: 11px; color: #64748b; text-transform: uppercase; }
-        .value { font-size: 18px; font-weight: bold; }
+        .label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
+        .value { font-size: 19px; font-weight: bold; margin-top: 5px; }
 
-        /* Indicators Status Styling */
-        .ind-container { display: flex; justify-content: space-around; background: #1e293b; padding: 10px; border-radius: 12px; margin-bottom: 15px; }
-        .ind-item { font-size: 12px; font-weight: bold; padding: 4px 8px; border-radius: 5px; background: #0f172a; }
-        .bull { color: #22c55e; border: 1px solid #22c55e; }
-        .bear { color: #ef4444; border: 1px solid #ef4444; }
-        .neutral { color: #94a3b8; border: 1px solid #334155; }
+        /* Indicator Status Bar */
+        .ind-bar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 10px 0; }
+        .ind-tag { font-size: 10px; font-weight: bold; padding: 6px; border-radius: 6px; background: #1e293b; border: 1px solid #334155; }
+        .bull { color: #22c55e; border-color: #22c55e; background: rgba(34, 197, 94, 0.1); }
+        .bear { color: #ef4444; border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
 
         .signal-box { 
             background: #1e293b; padding: 25px; border-radius: 20px; border: 2px solid #334155;
-            font-size: 22px; font-weight: 900; margin-bottom: 15px;
+            font-size: 22px; font-weight: 900; margin: 15px 0; min-height: 40px;
         }
         
-        .btn { width: 100%; padding: 15px; border-radius: 12px; border: none; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+        .btn { width: 100%; padding: 15px; border-radius: 12px; border: none; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 8px; transition: 0.3s; }
         .btn-voice { background: #10b981; color: white; }
         .btn-login { background: #3b82f6; color: white; }
         
-        .buy { color: #22c55e !important; border-color: #22c55e !important; box-shadow: 0 0 15px rgba(34, 197, 94, 0.3); }
-        .sell { color: #ef4444 !important; border-color: #ef4444 !important; box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
+        .buy-active { color: #22c55e !important; border-color: #22c55e !important; box-shadow: 0 0 20px rgba(34, 197, 94, 0.2); }
+        .sell-active { color: #ef4444 !important; border-color: #ef4444 !important; box-shadow: 0 0 20px rgba(239, 68, 68, 0.2); }
     </style>
 </head>
 <body>
 
     <div class="container">
         <div class="header">
-            <h1 style="margin:0; font-size: 20px;">🚀 AI PRO TERMINAL</h1>
-            <div id="status" style="font-size:12px; color:#94a3b8;">Connecting...</div>
+            <h1 style="margin:0; font-size: 20px;">🚀 AI PRO DUAL TERMINAL</h1>
+            <div id="status" style="font-size:11px; color:#94a3b8; margin-top:5px;">System Active ✅</div>
         </div>
 
         <div class="grid">
@@ -51,24 +51,24 @@
                 <div id="nifty" class="value" style="color:#22c55e;">0.00</div>
             </div>
             <div class="card">
-                <div class="label">RSI (14)</div>
-                <div id="rsi" class="value" style="color:#60a5fa;">--</div>
+                <div class="label">SENSEX</div>
+                <div id="sensex" class="value" style="color:#22c55e;">0.00</div>
             </div>
         </div>
 
-        <div class="ind-container">
-            <div id="ind-macd" class="ind-item neutral">MACD: --</div>
-            <div id="ind-ichi" class="ind-item neutral">ICHI: --</div>
-            <div id="ind-trend" class="ind-item neutral">TREND: --</div>
+        <div class="ind-bar">
+            <div id="tag-rsi" class="ind-tag">RSI: --</div>
+            <div id="tag-macd" class="ind-tag">MACD: --</div>
+            <div id="tag-ichi" class="ind-tag">ICHI: --</div>
         </div>
 
-        <div id="signal-box" class="signal-box">WAITING FOR DATA...</div>
+        <div id="signal-box" class="signal-box">SCANNING MARKET...</div>
 
         <button id="voiceBtn" class="btn btn-voice">🔈 ACTIVATE VOICE ALERTS</button>
         <button onclick="window.location.href='/login'" class="btn btn-login">🔗 RE-CONNECT UPSTOX</button>
 
         <div style="font-size: 10px; color: #475569; margin-top: 10px;">
-            Engine: MACD (12,26,9) | RSI (14) | Ichimoku Cloud (9,26,52)
+            Tracking: Nifty + Sensex | 15m Trend + Ichimoku + MACD
         </div>
     </div>
 
@@ -91,46 +91,52 @@
 
         document.getElementById('voiceBtn').addEventListener('click', function() {
             voiceEnabled = true;
-            this.innerHTML = "🔊 VOICE IS ON";
+            this.innerHTML = "🔊 VOICE MONITORING ON";
             this.style.background = "#059669";
-            speak("Voice system active. Ichimoku and MACD monitoring started.");
+            speak("Dual monitoring activated. Nifty and Sensex are now live.");
         });
 
         db.ref("market_data").on("value", (snapshot) => {
             const data = snapshot.val();
             if (data) {
                 document.getElementById('nifty').innerText = data.nifty || "0.00";
-                document.getElementById('rsi').innerText = data.rsi || "--";
+                document.getElementById('sensex').innerText = data.sensex || "0.00";
+                document.getElementById('tag-rsi').innerText = "RSI: " + (data.rsi || "--");
                 document.getElementById('status').innerText = data.status || "Connected ✅";
                 
                 const signalText = data.signal || "WAITING...";
                 const signalBox = document.getElementById('signal-box');
                 signalBox.innerText = signalText;
 
-                // --- Visual Indicator Logic ---
-                const macdEl = document.getElementById('ind-macd');
-                const ichiEl = document.getElementById('ind-ichi');
+                // Visual Tag Logic
+                const rsiTag = document.getElementById('tag-rsi');
+                const macdTag = document.getElementById('tag-macd');
+                const ichiTag = document.getElementById('tag-ichi');
 
                 if (signalText.includes("BUY")) {
-                    signalBox.className = "signal-box buy";
-                    macdEl.className = "ind-item bull"; macdEl.innerText = "MACD: BUY";
-                    ichiEl.className = "ind-item bull"; ichiEl.innerText = "ICHI: ABOVE";
-                    if (lastSignal !== signalText) { speak("Strong Buy Signal Detected. All indicators confirmed."); lastSignal = signalText; }
+                    signalBox.className = "signal-box buy-active";
+                    rsiTag.className = "ind-tag bull";
+                    macdTag.className = "ind-tag bull"; macdTag.innerText = "MACD: BUY";
+                    ichiTag.className = "ind-tag bull"; ichiTag.innerText = "ICHI: ABOVE";
+                    if (lastSignal !== signalText) { speak("Confirmed Buy Signal on Sensex and Nifty."); lastSignal = signalText; }
                 } else if (signalText.includes("SELL")) {
-                    signalBox.className = "signal-box sell";
-                    macdEl.className = "ind-item bear"; macdEl.innerText = "MACD: SELL";
-                    ichiEl.className = "ind-item bear"; ichiEl.innerText = "ICHI: BELOW";
-                    if (lastSignal !== signalText) { speak("Strong Sell Signal Detected. Indicators are Bearish."); lastSignal = signalText; }
+                    signalBox.className = "signal-box sell-active";
+                    rsiTag.className = "ind-tag bear";
+                    macdTag.className = "ind-tag bear"; macdTag.innerText = "MACD: SELL";
+                    ichiTag.className = "ind-tag bear"; ichiTag.innerText = "ICHI: BELOW";
+                    if (lastSignal !== signalText) { speak("Strong Sell Alert. Market Trend is Down."); lastSignal = signalText; }
                 } else {
                     signalBox.className = "signal-box";
-                    macdEl.className = "ind-item neutral"; macdEl.innerText = "MACD: WAIT";
-                    ichiEl.className = "ind-item neutral"; ichiEl.innerText = "ICHI: CLOUD";
+                    rsiTag.className = "ind-tag";
+                    macdTag.className = "ind-tag"; macdTag.innerText = "MACD: WAIT";
+                    ichiTag.className = "ind-tag"; ichiTag.innerText = "ICHI: CLOUD";
                 }
             }
         });
     </script>
 </body>
 </html>
+
 
 
 
