@@ -1,138 +1,137 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI PRO EXPERT TERMINAL</title>
+    <title>AI PRO EXPERT TERMINAL V2</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
     <style>
-        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; padding: 20px; }
-        .header { margin-bottom: 30px; }
-        .rocket { font-size: 40px; }
+        body { background-color: #0b0f1a; color: #e2e8f0; font-family: 'Inter', sans-serif; text-align: center; margin: 0; padding: 10px; }
+        .container { max-width: 500px; margin: auto; }
+        .header { background: #1e293b; padding: 15px; border-radius: 15px; margin-bottom: 15px; border-bottom: 3px solid #3b82f6; }
         
-        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .card { background: #1e293b; padding: 20px; border-radius: 15px; border: 1px solid #334155; }
-        .label { font-size: 14px; color: #94a3b8; text-transform: uppercase; }
-        .price { font-size: 24px; font-weight: bold; margin-top: 10px; color: #2ecc71; }
-        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .card { background: #161e2d; padding: 12px; border-radius: 12px; border: 1px solid #1e293b; }
+        .label { font-size: 11px; color: #64748b; text-transform: uppercase; }
+        .value { font-size: 18px; font-weight: bold; }
+
+        /* Indicators Status Styling */
+        .ind-container { display: flex; justify-content: space-around; background: #1e293b; padding: 10px; border-radius: 12px; margin-bottom: 15px; }
+        .ind-item { font-size: 12px; font-weight: bold; padding: 4px 8px; border-radius: 5px; background: #0f172a; }
+        .bull { color: #22c55e; border: 1px solid #22c55e; }
+        .bear { color: #ef4444; border: 1px solid #ef4444; }
+        .neutral { color: #94a3b8; border: 1px solid #334155; }
+
         .signal-box { 
-            background: #1e293b; border: 2px dashed #475569; padding: 30px; 
-            border-radius: 15px; margin: 20px 0; font-size: 22px; font-weight: 800;
-            color: #f1f5f9; min-height: 50px; display: flex; align-items: center; justify-content: center;
+            background: #1e293b; padding: 25px; border-radius: 20px; border: 2px solid #334155;
+            font-size: 22px; font-weight: 900; margin-bottom: 15px;
         }
         
-        .btn-activate {
-            background-color: #059669; color: white; border: none; padding: 18px 30px;
-            font-size: 18px; border-radius: 12px; font-weight: bold; cursor: pointer;
-            width: 100%; transition: 0.3s; box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
-        }
-        .btn-activate:active { transform: scale(0.98); }
+        .btn { width: 100%; padding: 15px; border-radius: 12px; border: none; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+        .btn-voice { background: #10b981; color: white; }
+        .btn-login { background: #3b82f6; color: white; }
         
-        .sync-info { font-size: 12px; color: #64748b; margin-top: 20px; }
-        .buy-signal { color: #2ecc71 !important; border-color: #2ecc71 !important; }
-        .sell-signal { color: #ef4444 !important; border-color: #ef4444 !important; }
+        .buy { color: #22c55e !important; border-color: #22c55e !important; box-shadow: 0 0 15px rgba(34, 197, 94, 0.3); }
+        .sell { color: #ef4444 !important; border-color: #ef4444 !important; box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="rocket">🚀</div>
-        <h1 style="margin: 5px 0; font-size: 24px;">AI PRO EXPERT TERMINAL</h1>
-        <p style="color: #64748b; font-size: 14px;">Live Data Sync: <span id="sync-status">Connected</span></p>
-    </div>
-
-    <div class="grid-container">
-        <div class="card">
-            <div class="label">NIFTY 50</div>
-            <div id="nifty-price" class="price">0.00</div>
+    <div class="container">
+        <div class="header">
+            <h1 style="margin:0; font-size: 20px;">🚀 AI PRO TERMINAL</h1>
+            <div id="status" style="font-size:12px; color:#94a3b8;">Connecting...</div>
         </div>
-        <div class="card">
-            <div class="label">SENSEX</div>
-            <div id="sensex-price" class="price">0.00</div>
+
+        <div class="grid">
+            <div class="card">
+                <div class="label">NIFTY 50</div>
+                <div id="nifty" class="value" style="color:#22c55e;">0.00</div>
+            </div>
+            <div class="card">
+                <div class="label">RSI (14)</div>
+                <div id="rsi" class="value" style="color:#60a5fa;">--</div>
+            </div>
         </div>
-    </div>
 
-    <div id="signal-display" class="signal-box">
-        WAITING FOR DATA...
-    </div>
+        <div class="ind-container">
+            <div id="ind-macd" class="ind-item neutral">MACD: --</div>
+            <div id="ind-ichi" class="ind-item neutral">ICHI: --</div>
+            <div id="ind-trend" class="ind-item neutral">TREND: --</div>
+        </div>
 
-    <button id="activateBtn" class="btn-activate">
-        ACTIVATE TERMINAL (VOICE ON)
-    </button>
+        <div id="signal-box" class="signal-box">WAITING FOR DATA...</div>
 
-    <div class="sync-info">
-        Last Sync: <span id="last-sync">--:--:--</span>
+        <button id="voiceBtn" class="btn btn-voice">🔈 ACTIVATE VOICE ALERTS</button>
+        <button onclick="window.location.href='/login'" class="btn btn-login">🔗 RE-CONNECT UPSTOX</button>
+
+        <div style="font-size: 10px; color: #475569; margin-top: 10px;">
+            Engine: MACD (12,26,9) | RSI (14) | Ichimoku Cloud (9,26,52)
+        </div>
     </div>
 
     <script>
-        // --- APNI FIREBASE CONFIG YAHAN DAALEIN ---
-        const firebaseConfig = {
-            databaseURL: "https://ai-pro-terminal-default-rtdb.us-central1.firebasedatabase.app"
-        };
+        const firebaseConfig = { databaseURL: "https://ai-pro-terminal-default-rtdb.us-central1.firebasedatabase.app" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let lastSpokenSignal = "";
+        let lastSignal = "";
+        let voiceEnabled = false;
 
-        // Voice Function
         function speak(text) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // Purani awaaz roko
+            if (voiceEnabled && 'speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
                 const msg = new SpeechSynthesisUtterance(text);
-                msg.lang = 'en-IN'; 
-                msg.rate = 0.9;
+                msg.lang = 'en-IN';
                 window.speechSynthesis.speak(msg);
             }
         }
 
-        // Button Click to enable Voice
-        const activateBtn = document.getElementById('activateBtn');
-        activateBtn.addEventListener('click', () => {
-            speak("Terminal Activated. AI Pro is watching the market.");
-            activateBtn.innerText = "TERMINAL ACTIVE 🔊";
-            activateBtn.style.backgroundColor = "#047857";
+        document.getElementById('voiceBtn').addEventListener('click', function() {
+            voiceEnabled = true;
+            this.innerHTML = "🔊 VOICE IS ON";
+            this.style.background = "#059669";
+            speak("Voice system active. Ichimoku and MACD monitoring started.");
         });
 
-        // Firebase Data Listener
         db.ref("market_data").on("value", (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                // Prices Update
-                document.getElementById('nifty-price').innerText = data.nifty || "0.00";
-                document.getElementById('sensex-price').innerText = data.sensex || "0.00";
-                document.getElementById('last-sync').innerText = data.last_sync || "--:--:--";
-
-                // Signal Update
+                document.getElementById('nifty').innerText = data.nifty || "0.00";
+                document.getElementById('rsi').innerText = data.rsi || "--";
+                document.getElementById('status').innerText = data.status || "Connected ✅";
+                
                 const signalText = data.signal || "WAITING...";
-                const signalBox = document.getElementById('signal-display');
+                const signalBox = document.getElementById('signal-box');
                 signalBox.innerText = signalText;
 
-                // Style & Voice Logic
+                // --- Visual Indicator Logic ---
+                const macdEl = document.getElementById('ind-macd');
+                const ichiEl = document.getElementById('ind-ichi');
+
                 if (signalText.includes("BUY")) {
-                    signalBox.className = "signal-box buy-signal";
-                    if(lastSpokenSignal !== signalText) {
-                        speak("Buy Signal Detected. Trend is Up.");
-                        lastSpokenSignal = signalText;
-                    }
+                    signalBox.className = "signal-box buy";
+                    macdEl.className = "ind-item bull"; macdEl.innerText = "MACD: BUY";
+                    ichiEl.className = "ind-item bull"; ichiEl.innerText = "ICHI: ABOVE";
+                    if (lastSignal !== signalText) { speak("Strong Buy Signal Detected. All indicators confirmed."); lastSignal = signalText; }
                 } else if (signalText.includes("SELL")) {
-                    signalBox.className = "signal-box sell-signal";
-                    if(lastSpokenSignal !== signalText) {
-                        speak("Sell Signal Detected. Trend is Down.");
-                        lastSpokenSignal = signalText;
-                    }
+                    signalBox.className = "signal-box sell";
+                    macdEl.className = "ind-item bear"; macdEl.innerText = "MACD: SELL";
+                    ichiEl.className = "ind-item bear"; ichiEl.innerText = "ICHI: BELOW";
+                    if (lastSignal !== signalText) { speak("Strong Sell Signal Detected. Indicators are Bearish."); lastSignal = signalText; }
                 } else {
                     signalBox.className = "signal-box";
+                    macdEl.className = "ind-item neutral"; macdEl.innerText = "MACD: WAIT";
+                    ichiEl.className = "ind-item neutral"; ichiEl.innerText = "ICHI: CLOUD";
                 }
             }
-        }, (error) => {
-            console.error("Firebase Error: ", error);
-            document.getElementById('sync-status').innerText = "Disconnected";
         });
     </script>
 </body>
 </html>
+
 
 
 
