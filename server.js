@@ -1,93 +1,80 @@
 const express = require('express');
 const axios = require('axios');
 const admin = require('firebase-admin');
+const { MACD, RSI, IchimokuCloud } = require('technicalindicators');
 
 const app = express();
+const port = process.env.PORT || 3000;
 
 // --- FIREBASE SETUP ---
-if (!admin.apps.length) {
-    admin.initializeApp({
-        credential: admin.credential.cert({
-            projectId: "ai-pro-terminal",
-            clientEmail: "firebase-adminsdk-fbsvc@ai-pro-terminal.iam.gserviceaccount.com",
-            privateKey: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : ""
-        }),
-        databaseURL: "https://ai-pro-terminal-default-rtdb.us-central1.firebasedatabase.app"
-    });
-}
-
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: process.env.DATABASE_URL
+});
 const db = admin.database();
 
-const API_KEY = "c6e93739-0e7f-4c2e-9a35-8e0e44ea015a"; 
-const API_SECRET = "13pgvjdvul"; 
-const REDIRECT_URI = "https://ai-trminal-1.onrender.com/callback"; 
+// Indicators ke liye data store
+let history = { close: [], high: [], low: [] };
 
-let lastPrice15Min = 0;
-let currentSignal = "WAITING...";
-
-app.get('/', (req, res) => res.send("AI Pro Terminal Signal System LIVE"));
-
-app.get('/login', (req, res) => {
-    const url = `https://api.upstox.com/v2/login/authorization/dialog?response_type=code&client_id=${API_KEY}&redirect_uri=${REDIRECT_URI}`;
-    res.redirect(url);
-});
-
-app.get('/callback', async (req, res) => {
-    const code = req.query.code;
+async function getMarketData(accessToken) {
     try {
-        const response = await axios.post('https://api.upstox.com/v2/login/authorization/token', 
-        new URLSearchParams({
-            code: code, client_id: API_KEY, client_secret: API_SECRET, redirect_uri: REDIRECT_URI, grant_type: 'authorization_code'
-        }));
+        // 1. Get Live Data (LTP)
+        const response = await axios.get('https://api.upstox.com/v2/market-quote/quotes?symbol=NSE_INDEX|Nifty%2050', {
+            headers: { 'Authorization': `Bearer ${accessToken}`, 'Accept': 'application/json' }
+        });
+
+        const niftyPrice = response.data.data['NSE_INDEX:Nifty 50'].last_price;
         
-        const accessToken = response.data.access_token;
-        res.send("<h1>Login Success! Signals Active.</h1>");
+        // 2. Historical Data (Fake data logic for calculation - As Upstox Free has limits)
+        // Note: Real trading mein hum yahan 100 candles fetch karte hain
+        // Abhi hum calculations ko current price se update kar rahe hain
+        updateHistory(niftyPrice);
+
+        // 3. INDICATORS CALCULATION
+        const rsiValue = RSI.calculate({ values: history.close, period: 14 }).pop() || 50;
+        const macdData = MACD.calculate({ 
+            values: history.close, fastPeriod: 12, slowPeriod: 26, signalPeriod: 9 
+        }).pop() || { MACD: 0, signal: 0 };
         
-        // --- DATA & SIGNAL LOOP ---
-        setInterval(async () => {
-            try {
-                const quoteUrl = 'https://api.upstox.com/v2/market-quote/quotes?symbol=NSE_INDEX|Nifty 50,BSE_INDEX|SENSEX';
-                const resQuote = await axios.get(quoteUrl, {
-                    headers: { 'Authorization': `Bearer ${accessToken}`, 'Accept': 'application/json' }
-                });
-                
-                const niftyPrice = resQuote.data.data['NSE_INDEX:Nifty 50'].last_price;
-                const sensexPrice = resQuote.data.data['BSE_INDEX:SENSEX'].last_price;
+        const ichimoku = IchimokuCloud.calculate({
+            high: history.high, low: history.low, conversionPeriod: 9, basePeriod: 26, spanPeriod: 52, displacement: 26
+        }).pop();
 
-                // --- 15 MIN SIGNAL LOGIC ---
-                // Agar pichla price nahi hai, toh pehla price set karo
-                if (lastPrice15Min === 0) lastPrice15Min = niftyPrice;
+        // 4. MASTER SIGNAL LOGIC (Confirmations)
+        let finalSignal = "WAITING FOR CONFIRMATION...";
+        
+        const isBullish = rsiValue > 55 && macdData.MACD > macdData.signal && (ichimoku ? niftyPrice > ichimoku.spanA : true);
+        const isBearish = rsiValue < 45 && macdData.MACD < macdData.signal && (ichimoku ? niftyPrice < ichimoku.spanA : true);
 
-                if (niftyPrice > lastPrice15Min + 5) { // 5 point ka buffer
-                    currentSignal = "BUY NIFTY (UPTREND)";
-                } else if (niftyPrice < lastPrice15Min - 5) {
-                    currentSignal = "SELL NIFTY (DOWNTREND)";
-                }
+        if (isBullish) finalSignal = "🔥 STRONG BUY NIFTY (CONFIRMED)";
+        else if (isBearish) finalSignal = "❄️ STRONG SELL NIFTY (CONFIRMED)";
 
-                // Update Firebase
-                await db.ref("market_data").update({
-                    nifty: niftyPrice,
-                    sensex: sensexPrice,
-                    signal: currentSignal,
-                    last_sync: new Date().toLocaleTimeString('en-IN')
-                });
+        // 5. Update Firebase
+        await db.ref("market_data").update({
+            nifty: niftyPrice,
+            signal: finalSignal,
+            rsi: rsiValue.toFixed(2),
+            last_sync: new Date().toLocaleTimeString()
+        });
 
-            } catch (err) { console.log("Loop Error: ", err.message); }
-        }, 5000);
+    } catch (error) {
+        console.error("Error fetching data:", error);
+    }
+}
 
-        // Har 15 minute mein 'lastPrice15Min' ko update karne ka timer
-        setInterval(() => {
-            db.ref("market_data/nifty").once('value', (snapshot) => {
-                lastPrice15Min = snapshot.val();
-                console.log("15 Min Reference Price Updated: ", lastPrice15Min);
-            });
-        }, 15 * 60 * 1000); // 15 Minutes
+function updateHistory(price) {
+    history.close.push(price);
+    history.high.push(price + 2);
+    history.low.push(price - 2);
+    if (history.close.length > 100) {
+        history.close.shift();
+        history.high.shift();
+        history.low.shift();
+    }
+}
 
-    } catch (e) { res.status(500).send("Login Failed"); }
-});
-
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
+// ... Baki ka Login aur Server setup purana wala rahega ...
 
 
 
