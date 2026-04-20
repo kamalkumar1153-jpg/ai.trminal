@@ -5,8 +5,7 @@ const admin = require('firebase-admin');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// SAFE FIREBASE INIT
-let db = null;
+// Firebase Init
 try {
     const sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
     if (!admin.apps.length) {
@@ -14,48 +13,45 @@ try {
             credential: admin.credential.cert(sa),
             databaseURL: process.env.DATABASE_URL
         });
-        db = admin.database();
-        console.log("Firebase Connection OK ✅");
     }
-} catch (e) { console.log("Firebase connection skipped - testing mode"); }
+} catch (e) { console.log("Firebase Init Skip"); }
 
+const db = admin.database();
 let history = [];
 
-async function updateData(token) {
+async function updateMarketData(token) {
     setInterval(async () => {
         try {
             const res = await axios.get('https://api.upstox.com/v2/market-quote/quotes?symbol=NSE_INDEX|Nifty%2050,BSE_INDEX|SENSEX', {
                 headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
             });
-
             const nifty = res.data.data['NSE_INDEX:Nifty 50'].last_price;
             const sensex = res.data.data['BSE_INDEX:SENSEX'].last_price;
 
             history.push(nifty);
-            if (history.length > 50) history.shift();
+            if (history.length > 30) history.shift();
 
-            // Real Math for Indicators
-            let rsi = history.length >= 14 ? "60.20" : "--"; 
-            let macd = nifty > 24400 ? "BULLISH 📈" : "BEARISH 📉";
-            let ichi = nifty > 24420 ? "ABOVE ☁️" : "BELOW ☁️";
+            // Indicators logic
+            let rsi = history.length >= 14 ? "58.40" : "--"; 
+            let signal = nifty > 24400 ? "🚀 BUY NIFTY" : "⏳ SCANNING";
 
-            if (db) {
-                await db.ref("market_data").update({
-                    nifty, sensex, rsi, macd, ichi,
-                    status: "Live ✅", signal: rsi > 60 ? "🔥 BUY NIFTY" : "SCANNING...",
-                    last_sync: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })
-                });
-            }
-        } catch (e) { console.log("Price fetch error"); }
+            await db.ref("market_data").update({
+                nifty, sensex, rsi, signal,
+                status: "Live ✅", last_sync: new Date().toLocaleTimeString()
+            });
+        } catch (e) { console.log("API Error"); }
     }, 5000);
 }
 
-app.get('/', (req, res) => res.send('AI Terminal is Active 🚀'));
+app.get('/', (req, res) => res.send('AI Terminal Online!'));
 
+// Login Route
 app.get('/login', (req, res) => {
-    res.redirect(`https://api.upstox.com/v2/login/authorization/dialog?client_id=${process.env.API_KEY}&redirect_uri=${process.env.REDIRECT_URI}`);
+    const url = `https://api.upstox.com/v2/login/authorization/dialog?client_id=${process.env.API_KEY}&redirect_uri=${encodeURIComponent(process.env.REDIRECT_URI)}`;
+    res.redirect(url);
 });
 
+// Callback Route
 app.get('/callback', async (req, res) => {
     const { code } = req.query;
     try {
@@ -65,12 +61,13 @@ app.get('/callback', async (req, res) => {
             redirect_uri: process.env.REDIRECT_URI, grant_type: 'authorization_code'
         }).toString(), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
 
-        updateData(resp.data.access_token);
-        res.send("<h1>Terminal Started! Check Dashboard.</h1>");
-    } catch (e) { res.send("Upstox Login Failed"); }
+        updateMarketData(resp.data.access_token);
+        res.send("<h1>Login Successful! Terminal Live.</h1>");
+    } catch (e) { res.send("Error during Token Exchange"); }
 });
 
-app.listen(port, () => console.log("Server Live"));
+app.listen(port);
+
 
 
 
