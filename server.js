@@ -5,40 +5,36 @@ const admin = require('firebase-admin');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Firebase Init
+// ===== Firebase =====
 let db = null;
 try {
     const sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-    if (!admin.apps.length) {
-        admin.initializeApp({
-            credential: admin.credential.cert(sa),
-            databaseURL: process.env.DATABASE_URL
-        });
-    }
+    admin.initializeApp({
+        credential: admin.credential.cert(sa),
+        databaseURL: process.env.DATABASE_URL
+    });
     db = admin.database();
 } catch (e) {
-    console.log("Firebase Init Skip");
+    console.log("Firebase Skip");
 }
 
-// ====== INDICATORS ======
+// ===== INDICATORS =====
 
-// RSI Calculation
 function calculateRSI(data, period = 14) {
     if (data.length < period + 1) return null;
 
-    let gains = 0, losses = 0;
+    let gain = 0, loss = 0;
 
     for (let i = data.length - period; i < data.length; i++) {
         let diff = data[i] - data[i - 1];
-        if (diff >= 0) gains += diff;
-        else losses -= diff;
+        if (diff > 0) gain += diff;
+        else loss -= diff;
     }
 
-    let rs = gains / (losses || 1);
+    let rs = gain / (loss || 1);
     return (100 - (100 / (1 + rs))).toFixed(2);
 }
 
-// EMA Calculation
 function calculateEMA(data, period = 9) {
     if (data.length < period) return null;
 
@@ -49,12 +45,57 @@ function calculateEMA(data, period = 9) {
         ema = data[i] * k + ema * (1 - k);
     }
 
-    return ema.toFixed(2);
+    return ema;
 }
 
-// ====== MARKET DATA ======
+function calculateMACD(data) {
+    if (data.length < 26) return null;
+
+    let ema12 = calculateEMA(data, 12);
+    let ema26 = calculateEMA(data, 26);
+
+    return (ema12 - ema26).toFixed(2);
+}
+
+// ===== AUTO TRADING ENGINE =====
 
 let history = [];
+let currentTrade = null;
+let balance = 100000; // ₹1L
+
+function executeTrade(price, signal) {
+
+    // BUY
+    if (signal.includes("BUY") && !currentTrade) {
+        currentTrade = {
+            type: "BUY",
+            entry: price,
+            qty: 1
+        };
+        console.log("BUY @", price);
+    }
+
+    // SELL
+    else if (signal.includes("SELL") && currentTrade) {
+        let pnl = (price - currentTrade.entry) * currentTrade.qty;
+        balance += pnl;
+
+        console.log("SELL @", price, "PnL:", pnl);
+
+        if (db) {
+            db.ref("trades").push({
+                entry: currentTrade.entry,
+                exit: price,
+                pnl,
+                time: new Date().toLocaleTimeString()
+            });
+        }
+
+        currentTrade = null;
+    }
+}
+
+// ===== MARKET LOOP =====
 
 async function updateMarketData(token) {
     setInterval(async () => {
@@ -63,8 +104,7 @@ async function updateMarketData(token) {
                 'https://api.upstox.com/v2/market-quote/quotes?symbol=NSE_INDEX|Nifty%2050,BSE_INDEX|SENSEX',
                 {
                     headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/json'
+                        'Authorization': `Bearer ${token}`
                     }
                 }
             );
@@ -72,39 +112,43 @@ async function updateMarketData(token) {
             const nifty = res.data.data['NSE_INDEX:Nifty 50'].last_price;
             const sensex = res.data.data['BSE_INDEX:SENSEX'].last_price;
 
-            // Store history
             history.push(nifty);
-            if (history.length > 50) history.shift();
+            if (history.length > 60) history.shift();
 
-            // Indicators
             let rsi = calculateRSI(history);
             let ema = calculateEMA(history);
+            let macd = calculateMACD(history);
 
-            // Smart Signal Logic
-            let signal = "⏳ SCANNING";
+            // SIGNAL LOGIC
+            let signal = "⏳ WAIT";
 
-            if (rsi && ema) {
+            if (rsi && ema && macd) {
                 if (rsi < 30 && nifty > ema) {
-                    signal = "🚀 STRONG BUY";
+                    signal = "🚀 BUY";
                 } else if (rsi > 70 && nifty < ema) {
-                    signal = "🔻 STRONG SELL";
+                    signal = "🔻 SELL";
                 } else if (nifty > ema) {
                     signal = "📈 BUY TREND";
-                } else if (nifty < ema) {
+                } else {
                     signal = "📉 SELL TREND";
                 }
             }
 
-            // Firebase Update
+            // AUTO TRADE
+            executeTrade(nifty, signal);
+
+            // SAVE DATA
             if (db) {
-                await db.ref("market_data").update({
+                await db.ref("market_data").set({
                     nifty,
                     sensex,
                     rsi: rsi || "--",
-                    ema: ema || "--",
+                    ema: ema ? ema.toFixed(2) : "--",
+                    macd: macd || "--",
                     signal,
-                    status: "Live ✅",
-                    last_sync: new Date().toLocaleTimeString()
+                    balance,
+                    status: "Auto Trading ON 🤖",
+                    time: new Date().toLocaleTimeString()
                 });
             }
 
@@ -116,19 +160,17 @@ async function updateMarketData(token) {
     }, 5000);
 }
 
-// ====== ROUTES ======
+// ===== ROUTES =====
 
 app.get('/', (req, res) => {
-    res.send('🚀 AI Trading Terminal Online!');
+    res.send("🚀 AI AUTO TRADING RUNNING");
 });
 
-// Login
 app.get('/login', (req, res) => {
     const url = `https://api.upstox.com/v2/login/authorization/dialog?client_id=${process.env.API_KEY}&redirect_uri=${encodeURIComponent(process.env.REDIRECT_URI)}`;
     res.redirect(url);
 });
 
-// Callback
 app.get('/callback', async (req, res) => {
     const { code } = req.query;
 
@@ -147,17 +189,9 @@ app.get('/callback', async (req, res) => {
 
         updateMarketData(resp.data.access_token);
 
-        res.send("<h1>✅ Login Successful! AI Terminal Live 🚀</h1>");
+        res.send("✅ Auto Trading Started");
 
     } catch (e) {
-        console.log("Token Error:", e.message);
-        res.send("❌ Error during Token Exchange");
-    }
-});
-
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-});
 
 
 
