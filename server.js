@@ -1,18 +1,3 @@
-const express = require('express');
-const axios = require('axios');
-const admin = require('firebase-admin');
-
-const app = express();
-const port = process.env.PORT || 3000;
-
-// Firebase Setup
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: process.env.DATABASE_URL
-});
-const db = admin.database();
-
 async function getPrices(token) {
     try {
         const url = 'https://api.upstox.com/v2/market-quote/quotes?symbol=NSE_INDEX|Nifty%2050,BSE_INDEX|SENSEX';
@@ -23,38 +8,37 @@ async function getPrices(token) {
         const nifty = res.data.data['NSE_INDEX:Nifty 50'].last_price;
         const sensex = res.data.data['BSE_INDEX:SENSEX'].last_price;
 
+        // History maintain karein (Indicators ke liye 14-20 candles chahiye)
+        history.nifty.push(nifty);
+        if (history.nifty.length > 50) history.nifty.shift();
+
+        let rsiVal = "--";
+        let signal = "SCANNING...";
+
+        if (history.nifty.length >= 14) {
+            const rsis = RSI.calculate({ values: history.nifty, period: 14 });
+            rsiVal = rsis.length > 0 ? rsis[rsis.length - 1].toFixed(2) : "--";
+
+            // Signal Logic
+            if (rsiVal > 60) signal = "🔥 BUY NIFTY (UPTREND)";
+            else if (rsiVal < 40) signal = "❄️ SELL NIFTY (DOWNTREND)";
+            else signal = "⏳ SIDEWAYS MARKET";
+        }
+
+        // Firebase ko data bhein jo Dashboard ke labels se match kare
         await db.ref("market_data").update({
             nifty: nifty,
             sensex: sensex,
-            status: "Live ✅",
+            rsi: rsiVal,
+            macd: (rsiVal > 50 ? "BULLISH" : "BEARISH"), // Temporary logic for MACD label
+            ichi: (nifty > 24400 ? "ABOVE" : "BELOW"),   // Temporary logic for ICHI label
+            signal: signal,
+            status: "Connected ✅",
             last_sync: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })
         });
-    } catch (e) { console.log("Price fetch error"); }
+    } catch (e) { console.log("Fetch Error"); }
 }
 
-app.get('/', (req, res) => res.send('Server is Running!'));
-
-app.get('/login', (req, res) => {
-    const loginUrl = `https://api.upstox.com/v2/login/authorization/dialog?client_id=${process.env.API_KEY}&redirect_uri=${process.env.REDIRECT_URI}`;
-    res.redirect(loginUrl);
-});
-
-app.get('/callback', async (req, res) => {
-    const { code } = req.query;
-    try {
-        const tokenResp = await axios.post('https://api.upstox.com/v2/login/authorization/token', 
-        new URLSearchParams({
-            code, client_id: process.env.API_KEY, client_secret: process.env.API_SECRET,
-            redirect_uri: process.env.REDIRECT_URI, grant_type: 'authorization_code'
-        }).toString(), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
-
-        const token = tokenResp.data.access_token;
-        setInterval(() => getPrices(token), 5000);
-        res.send("<h1>Terminal Active!</h1>");
-    } catch (err) { res.send("Error: " + err.message); }
-});
-
-app.listen(port, () => console.log("Server Started"));
 
 
                                            
