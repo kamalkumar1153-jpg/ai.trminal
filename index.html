@@ -1,120 +1,74 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI PRO DUAL TERMINAL</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
-    <style>
-        body { background-color: #0b0f1a; color: #e2e8f0; font-family: 'Inter', sans-serif; text-align: center; margin: 0; padding: 10px; }
-        .container { max-width: 500px; margin: auto; }
-        .header { background: #1e293b; padding: 15px; border-radius: 15px; margin-bottom: 10px; border-bottom: 3px solid #3b82f6; }
-        
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        .card { background: #161e2d; padding: 12px; border-radius: 12px; border: 1px solid #1e293b; }
-        .label { font-size: 11px; color: #64748b; text-transform: uppercase; }
-        .value { font-size: 19px; font-weight: bold; margin-top: 5px; }
+<title>AI AUTO TRADER</title>
 
-        .ind-bar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 10px 0; }
-        .ind-tag { font-size: 10px; font-weight: bold; padding: 6px; border-radius: 6px; background: #1e293b; border: 1px solid #334155; }
-        .bull { color: #22c55e; border-color: #22c55e; background: rgba(34, 197, 94, 0.1); }
-        .bear { color: #ef4444; border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
-        .signal-box { 
-            background: #1e293b; padding: 25px; border-radius: 20px; border: 2px solid #334155;
-            font-size: 22px; font-weight: 900; margin: 15px 0; min-height: 40px;
-        }
-        
-        .btn-voice { width: 100%; padding: 15px; border-radius: 12px; border: none; font-size: 16px; font-weight: bold; cursor: pointer; background: #10b981; color: white; }
-        
-        .buy-active { color: #22c55e !important; border-color: #22c55e !important; box-shadow: 0 0 20px rgba(34, 197, 94, 0.2); }
-        .sell-active { color: #ef4444 !important; border-color: #ef4444 !important; box-shadow: 0 0 20px rgba(239, 68, 68, 0.2); }
-    </style>
+<style>
+body { background:#0b1220; color:white; text-align:center; font-family:Arial; }
+.card { background:#1b2335; padding:15px; margin:10px; border-radius:10px; }
+.big { font-size:26px; color:#00ff99; }
+.signal { font-size:22px; padding:20px; border-radius:10px; margin:10px; }
+</style>
 </head>
+
 <body>
 
-    <div class="container">
-        <div class="header">
-            <h1 style="margin:0; font-size: 20px;">🚀 AI PRO DUAL TERMINAL</h1>
-            <div id="status" style="font-size:11px; color:#94a3b8; margin-top:5px;">System Ready</div>
-        </div>
+<h2>🤖 AI AUTO TRADER</h2>
 
-        <div class="grid">
-            <div class="card">
-                <div class="label">NIFTY 50</div>
-                <div id="nifty" class="value" style="color:#22c55e;">0.00</div>
-            </div>
-            <div class="card">
-                <div class="label">SENSEX</div>
-                <div id="sensex" class="value" style="color:#22c55e;">0.00</div>
-            </div>
-        </div>
+<div class="card">NIFTY <div id="nifty" class="big">--</div></div>
+<div class="card">SENSEX <div id="sensex" class="big">--</div></div>
 
-        <div class="ind-bar">
-            <div id="tag-rsi" class="ind-tag">RSI: --</div>
-            <div id="tag-macd" class="ind-tag">MACD: --</div>
-            <div id="tag-ichi" class="ind-tag">ICHI: --</div>
-        </div>
+<div class="card">
+<div id="rsi">RSI: --</div>
+<div id="macd">MACD: --</div>
+</div>
 
-        <div id="signal-box" class="signal-box">ANALYZING...</div>
+<div class="card">💰 Balance <div id="balance" class="big">--</div></div>
 
-        <button id="voiceBtn" class="btn-voice">🔈 ACTIVATE VOICE ALERTS</button>
+<div id="signal" class="signal">WAIT...</div>
 
-        <div style="font-size: 10px; color: #475569; margin-top: 15px;">
-            Dual Tracking Mode | Automatic Data Sync
-        </div>
-    </div>
+<button onclick="speak()">🔊 Voice</button>
 
-    <script>
-        const firebaseConfig = { databaseURL: "https://ai-pro-terminal-default-rtdb.us-central1.firebasedatabase.app" };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+<script>
+const firebaseConfig = {
+  // apna config
+};
 
-        let lastSignal = "";
-        let voiceEnabled = false;
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-        function speak(text) {
-            if (voiceEnabled && 'speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const msg = new SpeechSynthesisUtterance(text);
-                msg.lang = 'en-IN';
-                window.speechSynthesis.speak(msg);
-            }
-        }
+let lastSignal = "";
 
-        document.getElementById('voiceBtn').addEventListener('click', function() {
-            voiceEnabled = true;
-            this.innerHTML = "🔊 VOICE ALERTS ON";
-            this.style.background = "#059669";
-            speak("Voice monitoring active.");
-        });
+db.ref("market_data").on("value", snap => {
+    let d = snap.val();
+    if (!d) return;
 
-        db.ref("market_data").on("value", (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                document.getElementById('nifty').innerText = data.nifty || "0.00";
-                document.getElementById('sensex').innerText = data.sensex || "0.00";
-                document.getElementById('tag-rsi').innerText = "RSI: " + (data.rsi || "--");
-                document.getElementById('status').innerText = data.status || "Connected ✅";
-                
-                const signalText = data.signal || "WAITING...";
-                const signalBox = document.getElementById('signal-box');
-                signalBox.innerText = signalText;
+    nifty.innerText = d.nifty;
+    sensex.innerText = d.sensex;
+    rsi.innerText = "RSI: " + d.rsi;
+    macd.innerText = "MACD: " + d.macd;
+    balance.innerText = d.balance;
+    signal.innerText = d.signal;
 
-                if (signalText.includes("BUY")) {
-                    signalBox.className = "signal-box buy-active";
-                    if (lastSignal !== signalText) { speak("Buy Signal Detected."); lastSignal = signalText; }
-                } else if (signalText.includes("SELL")) {
-                    signalBox.className = "signal-box sell-active";
-                    if (lastSignal !== signalText) { speak("Sell Signal Detected."); lastSignal = signalText; }
-                } else {
-                    signalBox.className = "signal-box";
-                }
-            }
-        });
-    </script>
+    if (d.signal !== lastSignal) {
+        speakText(d.signal);
+        lastSignal = d.signal;
+    }
+});
+
+function speakText(text) {
+    let s = new SpeechSynthesisUtterance(text);
+    speechSynthesis.speak(s);
+}
+
+function speak() {
+    speakText(signal.innerText);
+}
+</script>
+
 </body>
 </html>
 
