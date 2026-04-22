@@ -1,36 +1,66 @@
-        async function updateData() {
-            try {
-                const res = await fetch('https://docs.google.com/spreadsheets/d/1IMXl6rCvbTRFNfeypfY4KpEdeFAsnJ0rh04t46ujcoI/export?format=csv');
-                const csvText = await res.text();
-                const rows = csvText.split('\n');
-                
-                const columns = rows[0].split(',');
-                const niftyPrice = columns[0].replace(/"/g, '').trim(); 
-                
-                // Column E (Index 4) se AI Signal uthana
-                const aiSignal = columns[4].replace(/"/g, '').trim();
+// 1. Google Sheet ka Link (CSV Format)
+const sheetCsvUrl = 'https://docs.google.com/spreadsheets/d/1IMXl6rCvbTRFNfeypfY4KpEdeFAsnJ0rh04t46ujcoI/export?format=csv';
 
-                if(niftyPrice) {
-                    document.getElementById('nifty').innerText = "₹" + niftyPrice;
-                }
-                
-                if(aiSignal) {
-                    document.getElementById('signal').innerText = aiSignal;
-                    // Dynamic Colors
-                    if(aiSignal.includes("BUY")) {
-                        document.getElementById('signal').style.color = "#4ade80";
-                    } else if(aiSignal.includes("SELL")) {
-                        document.getElementById('signal').style.color = "#f87171";
-                    } else {
-                        document.getElementById('signal').style.color = "#f1c40f";
-                    }
-                }
+// 2. Data Fetch Karne wala Function
+async function updateTerminal() {
+    try {
+        console.log("Syncing with Google Sheets...");
+        
+        // Sheet se data fetch karna
+        const response = await fetch(sheetCsvUrl);
+        if (!response.ok) throw new Error('Network response was not ok');
+        
+        const csvText = await response.text();
+        const rows = csvText.split('\n');
+        
+        // Row 1 ke Columns ko split karna
+        const cols = rows[0].split(',');
 
-                document.getElementById('time').innerText = new Date().toLocaleTimeString();
-            } catch (e) {
-                console.log("Re-Syncing Indicators...");
+        // 3. Data Mapping (A1, B1, C1, D1, E1)
+        const niftyPrice = cols[0].replace(/"/g, '').trim();  // Column A
+        const sensexPrice = cols[1].replace(/"/g, '').trim(); // Column B
+        const rsiValue   = cols[2].replace(/"/g, '').trim(); // Column C
+        const trend      = cols[3].replace(/"/g, '').trim(); // Column D
+        const masterSig  = cols[4].replace(/"/g, '').trim(); // Column E
+
+        // 4. HTML Elements Update karna
+        if (niftyPrice) {
+            document.getElementById('nifty').innerText = "₹" + niftyPrice;
+        }
+        
+        if (sensexPrice) {
+            document.getElementById('sensex').innerText = "₹" + sensexPrice;
+        }
+
+        if (masterSig) {
+            const sigBox = document.getElementById('signal');
+            sigBox.innerText = masterSig;
+
+            // 5. Dynamic Colors (Signal ke hisaab se)
+            if (masterSig.includes("BUY")) {
+                sigBox.style.color = "#4ade80"; // Green
+            } else if (masterSig.includes("SELL")) {
+                sigBox.style.color = "#f87171"; // Red
+            } else {
+                sigBox.style.color = "#f1c40f"; // Yellow
             }
         }
+
+        // Time Update
+        document.getElementById('time').innerText = new Date().toLocaleTimeString();
+
+    } catch (error) {
+        console.error("Error fetching data:", error);
+        document.getElementById('time').innerText = "Re-syncing...";
+    }
+}
+
+// 6. Har 10 Second mein update (10000ms)
+setInterval(updateTerminal, 10000);
+
+// Initial Call (Page load hote hi pehli baar chalega)
+updateTerminal();
+
 
 
 
