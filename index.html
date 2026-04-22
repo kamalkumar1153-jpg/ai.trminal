@@ -1,76 +1,64 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>AI AUTO TRADER</title>
-
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
-
-<style>
-body { background:#0b1220; color:white; text-align:center; font-family:Arial; }
-.card { background:#1b2335; padding:15px; margin:10px; border-radius:10px; }
-.big { font-size:26px; color:#00ff99; }
-.signal { font-size:22px; padding:20px; border-radius:10px; margin:10px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI AUTO TRADER</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <style>
+        body { background: #0b111e; color: white; font-family: sans-serif; text-align: center; }
+        .card { background: #1a2332; margin: 10px; padding: 20px; border-radius: 10px; border-bottom: 2px solid #2ecc71; }
+        .value { font-size: 24px; font-weight: bold; color: #2ecc71; }
+        .label { color: #94a3b8; font-size: 14px; margin-bottom: 5px; }
+    </style>
 </head>
-
 <body>
+    <h2>🤖 AI AUTO TRADER</h2>
+    
+    <div class="card">
+        <div class="label">NIFTY</div>
+        <div id="nifty" class="value">--</div>
+    </div>
 
-<h2>🤖 AI AUTO TRADER</h2>
+    <div class="card">
+        <div class="label">SENSEX</div>
+        <div id="sensex" class="value">--</div>
+    </div>
 
-<div class="card">NIFTY <div id="nifty" class="big">--</div></div>
-<div class="card">SENSEX <div id="sensex" class="big">--</div></div>
+    <div class="card">
+        <div class="label">RSI: <span id="rsi">--</span></div>
+        <div id="signal" class="value">WAITING...</div>
+    </div>
 
-<div class="card">
-<div id="rsi">RSI: --</div>
-<div id="macd">MACD: --</div>
-</div>
+    <script>
+        // --- YEH BADLO: Firebase Console -> Project Settings se copy karein ---
+        const firebaseConfig = {
+            apiKey: "AIzaSy...",
+            authDomain: "apka-project.firebaseapp.com",
+            databaseURL: "https://apka-project-default-rtdb.firebaseio.com",
+            projectId: "apka-project",
+            storageBucket: "apka-project.appspot.com",
+            appId: "1:..."
+        };
 
-<div class="card">💰 Balance <div id="balance" class="big">--</div></div>
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-<div id="signal" class="signal">WAIT...</div>
-
-<button onclick="speak()">🔊 Voice</button>
-
-<script>
-const firebaseConfig = {
-  // apna config
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-let lastSignal = "";
-
-db.ref("market_data").on("value", snap => {
-    let d = snap.val();
-    if (!d) return;
-
-    nifty.innerText = d.nifty;
-    sensex.innerText = d.sensex;
-    rsi.innerText = "RSI: " + d.rsi;
-    macd.innerText = "MACD: " + d.macd;
-    balance.innerText = d.balance;
-    signal.innerText = d.signal;
-
-    if (d.signal !== lastSignal) {
-        speakText(d.signal);
-        lastSignal = d.signal;
-    }
-});
-
-function speakText(text) {
-    let s = new SpeechSynthesisUtterance(text);
-    speechSynthesis.speak(s);
-}
-
-function speak() {
-    speakText(signal.innerText);
-}
-</script>
-
+        // Real-time data update
+        db.ref("market_data").on("value", (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                document.getElementById("nifty").innerText = data.nifty;
+                document.getElementById("sensex").innerText = data.sensex;
+                document.getElementById("rsi").innerText = data.rsi;
+                document.getElementById("signal").innerText = data.signal;
+            }
+        });
+    </script>
 </body>
 </html>
+
 
 
 
