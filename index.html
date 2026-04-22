@@ -3,66 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI TERMINAL PRO</title>
+    <title>AI TERMINAL - GOOGLE DATA</title>
     <style>
-        body { background: #0b111e; color: white; font-family: sans-serif; text-align: center; padding: 10px; }
-        .container { max-width: 450px; margin: auto; }
-        .widget-card { background: #1a2332; margin: 15px 0; border-radius: 15px; overflow: hidden; border: 1px solid #2e394d; min-height: 125px; }
-        .signal-card { padding: 25px; background: #1a2332; border-radius: 15px; border-bottom: 5px solid #f1c40f; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-        .signal-text { font-size: 32px; font-weight: bold; color: #f1c40f; margin-top: 10px; }
+        body { background: #0b111e; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
+        .container { max-width: 400px; margin: auto; }
+        .card { background: #1a2332; margin: 15px 0; padding: 25px; border-radius: 20px; border-left: 6px solid #4285f4; }
+        .label { color: #94a3b8; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        .price { font-size: 38px; font-weight: bold; color: #4285f4; margin: 10px 0; }
+        .signal { font-size: 24px; font-weight: bold; color: #f1c40f; }
+        .footer { font-size: 11px; color: #64748b; margin-top: 20px; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2 style="color: #4285f4; margin-bottom: 20px;">🤖 AI LIVE TERMINAL</h2>
-
-        <div class="widget-card">
-            <div class="tradingview-widget-container">
-                <div class="tradingview-widget-container__widget"></div>
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-                {
-                "symbol": "NSE:NIFTY1!",
-                "colorTheme": "dark",
-                "isTransparent": true,
-                "locale": "in"
-                }
-                </script>
-            </div>
+        <h2 style="color: #4285f4;">📊 AI GOOGLE TERMINAL</h2>
+        
+        <div class="card">
+            <div class="label">NIFTY 50 (Google)</div>
+            <div id="nifty" class="price">Connecting...</div>
         </div>
 
-        <div class="widget-card">
-            <div class="tradingview-widget-container">
-                <div class="tradingview-widget-container__widget (1000425446.jpg)"></div>
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-                {
-                "symbol": "BSE:SENSEX",
-                "colorTheme": "dark",
-                "isTransparent": true,
-                "locale": "in"
-                }
-                </script>
-            </div>
+        <div class="card" style="border-left-color: #34a853;">
+            <div class="label">SENSEX (Google)</div>
+            <div id="sensex" class="price">Connecting...</div>
         </div>
 
-        <div class="signal-card">
-            <div style="color: #94a3b8; font-size: 14px; text-transform: uppercase;">AI Analysis</div>
-            <div id="ai-signal" class="signal-text">📊 SCANNING...</div>
-            <div style="font-size: 11px; color: #64748b; margin-top: 15px;">Target: 24,400 | Live Future Data</div>
+        <div class="card" style="border-left-color: #f1c40f;">
+            <div class="label">AI ANALYSIS</div>
+            <div id="signal" class="signal">SCANNING...</div>
+        </div>
+
+        <div class="footer">
+            Source: Google Finance | Sync: <span id="time">--:--:--</span>
         </div>
     </div>
 
     <script>
-        function updateSignal() {
-            const signals = ["🚀 BULLISH", "📉 BEARISH", "📊 NEUTRAL", "🔥 STRONG BUY"];
-            const random = signals[Math.floor(Math.random() * signals.length)];
-            document.getElementById('ai-signal').innerText = random;
+        async function fetchGoogleData() {
+            try {
+                // Google Finance Tickers: NIFTY_50:INDEXNSE and SENSEX:INDEXBOM
+                const tickers = ["NIFTY_50:INDEXNSE", "SENSEX:INDEXBOM"];
+                
+                // Proxy ka use kar rahe hain taaki Google data block na kare
+                const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://www.google.com/finance/quote/NIFTY_50:INDEXNSE')}`);
+                const data = await response.json();
+                
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(data.contents, 'text/html');
+                
+                // Google ka latest price selector
+                const priceElement = doc.querySelector(".YMl-qc.fxKbKc");
+                if (priceElement) {
+                    const priceText = priceElement.innerText;
+                    document.getElementById('nifty').innerText = "₹" + priceText;
+                    
+                    // Simple Signal Logic
+                    const priceNum = parseFloat(priceText.replace(/,/g, ''));
+                    if (priceNum > 24400) {
+                        document.getElementById('signal').innerText = "🚀 BULLISH";
+                        document.getElementById('signal').style.color = "#4ade80";
+                    } else {
+                        document.getElementById('signal').innerText = "📉 BEARISH";
+                        document.getElementById('signal').style.color = "#f87171";
+                    }
+                }
+
+                // Time update
+                document.getElementById('time').innerText = new Date().toLocaleTimeString();
+
+            } catch (err) {
+                console.log("Retrying Google Sync...");
+            }
         }
-        setInterval(updateSignal, 60000);
-        updateSignal();
+
+        // Har 10 second mein update
+        setInterval(fetchGoogleData, 10000);
+        fetchGoogleData();
     </script>
 </body>
 </html>
+
 
 
 
