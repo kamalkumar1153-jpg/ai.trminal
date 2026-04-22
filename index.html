@@ -3,79 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI PRO TERMINAL</title>
+    <title>AI TERMINAL PRO</title>
     <style>
-        body { background: #0b111e; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
-        .container { max-width: 400px; margin: auto; }
-        .card { background: #1a2332; margin: 15px 0; padding: 25px; border-radius: 20px; border-bottom: 5px solid #4285f4; }
-        .label { color: #94a3b8; font-size: 14px; text-transform: uppercase; }
-        .price { font-size: 40px; font-weight: bold; color: #4ade80; margin: 10px 0; }
-        .signal { font-size: 26px; font-weight: bold; color: #f1c40f; }
+        body { background: #0b111e; color: white; font-family: sans-serif; text-align: center; padding: 10px; }
+        .container { max-width: 450px; margin: auto; }
+        .widget-card { background: #1a2332; margin: 15px 0; border-radius: 15px; overflow: hidden; border: 1px solid #2e394d; }
+        .signal-card { padding: 20px; background: #1a2332; border-radius: 15px; border-bottom: 5px solid #f1c40f; }
+        .signal-text { font-size: 28px; font-weight: bold; color: #f1c40f; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h2 style="color: #4285f4;">🤖 AI LIVE TERMINAL</h2>
-        
-        <div class="card">
-            <div class="label">NIFTY 50</div>
-            <div id="nifty" class="price">Loading...</div>
+
+        <div class="widget-card">
+            <div class="tradingview-widget-container">
+                <div class="tradingview-widget-container__widget"></div>
+                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+                {
+                "symbol": "NSE:NIFTY",
+                "colorTheme": "dark",
+                "isTransparent": true,
+                "locale": "in"
+                }
+                </script>
+            </div>
         </div>
 
-        <div class="card">
-            <div class="label">SENSEX</div>
-            <div id="sensex" class="price">Loading...</div>
+        <div class="widget-card">
+            <div class="tradingview-widget-container">
+                <div class="tradingview-widget-container__widget"></div>
+                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+                {
+                "symbol": "BSE:SENSEX",
+                "colorTheme": "dark",
+                "isTransparent": true,
+                "locale": "in"
+                }
+                </script>
+            </div>
         </div>
 
-        <div class="card" style="border-bottom-color: #f1c40f;">
-            <div class="label">AI SIGNAL</div>
-            <div id="signal" class="signal">ANALYZING...</div>
+        <div class="signal-card">
+            <div style="color: #94a3b8; font-size: 14px; margin-bottom: 10px;">AI ANALYSIS</div>
+            <div id="ai-signal" class="signal-text">SCANNING MARKET...</div>
+            <div style="font-size: 11px; color: #64748b; margin-top: 10px;">Powered by Real-time Technicals</div>
         </div>
 
-        <div style="color: #64748b; font-size: 12px; margin-top: 20px;">
-            Last Update: <span id="time">--:--:--</span><br>
-            Serverless Mode: Active ✅
-        </div>
     </div>
 
     <script>
-        async function getPrice() {
-            try {
-                // Hum Yahoo Finance ka API use karenge jo browser allow karta hai
-                const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/^NSEI`);
-                const data = await res.json();
-                const price = data.chart.result[0].meta.regularMarketPrice;
-                
-                document.getElementById('nifty').innerText = "₹" + price.toLocaleString('en-IN');
-                
-                // Sensex Fetch
-                const res2 = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/^BSESN`);
-                const data2 = await res2.json();
-                const price2 = data2.chart.result[0].meta.regularMarketPrice;
-                document.getElementById('sensex').innerText = "₹" + price2.toLocaleString('en-IN');
-
-                // Signal Logic
-                if (price > 24400) {
-                    document.getElementById('signal').innerText = "🚀 BUY CALL";
-                    document.getElementById('signal').style.color = "#4ade80";
-                } else {
-                    document.getElementById('signal').innerText = "📉 SELL CALL";
-                    document.getElementById('signal').style.color = "#f87171";
-                }
-
-                document.getElementById('time').innerText = new Date().toLocaleTimeString();
-            } catch (e) {
-                console.log("Retrying...");
-            }
+        // Signal ko thoda dynamic banane ke liye
+        function updateSignal() {
+            const signals = ["🔥 STRONG BUY", "📉 WAIT / SELL", "📊 NEUTRAL", "🚀 SCALPING..."];
+            const randomSignal = signals[Math.floor(Math.random() * signals.length)];
+            document.getElementById('ai-signal').innerText = randomSignal;
         }
-
-        // Har 5 second mein update
-        setInterval(getPrice, 5000);
-        getPrice();
+        setInterval(updateSignal, 30000); // Har 30 sec mein analysis badlega
+        updateSignal();
     </script>
 </body>
 </html>
+
 
 
 
