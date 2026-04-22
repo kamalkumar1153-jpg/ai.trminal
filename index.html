@@ -3,105 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI AUTO TRADER - LIVE</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <title>AI PRO TERMINAL - LIVE</title>
     <style>
-        body { 
-            background: #0b111e; 
-            color: white; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            text-align: center; 
-            margin: 0;
-            padding: 20px;
-        }
+        body { background: #0b111e; color: white; font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; }
         .container { max-width: 450px; margin: auto; }
-        .card { 
-            background: #1a2332; 
-            margin: 15px 0; 
-            padding: 20px; 
-            border-radius: 12px; 
-            border-bottom: 4px solid #2ecc71;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-        }
-        .value { font-size: 32px; font-weight: bold; color: #2ecc71; margin-top: 10px; }
-        .label { color: #94a3b8; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
-        .status-bar { font-size: 13px; color: #64748b; margin-top: 20px; font-style: italic; }
-        h2 { margin-bottom: 30px; letter-spacing: 2px; color: #f1f5f9; }
-        #signal { color: #f1c40f; } /* Default Waiting Color */
+        .card { background: #1a2332; margin: 15px 0; padding: 25px; border-radius: 20px; border-bottom: 5px solid #4285f4; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .label { color: #94a3b8; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .price { font-size: 42px; font-weight: bold; color: #4ade80; }
+        .signal-card { border-bottom-color: #f1c40f; }
+        .signal-text { font-size: 28px; color: #f1c40f; font-weight: bold; }
+        .status { font-size: 12px; color: #64748b; margin-top: 20px; }
+        iframe { display: none; } /* Hidden scraper */
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>🤖 AI AUTO TRADER</h2>
-        
+        <h2 style="color: #4285f4; margin-bottom: 5px;">🤖 AI LIVE TERMINAL</h2>
+        <p style="color: #94a3b8; font-size: 13px; margin-bottom: 30px;">Direct Google Finance Integration</p>
+
         <div class="card">
             <div class="label">NIFTY 50</div>
-            <div id="nifty" class="value">--</div>
+            <div id="nifty-price" class="price">Fetching...</div>
         </div>
 
         <div class="card">
             <div class="label">SENSEX</div>
-            <div id="sensex" class="value">--</div>
+            <div id="sensex-price" class="price">Fetching...</div>
         </div>
 
-        <div class="card" style="border-bottom-color: #3498db;">
+        <div class="card signal-card">
             <div class="label">AI SIGNAL</div>
-            <div id="signal" class="value">SCANNING...</div>
+            <div id="ai-signal" class="signal-text">ANALYZING...</div>
         </div>
 
-        <div class="status-bar">
-            Backend Status: <span id="status">Connecting...</span> | 
-            Time: <span id="time">--:--:--</span>
+        <div class="status">
+            Last Update: <span id="sync-time">--:--:--</span><br>
+            Serverless Mode: Active ✅
         </div>
     </div>
 
     <script>
-        // Aapka Firebase Configuration (Updated with your data)
-        const firebaseConfig = {
-            apiKey: "AIzaSyAB6k07n5Xs8wk1R7rlpldCldmdjpw1NHg",
-            authDomain: "ai-pro-terminal.firebaseapp.com",
-            databaseURL: "https://ai-pro-terminal-default-rtdb.firebaseio.com",
-            projectId: "ai-pro-terminal",
-            storageBucket: "ai-pro-terminal.firebasestorage.app",
-            messagingSenderId: "922428332789",
-            appId: "1:922428332789:web:9f6edba9ac1655e75fc3bc",
-            measurementId: "G-VKZ9TD9KN4"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        // Database listener
-        db.ref("market_data").on("value", (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                // UI update
-                document.getElementById("nifty").innerText = data.nifty || "0.00";
-                document.getElementById("sensex").innerText = data.sensex || "0.00";
-                document.getElementById("signal").innerText = data.signal || "WAITING";
-                document.getElementById("status").innerText = data.status || "Live";
-                document.getElementById("time").innerText = data.last_sync || "--:--";
-
-                // Dynamic Colors for Signal
-                const signalEl = document.getElementById("signal");
-                if(data.signal && data.signal.includes("BUY")) {
-                    signalEl.style.color = "#2ecc71"; // Green
-                } else if(data.signal && data.signal.includes("SELL")) {
-                    signalEl.style.color = "#e74c3c"; // Red
+        async function fetchMarketData() {
+            try {
+                // Hum proxy use kar rahe hain taaki direct browser se data utha sakein
+                const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://www.google.com/finance/quote/NIFTY_50:INDEXNSE')}`);
+                const data = await response.json();
+                
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(data.contents, 'text/html');
+                
+                // Google Finance ka Price Selector
+                const nifty = doc.querySelector(".YMl-qc.fxKbKc").innerText;
+                
+                document.getElementById('nifty-price').innerText = "₹" + nifty;
+                
+                // Simple Signal Logic
+                const niftyVal = parseFloat(nifty.replace(/,/g, ''));
+                if (niftyVal > 24400) {
+                    document.getElementById('ai-signal').innerText = "🚀 BUY CALL";
+                    document.getElementById('ai-signal').style.color = "#4ade80";
                 } else {
-                    signalEl.style.color = "#f1c40f"; // Yellow
+                    document.getElementById('ai-signal').innerText = "📉 SELL CALL";
+                    document.getElementById('ai-signal').style.color = "#f87171";
                 }
+
+                document.getElementById('sync-time').innerText = new Date().toLocaleTimeString();
+            } catch (error) {
+                console.log("Retry in 10s...");
             }
-        }, (error) => {
-            console.error("Firebase Read Error: ", error);
-            document.getElementById("status").innerText = "Check Rules!";
-        });
+        }
+
+        // Har 10 second mein update
+        setInterval(fetchMarketData, 10000);
+        fetchMarketData();
     </script>
 </body>
 </html>
+
 
 
 
