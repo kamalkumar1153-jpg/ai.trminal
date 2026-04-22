@@ -5,59 +5,36 @@ const admin = require('firebase-admin');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// CRITICAL: Server crash hone se rokne ke liye
-process.on('uncaughtException', (err) => {
-    console.error('SERVER ERROR IGNORED:', err.message);
-});
+// SERVER CRASH PREVENTER
+process.on('uncaughtException', (err) => console.log('Error Handled:', err.message));
 
-// Firebase Initialization
+// FIREBASE SETUP (Safe Mode)
 try {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
     if (!admin.apps.length) {
+        const sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
         admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount),
+            credential: admin.credential.cert(sa),
             databaseURL: "https://ai-pro-terminal-default-rtdb.firebaseio.com"
         });
         console.log("Firebase Connected ✅");
     }
 } catch (e) {
-    console.error("Firebase Auth Error: Check your FIREBASE_SERVICE_ACCOUNT variable");
+    console.log("Firebase Error: Variables check karein");
 }
 
 const db = admin.database();
 
-// Live Market Sync Function
-async function startMarketSync(token) {
-    setInterval(async () => {
-        try {
-            const response = await axios.get('https://api.upstox.com/v2/market-quote/quotes?symbol=NSE_INDEX|Nifty%2050,BSE_INDEX|SENSEX', {
-                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
-            });
-
-            const nifty = response.data.data['NSE_INDEX:Nifty 50'].last_price;
-            const sensex = response.data.data['BSE_INDEX:SENSEX'].last_price;
-
-            await db.ref("market_data").update({
-                nifty: nifty,
-                sensex: sensex,
-                signal: nifty > 24400 ? "BUY NIFTY" : "SELL NIFTY",
-                last_sync: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })
-            });
-            console.log(`Updated: Nifty ${nifty}`);
-        } catch (err) {
-            console.log("Sync Error: Token might be expired");
-        }
-    }, 5000); // Har 5 second mein update
-}
-
-// Routes
+// HOME ROUTE (Render ko 'Live' rakhne ke liye)
 app.get('/', (req, res) => res.send('AI Terminal is Active 🚀'));
 
+// LOGIN ROUTE
 app.get('/login', (req, res) => {
-    const loginUrl = `https://api.upstox.com/v2/login/authorization/dialog?client_id=${process.env.API_KEY}&redirect_uri=${encodeURIComponent(process.env.REDIRECT_URI)}`;
-    res.redirect(loginUrl);
+    const client_id = "c6e93739-0e7f-4c2e-9a35-8e0e44ea015a"; // Screenshot se
+    const redirect = encodeURIComponent("https://ai-trminal-1.onrender.com/callback");
+    res.redirect(`https://api.upstox.com/v2/login/authorization/dialog?client_id=${client_id}&redirect_uri=${redirect}`);
 });
 
+// CALLBACK ROUTE
 app.get('/callback', async (req, res) => {
     const { code } = req.query;
     try {
@@ -70,17 +47,35 @@ app.get('/callback', async (req, res) => {
             grant_type: 'authorization_code'
         }).toString(), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
 
-        startMarketSync(resp.data.access_token);
-        res.send("<h1>Login Successful! Prices are now syncing to Firebase.</h1>");
+        // Token milte hi syncing shuru
+        startSync(resp.data.access_token);
+        res.send("<h1>Login Done! Dashboard Check Karein.</h1>");
     } catch (e) {
-        res.send("Login Error: Check Redirect URI in Upstox Portal.");
+        res.send("Login Failed: Upstox Portal mein Redirect URI check karein.");
     }
 });
 
-// Port Binding (Important for Render)
+// SYNC FUNCTION
+function startSync(token) {
+    setInterval(async () => {
+        try {
+            const res = await axios.get('https://api.upstox.com/v2/market-quote/quotes?symbol=NSE_INDEX|Nifty%2050,BSE_INDEX|SENSEX', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const nifty = res.data.data['NSE_INDEX:Nifty 50'].last_price;
+            await db.ref("market_data").update({
+                nifty: nifty,
+                last_sync: new Date().toLocaleTimeString()
+            });
+        } catch (err) { console.log("Sync Error"); }
+    }, 5000);
+}
+
+// BIND TO PORT (Render ke liye sabse zaroori)
 app.listen(port, '0.0.0.0', () => {
-    console.log(`Server is running on port ${port}`);
+    console.log(`Server running on port ${port}`);
 });
+
 
 
 
