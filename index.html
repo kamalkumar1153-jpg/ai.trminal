@@ -3,86 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI TERMINAL - GOOGLE DATA</title>
+    <title>AI TERMINAL PRO</title>
     <style>
         body { background: #0b111e; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
         .container { max-width: 400px; margin: auto; }
-        .card { background: #1a2332; margin: 15px 0; padding: 25px; border-radius: 20px; border-left: 6px solid #4285f4; }
-        .label { color: #94a3b8; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
-        .price { font-size: 38px; font-weight: bold; color: #4285f4; margin: 10px 0; }
-        .signal { font-size: 24px; font-weight: bold; color: #f1c40f; }
-        .footer { font-size: 11px; color: #64748b; margin-top: 20px; }
+        .card { background: #1a2332; margin: 15px 0; padding: 30px; border-radius: 25px; border-left: 8px solid #4285f4; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: 0.3s; }
+        .label { color: #94a3b8; font-size: 14px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
+        .price { font-size: 42px; font-weight: bold; color: #4ade80; margin: 15px 0; text-shadow: 0 0 10px rgba(74, 222, 128, 0.3); }
+        .signal { font-size: 28px; font-weight: bold; color: #f1c40f; }
+        .status { font-size: 11px; color: #64748b; margin-top: 25px; border-top: 1px solid #2e394d; padding-top: 10px; }
     </style>
 </head>
 <body>
-
     <div class="container">
-        <h2 style="color: #4285f4;">📊 AI GOOGLE TERMINAL</h2>
+        <h2 style="color: #4285f4; letter-spacing: 1px; margin-bottom: 5px;">🤖 AI LIVE TERMINAL</h2>
+        <p style="font-size: 11px; color: #64748b; margin-bottom: 20px;">Powered by Google Finance Data</p>
         
         <div class="card">
-            <div class="label">NIFTY 50 (Google)</div>
+            <div class="label">NIFTY 50</div>
             <div id="nifty" class="price">Connecting...</div>
         </div>
 
         <div class="card" style="border-left-color: #34a853;">
-            <div class="label">SENSEX (Google)</div>
+            <div class="label">SENSEX</div>
             <div id="sensex" class="price">Connecting...</div>
         </div>
 
         <div class="card" style="border-left-color: #f1c40f;">
-            <div class="label">AI ANALYSIS</div>
+            <div class="label">AI SIGNAL</div>
             <div id="signal" class="signal">SCANNING...</div>
         </div>
 
-        <div class="footer">
-            Source: Google Finance | Sync: <span id="time">--:--:--</span>
+        <div class="status">
+            SYSTEM: ONLINE ✅ | DATA: LIVE SHEET | SYNC: <span id="time">--:--:--</span>
         </div>
     </div>
 
     <script>
-        async function fetchGoogleData() {
+        // Aapka Special CSV Link
+        const sheetCsvUrl = 'https://docs.google.com/spreadsheets/d/1IMXl6rCvbTRFNfeypfY4KpEdeFAsnJ0rh04t46ujcoI/export?format=csv';
+
+        async function updateData() {
             try {
-                // Google Finance Tickers: NIFTY_50:INDEXNSE and SENSEX:INDEXBOM
-                const tickers = ["NIFTY_50:INDEXNSE", "SENSEX:INDEXBOM"];
+                const res = await fetch(sheetCsvUrl);
+                const csvText = await res.text();
+                const rows = csvText.split('\n');
                 
-                // Proxy ka use kar rahe hain taaki Google data block na kare
-                const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://www.google.com/finance/quote/NIFTY_50:INDEXNSE')}`);
-                const data = await response.json();
-                
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(data.contents, 'text/html');
-                
-                // Google ka latest price selector
-                const priceElement = doc.querySelector(".YMl-qc.fxKbKc");
-                if (priceElement) {
-                    const priceText = priceElement.innerText;
-                    document.getElementById('nifty').innerText = "₹" + priceText;
+                // Sheet layout: A1 Nifty, A2 Sensex
+                let niftyPrice = rows[0].split(',')[0].replace(/"/g, '').trim(); 
+                let sensexPrice = rows[1].split(',')[0].replace(/"/g, '').trim();
+
+                if(niftyPrice) {
+                    document.getElementById('nifty').innerText = "₹" + niftyPrice;
                     
-                    // Simple Signal Logic
-                    const priceNum = parseFloat(priceText.replace(/,/g, ''));
-                    if (priceNum > 24400) {
-                        document.getElementById('signal').innerText = "🚀 BULLISH";
+                    // Signal Logic (Simple Trend Analysis)
+                    const nVal = parseFloat(niftyPrice.replace(/,/g, ''));
+                    if(nVal > 24400) {
+                        document.getElementById('signal').innerText = "🚀 BUY CALL";
                         document.getElementById('signal').style.color = "#4ade80";
                     } else {
-                        document.getElementById('signal').innerText = "📉 BEARISH";
+                        document.getElementById('signal').innerText = "📉 SELL CALL";
                         document.getElementById('signal').style.color = "#f87171";
                     }
                 }
+                
+                if(sensexPrice) {
+                    document.getElementById('sensex').innerText = "₹" + sensexPrice;
+                }
 
-                // Time update
                 document.getElementById('time').innerText = new Date().toLocaleTimeString();
-
-            } catch (err) {
-                console.log("Retrying Google Sync...");
+            } catch (e) {
+                console.log("Sync error... checking sheet access.");
             }
         }
 
-        // Har 10 second mein update
-        setInterval(fetchGoogleData, 10000);
-        fetchGoogleData();
+        // Har 10 second mein refresh
+        setInterval(updateData, 10000);
+        updateData();
     </script>
 </body>
 </html>
+
 
 
 
