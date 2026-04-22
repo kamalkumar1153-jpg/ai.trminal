@@ -1,4 +1,3 @@
-
 const express = require('express');
 const axios = require('axios');
 const admin = require('firebase-admin');
@@ -6,91 +5,75 @@ const admin = require('firebase-admin');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// SERVER CRASH PREVENTER: Koi bhi unexpected error aane par server ko band nahi hone dega
-process.on('uncaughtException', (err) => {
-    console.error('Handled Exception:', err.message);
-});
+// SERVER PROTECTOR: Ye line crash hone se bachati hai
+process.on('uncaughtException', (err) => console.log('Handled:', err.message));
 
-// --- 1. FIREBASE INITIALIZATION (SABSE PEHLE) ---
+// --- STEP 1: FIREBASE INITIALIZATION (Order is Critical) ---
 try {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
     if (!admin.apps.length) {
-        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccount),
             databaseURL: "https://ai-pro-terminal-default-rtdb.firebaseio.com"
         });
-        console.log("Firebase Connected Successfully ✅");
+        console.log("Firebase Connected ✅");
     }
 } catch (error) {
-    console.error("Firebase Auth Error: Please check your FIREBASE_SERVICE_ACCOUNT variable format.");
+    console.log("Firebase Init Error: Check your FIREBASE_SERVICE_ACCOUNT variable.");
 }
 
 const db = admin.database();
 
-// Live Market Data Sync Function
-function startMarketSync(accessToken) {
-    setInterval(async () => {
-        try {
-            const url = 'https://api.upstox.com/v2/market-quote/quotes?symbol=NSE_INDEX|Nifty%2050,BSE_INDEX|SENSEX';
-            const response = await axios.get(url, {
-                headers: { 
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Accept': 'application/json' 
-                }
-            });
-
-            const niftyData = response.data.data['NSE_INDEX:Nifty 50'];
-            const sensexData = response.data.data['BSE_INDEX:SENSEX'];
-
-            // Firebase update
-            await db.ref("market_data").update({
-                nifty: niftyData.last_price,
-                sensex: sensexData.last_price,
-                signal: niftyData.last_price > 24400 ? "🔥 BUY NIFTY" : "❄️ SELL NIFTY",
-                last_sync: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })
-            });
-            
-            console.log(`Live Update: Nifty ${niftyData.last_price}`);
-        } catch (err) {
-            console.error("Sync Error: Check if token is valid.");
-        }
-    }, 5000); // 5 seconds interval
-}
-
-// --- 2. ROUTES ---
-
-app.get('/', (req, res) => res.send('AI Terminal is Running 🚀'));
+// --- STEP 2: ROUTES ---
+app.get('/', (req, res) => res.send('AI Terminal Online 🚀'));
 
 app.get('/login', (req, res) => {
-    // Screenshot 1000424175 se aapki API Key
+    // Aapki Upstox API Key screenshot 1000424175 se
     const client_id = "c6e93739-0e7f-4c2e-9a35-8e0e44ea015a"; 
-    const redirect_uri = encodeURIComponent("https://ai-trminal-1.onrender.com/callback");
-    res.redirect(`https://api.upstox.com/v2/login/authorization/dialog?client_id=${client_id}&redirect_uri=${redirect_uri}`);
+    const redirect = encodeURIComponent("https://ai-trminal-1.onrender.com/callback");
+    res.redirect(`https://api.upstox.com/v2/login/authorization/dialog?client_id=${client_id}&redirect_uri=${redirect}`);
 });
 
 app.get('/callback', async (req, res) => {
     const { code } = req.query;
     try {
-        const response = await axios.post('https://api.upstox.com/v2/login/authorization/token', 
+        const resp = await axios.post('https://api.upstox.com/v2/login/authorization/token', 
         new URLSearchParams({
-            code: code,
-            client_id: process.env.API_KEY,
+            code, 
+            client_id: process.env.API_KEY, 
             client_secret: process.env.API_SECRET,
-            redirect_uri: process.env.REDIRECT_URI,
+            redirect_uri: process.env.REDIRECT_URI, 
             grant_type: 'authorization_code'
         }).toString(), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
 
-        startMarketSync(response.data.access_token);
-        res.send("<h1>Login Successful! Dashboard is now Live.</h1>");
-    } catch (error) {
-        res.status(500).send("Login Failed: Verify Redirect URI in Upstox Portal.");
+        startMarketSync(resp.data.access_token);
+        res.send("<h1>Login Successful! Dashboard Syncing.</h1>");
+    } catch (e) {
+        res.send("Login Failed: Check Redirect URI.");
     }
 });
 
-// --- 3. BIND TO PORT ---
+function startMarketSync(token) {
+    setInterval(async () => {
+        try {
+            const url = 'https://api.upstox.com/v2/market-quote/quotes?symbol=NSE_INDEX|Nifty%2050,BSE_INDEX|SENSEX';
+            const res = await axios.get(url, { headers: { 'Authorization': `Bearer ${token}` } });
+            
+            const nifty = res.data.data['NSE_INDEX:Nifty 50'].last_price;
+            await db.ref("market_data").update({
+                nifty: nifty,
+                last_sync: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })
+            });
+            console.log("Syncing: " + nifty);
+        } catch (err) { console.log("Sync failed"); }
+    }, 5000);
+}
+
+// --- STEP 3: PORT BINDING ---
 app.listen(port, '0.0.0.0', () => {
-    console.log(`Server is active on port ${port}`);
+    console.log(`Server listening on port ${port}`);
 });
+
 
 
 
