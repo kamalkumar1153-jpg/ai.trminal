@@ -3,61 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI AUTO TRADER</title>
+    <title>AI AUTO TRADER - LIVE</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
-        body { background: #0b111e; color: white; font-family: sans-serif; text-align: center; }
-        .card { background: #1a2332; margin: 10px; padding: 20px; border-radius: 10px; border-bottom: 2px solid #2ecc71; }
-        .value { font-size: 24px; font-weight: bold; color: #2ecc71; }
-        .label { color: #94a3b8; font-size: 14px; margin-bottom: 5px; }
+        body { 
+            background: #0b111e; 
+            color: white; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center; 
+            margin: 0;
+            padding: 20px;
+        }
+        .container { max-width: 400px; margin: auto; }
+        .card { 
+            background: #1a2332; 
+            margin: 15px 0; 
+            padding: 20px; 
+            border-radius: 12px; 
+            border-bottom: 3px solid #2ecc71;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .value { font-size: 28px; font-weight: bold; color: #2ecc71; margin-top: 10px; }
+        .label { color: #94a3b8; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        .status-bar { font-size: 12px; color: #64748b; margin-top: 20px; }
+        h2 { margin-bottom: 30px; letter-spacing: 2px; }
+        #signal { color: #f1c40f; } /* Default Waiting Color */
     </style>
 </head>
 <body>
-    <h2>🤖 AI AUTO TRADER</h2>
-    
-    <div class="card">
-        <div class="label">NIFTY</div>
-        <div id="nifty" class="value">--</div>
-    </div>
 
-    <div class="card">
-        <div class="label">SENSEX</div>
-        <div id="sensex" class="value">--</div>
-    </div>
+    <div class="container">
+        <h2>🤖 AI AUTO TRADER</h2>
+        
+        <div class="card">
+            <div class="label">NIFTY 50</div>
+            <div id="nifty" class="value">--</div>
+        </div>
 
-    <div class="card">
-        <div class="label">RSI: <span id="rsi">--</span></div>
-        <div id="signal" class="value">WAITING...</div>
+        <div class="card">
+            <div class="label">SENSEX</div>
+            <div id="sensex" class="value">--</div>
+        </div>
+
+        <div class="card">
+            <div class="label">RSI Indicator</div>
+            <div id="rsi" class="value">--</div>
+        </div>
+
+        <div class="card">
+            <div class="label">Current Signal</div>
+            <div id="signal" class="value">WAITING...</div>
+        </div>
+
+        <div class="status-bar">
+            Last Updated: <span id="time">--:--:--</span>
+        </div>
     </div>
 
     <script>
-        // --- YEH BADLO: Firebase Console -> Project Settings se copy karein ---
+        // --- APNA FIREBASE CONFIG YAHAN UPDATE KAREIN ---
         const firebaseConfig = {
-            apiKey: "AIzaSy...",
-            authDomain: "apka-project.firebaseapp.com",
-            databaseURL: "https://apka-project-default-rtdb.firebaseio.com",
-            projectId: "apka-project",
-            storageBucket: "apka-project.appspot.com",
+            // Screenshot 1000425237 ke mutabik ye URL hai
+            databaseURL: "https://ai-pro-terminal-default-rtdb.firebaseio.com", 
+            // Baki details apne Firebase Console -> Project Settings se copy karein
+            apiKey: "AIzaSy...", 
+            projectId: "ai-pro-terminal",
             appId: "1:..."
         };
 
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Real-time data update
+        // Real-time listener: Jaise hi database badlega, HTML apne aap change hoga
         db.ref("market_data").on("value", (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                document.getElementById("nifty").innerText = data.nifty;
-                document.getElementById("sensex").innerText = data.sensex;
-                document.getElementById("rsi").innerText = data.rsi;
-                document.getElementById("signal").innerText = data.signal;
+                // UI Update
+                document.getElementById("nifty").innerText = data.nifty || "--";
+                document.getElementById("sensex").innerText = data.sensex || "--";
+                document.getElementById("rsi").innerText = data.rsi || "--";
+                document.getElementById("signal").innerText = data.signal || "SCANNING";
+                document.getElementById("time").innerText = data.last_sync || "--";
+
+                // Signal Color Change Logic
+                const signalEl = document.getElementById("signal");
+                if(data.signal && data.signal.includes("BUY")) {
+                    signalEl.style.color = "#2ecc71"; // Green
+                } else if(data.signal && data.signal.includes("SELL")) {
+                    signalEl.style.color = "#e74c3c"; // Red
+                } else {
+                    signalEl.style.color = "#f1c40f"; // Yellow
+                }
             }
+        }, (error) => {
+            console.error("Firebase Read Error: ", error);
         });
     </script>
 </body>
 </html>
+
 
 
 
