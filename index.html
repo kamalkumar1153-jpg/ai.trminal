@@ -1,85 +1,82 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI PRO TERMINAL - LIVE</title>
+    <title>AI PRO TERMINAL</title>
     <style>
-        body { background: #0b111e; color: white; font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; }
-        .container { max-width: 450px; margin: auto; }
-        .card { background: #1a2332; margin: 15px 0; padding: 25px; border-radius: 20px; border-bottom: 5px solid #4285f4; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-        .label { color: #94a3b8; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
-        .price { font-size: 42px; font-weight: bold; color: #4ade80; }
-        .signal-card { border-bottom-color: #f1c40f; }
-        .signal-text { font-size: 28px; color: #f1c40f; font-weight: bold; }
-        .status { font-size: 12px; color: #64748b; margin-top: 20px; }
-        iframe { display: none; } /* Hidden scraper */
+        body { background: #0b111e; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
+        .container { max-width: 400px; margin: auto; }
+        .card { background: #1a2332; margin: 15px 0; padding: 25px; border-radius: 20px; border-bottom: 5px solid #4285f4; }
+        .label { color: #94a3b8; font-size: 14px; text-transform: uppercase; }
+        .price { font-size: 40px; font-weight: bold; color: #4ade80; margin: 10px 0; }
+        .signal { font-size: 26px; font-weight: bold; color: #f1c40f; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2 style="color: #4285f4; margin-bottom: 5px;">🤖 AI LIVE TERMINAL</h2>
-        <p style="color: #94a3b8; font-size: 13px; margin-bottom: 30px;">Direct Google Finance Integration</p>
-
+        <h2 style="color: #4285f4;">🤖 AI LIVE TERMINAL</h2>
+        
         <div class="card">
             <div class="label">NIFTY 50</div>
-            <div id="nifty-price" class="price">Fetching...</div>
+            <div id="nifty" class="price">Loading...</div>
         </div>
 
         <div class="card">
             <div class="label">SENSEX</div>
-            <div id="sensex-price" class="price">Fetching...</div>
+            <div id="sensex" class="price">Loading...</div>
         </div>
 
-        <div class="card signal-card">
+        <div class="card" style="border-bottom-color: #f1c40f;">
             <div class="label">AI SIGNAL</div>
-            <div id="ai-signal" class="signal-text">ANALYZING...</div>
+            <div id="signal" class="signal">ANALYZING...</div>
         </div>
 
-        <div class="status">
-            Last Update: <span id="sync-time">--:--:--</span><br>
+        <div style="color: #64748b; font-size: 12px; margin-top: 20px;">
+            Last Update: <span id="time">--:--:--</span><br>
             Serverless Mode: Active ✅
         </div>
     </div>
 
     <script>
-        async function fetchMarketData() {
+        async function getPrice() {
             try {
-                // Hum proxy use kar rahe hain taaki direct browser se data utha sakein
-                const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://www.google.com/finance/quote/NIFTY_50:INDEXNSE')}`);
-                const data = await response.json();
+                // Hum Yahoo Finance ka API use karenge jo browser allow karta hai
+                const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/^NSEI`);
+                const data = await res.json();
+                const price = data.chart.result[0].meta.regularMarketPrice;
                 
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(data.contents, 'text/html');
+                document.getElementById('nifty').innerText = "₹" + price.toLocaleString('en-IN');
                 
-                // Google Finance ka Price Selector
-                const nifty = doc.querySelector(".YMl-qc.fxKbKc").innerText;
-                
-                document.getElementById('nifty-price').innerText = "₹" + nifty;
-                
-                // Simple Signal Logic
-                const niftyVal = parseFloat(nifty.replace(/,/g, ''));
-                if (niftyVal > 24400) {
-                    document.getElementById('ai-signal').innerText = "🚀 BUY CALL";
-                    document.getElementById('ai-signal').style.color = "#4ade80";
+                // Sensex Fetch
+                const res2 = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/^BSESN`);
+                const data2 = await res2.json();
+                const price2 = data2.chart.result[0].meta.regularMarketPrice;
+                document.getElementById('sensex').innerText = "₹" + price2.toLocaleString('en-IN');
+
+                // Signal Logic
+                if (price > 24400) {
+                    document.getElementById('signal').innerText = "🚀 BUY CALL";
+                    document.getElementById('signal').style.color = "#4ade80";
                 } else {
-                    document.getElementById('ai-signal').innerText = "📉 SELL CALL";
-                    document.getElementById('ai-signal').style.color = "#f87171";
+                    document.getElementById('signal').innerText = "📉 SELL CALL";
+                    document.getElementById('signal').style.color = "#f87171";
                 }
 
-                document.getElementById('sync-time').innerText = new Date().toLocaleTimeString();
-            } catch (error) {
-                console.log("Retry in 10s...");
+                document.getElementById('time').innerText = new Date().toLocaleTimeString();
+            } catch (e) {
+                console.log("Retrying...");
             }
         }
 
-        // Har 10 second mein update
-        setInterval(fetchMarketData, 10000);
-        fetchMarketData();
+        // Har 5 second mein update
+        setInterval(getPrice, 5000);
+        getPrice();
     </script>
 </body>
 </html>
+
 
 
 
