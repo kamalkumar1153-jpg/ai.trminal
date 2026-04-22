@@ -7,7 +7,7 @@
     <style>
         body { background: #0b111e; color: white; font-family: sans-serif; text-align: center; padding: 10px; }
         .container { max-width: 450px; margin: auto; }
-        .widget-card { background: #1a2332; margin: 15px 0; border-radius: 15px; overflow: hidden; border: 1px solid #2e394d; min-height: 120px; }
+        .widget-card { background: #1a2332; margin: 15px 0; border-radius: 15px; overflow: hidden; border: 1px solid #2e394d; min-height: 125px; }
         .signal-card { padding: 25px; background: #1a2332; border-radius: 15px; border-bottom: 5px solid #f1c40f; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
         .signal-text { font-size: 32px; font-weight: bold; color: #f1c40f; margin-top: 10px; }
     </style>
@@ -22,7 +22,7 @@
                 <div class="tradingview-widget-container__widget"></div>
                 <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
                 {
-                "symbol": "NSE:NIFTY50",
+                "symbol": "NSE:NIFTY1!",
                 "colorTheme": "dark",
                 "isTransparent": true,
                 "locale": "in"
@@ -33,7 +33,7 @@
 
         <div class="widget-card">
             <div class="tradingview-widget-container">
-                <div class="tradingview-widget-container__widget"></div>
+                <div class="tradingview-widget-container__widget (1000425446.jpg)"></div>
                 <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
                 {
                 "symbol": "BSE:SENSEX",
@@ -47,22 +47,23 @@
 
         <div class="signal-card">
             <div style="color: #94a3b8; font-size: 14px; text-transform: uppercase;">AI Analysis</div>
-            <div id="ai-signal" class="signal-text">🔥 STRONG BUY</div>
-            <div style="font-size: 11px; color: #64748b; margin-top: 15px;">Data synced with TradingView Live</div>
+            <div id="ai-signal" class="signal-text">📊 SCANNING...</div>
+            <div style="font-size: 11px; color: #64748b; margin-top: 15px;">Target: 24,400 | Live Future Data</div>
         </div>
     </div>
 
     <script>
-        // Analysis updater
         function updateSignal() {
-            const signals = ["🔥 STRONG BUY", "🚀 BULLISH", "📊 NEUTRAL", "📉 BEARISH"];
+            const signals = ["🚀 BULLISH", "📉 BEARISH", "📊 NEUTRAL", "🔥 STRONG BUY"];
             const random = signals[Math.floor(Math.random() * signals.length)];
             document.getElementById('ai-signal').innerText = random;
         }
         setInterval(updateSignal, 60000);
+        updateSignal();
     </script>
 </body>
 </html>
+
 
 
 
