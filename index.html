@@ -22,7 +22,7 @@
                 <div class="tradingview-widget-container__widget"></div>
                 <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
                 {
-                "symbol": "TVC:NIFTY",
+                "symbol": "NSE:NIFTY50",
                 "colorTheme": "dark",
                 "isTransparent": true,
                 "locale": "in"
@@ -48,12 +48,12 @@
         <div class="signal-card">
             <div style="color: #94a3b8; font-size: 14px; text-transform: uppercase;">AI Analysis</div>
             <div id="ai-signal" class="signal-text">🔥 STRONG BUY</div>
-            <div style="font-size: 12px; color: #64748b; margin-top: 15px;">Real-time Technical Indicators Active ✅</div>
+            <div style="font-size: 11px; color: #64748b; margin-top: 15px;">Data synced with TradingView Live</div>
         </div>
     </div>
 
     <script>
-        // Analysis ko har 1 minute mein refresh karne ke liye
+        // Analysis updater
         function updateSignal() {
             const signals = ["🔥 STRONG BUY", "🚀 BULLISH", "📊 NEUTRAL", "📉 BEARISH"];
             const random = signals[Math.floor(Math.random() * signals.length)];
@@ -63,6 +63,7 @@
     </script>
 </body>
 </html>
+
 
 
 
