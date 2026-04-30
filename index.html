@@ -3,54 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Scanner Live</title>
+    <title>AI Market Terminal v3</title>
     <style>
         :root { --bg: #0d1117; --card: #161b22; --blue: #58a6ff; --green: #3fb950; --red: #f85149; }
-        body { background: var(--bg); color: white; font-family: sans-serif; padding: 15px; text-align: center; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 20px; }
-        .card { background: var(--card); border: 1px solid #30363d; border-radius: 12px; padding: 15px; position: relative; }
-        .price { font-size: 22px; font-weight: bold; margin: 5px 0; color: var(--green); }
-        .btn-alert { background: var(--blue); border: none; padding: 12px; color: white; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; }
-        .signal-tag { font-size: 12px; font-weight: bold; padding: 4px 8px; border-radius: 4px; }
-        .score-bar { height: 4px; background: #30363d; margin-top: 10px; border-radius: 2px; overflow: hidden; }
-        .score-fill { height: 100%; transition: 1s; }
+        body { background: var(--bg); color: white; font-family: sans-serif; padding: 15px; margin: 0; }
+        .container { max-width: 450px; margin: auto; }
+        .market-card { background: var(--card); border: 1px solid #30363d; border-radius: 15px; padding: 20px; margin-bottom: 20px; position: relative; overflow: hidden; }
+        .index-name { font-size: 14px; color: #8b949e; font-weight: bold; letter-spacing: 1px; }
+        .price { font-size: 32px; font-weight: bold; margin: 10px 0; color: var(--green); }
+        .row { display: flex; justify-content: space-between; font-size: 12px; color: #8b949e; border-top: 1px solid #21262d; padding-top: 10px; }
+        .signal-box { width: 100%; padding: 12px; border-radius: 8px; margin-top: 15px; font-weight: bold; text-align: center; font-size: 14px; }
+        .score-bg { position: absolute; bottom: 0; left: 0; height: 4px; transition: 1s; }
+        .BULLISH { background: rgba(63, 185, 80, 0.1); color: var(--green); border: 1px solid var(--green); }
+        .BEARISH { background: rgba(248, 81, 73, 0.1); color: var(--red); border: 1px solid var(--red); }
+        .WAIT { background: rgba(88, 166, 255, 0.1); color: var(--blue); border: 1px solid var(--blue); }
     </style>
 </head>
 <body>
-    <h3>💎 SMART SCANNER</h3>
-    <button class="btn-alert" onclick="Notification.requestPermission()">🔔 ENABLE BUY ALERTS</button>
+    <div class="container">
+        <h3 style="text-align: center; color: var(--blue);">🚀 AI MARKET TERMINAL</h3>
 
-    <div id="grid" class="grid"></div>
-    <div id="time" style="font-size: 10px; color: #8b949e; margin-top: 20px;">Loading Data...</div>
+        <div class="market-card" id="nifty-card">
+            <div class="index-name">NIFTY 50</div>
+            <div id="n-price" class="price">₹ --</div>
+            <div class="row">
+                <span>RSI: <b id="n-rsi">--</b></span>
+                <span>SCORE: <b id="n-score">--</b>%</span>
+            </div>
+            <div id="n-signal" class="signal-box WAIT">SYNCING...</div>
+            <div id="n-bar" class="score-bg"></div>
+        </div>
+
+        <div class="market-card" id="sensex-card">
+            <div class="index-name">SENSEX</div>
+            <div id="s-price" class="price">₹ --</div>
+            <div class="row">
+                <span>RSI: <b id="s-rsi">--</b></span>
+                <span>SCORE: <b id="s-score">--</b>%</span>
+            </div>
+            <div id="s-signal" class="signal-box WAIT">SYNCING...</div>
+            <div id="s-bar" class="score-bg"></div>
+        </div>
+
+        <div id="status" style="text-align: center; font-size: 10px; color: #484f58;">Connecting to Firebase...</div>
+    </div>
 
     <script>
-        async function fetchMarket() {
-            try {
-                const res = await fetch('market_scan.json?t=' + Date.now());
-                const json = await res.json();
-                const grid = document.getElementById('grid');
-                grid.innerHTML = '';
+        const FB_URL = "https://market--treminal-default-rtdb.firebaseio.com/market_data.json";
 
-                Object.keys(json.data).forEach(key => {
-                    const d = json.data[key];
-                    const color = d.score >= 70 ? 'var(--green)' : d.score >= 40 ? 'var(--blue)' : 'var(--red)';
+        async function updateUI() {
+            try {
+                const res = await fetch(FB_URL);
+                const data = await res.json();
+
+                function render(d, prefix) {
+                    if(!d) return;
+                    document.getElementById(`${prefix}-price`).innerText = "₹ " + d.price.toLocaleString('en-IN');
+                    document.getElementById(`${prefix}-rsi`).innerText = d.rsi;
+                    document.getElementById(`${prefix}-score`).innerText = d.score;
                     
-                    grid.innerHTML += `
-                        <div class="card">
-                            <div style="font-size:12px; color:#8b949e;">${key}</div>
-                            <div class="price">₹${d.price}</div>
-                            <span class="signal-tag" style="background:${color}22; color:${color}">${d.signal}</span>
-                            <div class="score-bar"><div class="score-fill" style="width:${d.score}%; background:${color}"></div></div>
-                        </div>`;
-                });
-                document.getElementById('time').innerText = "Last Update: " + json.last_update;
-            } catch (e) { document.getElementById('time').innerText = "Waiting for JSON file..."; }
+                    const sig = document.getElementById(`${prefix}-signal`);
+                    const bar = document.getElementById(`${prefix}-bar`);
+                    
+                    const color = d.score >= 70 ? '#3fb950' : d.score >= 40 ? '#58a6ff' : '#f85149';
+                    const type = d.score >= 70 ? 'BULLISH' : d.score >= 40 ? 'WAIT' : 'BEARISH';
+                    
+                    sig.className = `signal-box ${type}`;
+                    sig.innerText = d.signal;
+                    bar.style.width = d.score + "%";
+                    bar.style.backgroundColor = color;
+                }
+
+                render(data.nifty, 'n');
+                render(data.sensex, 's');
+                document.getElementById('status').innerText = "Last Sync: " + data.nifty.time;
+            } catch (e) { document.getElementById('status').innerText = "Firebase Connection Error!"; }
         }
-        setInterval(fetchMarket, 30000);
-        fetchMarket();
+
+        setInterval(updateUI, 5000);
+        updateUI();
     </script>
 </body>
 </html>
+
 
 
 
