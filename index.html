@@ -3,45 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI TERMINAL PRO</title>
+    <title>Smart Market Scanner v3</title>
     <style>
-        body { background: #0b111e; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
-        .card { background: #1a2332; margin: 15px auto; padding: 25px; border-radius: 20px; border-left: 6px solid #4285f4; max-width: 400px; }
-        .price { font-size: 38px; font-weight: bold; color: #4ade80; margin: 10px 0; }
-        .signal { font-size: 28px; font-weight: bold; }
+        :root { --bg: #0d1117; --card: #161b22; --green: #3fb950; --red: #f85149; --blue: #58a6ff; --border: #30363d; }
+        body { background: var(--bg); color: white; font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 15px; margin: 0; }
+        .container { max-width: 500px; margin: auto; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .btn-alert { background: var(--blue); color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: bold; margin-bottom: 20px; cursor: pointer; }
+        
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; position: relative; }
+        .sym { font-size: 12px; color: #8b949e; font-weight: bold; }
+        .price { font-size: 20px; font-weight: bold; margin: 5px 0; }
+        .score-bar { height: 4px; background: #30363d; border-radius: 2px; margin: 10px 0; overflow: hidden; }
+        .score-fill { height: 100%; transition: 1s ease; }
+        .signal { font-size: 11px; font-weight: bold; }
+        
+        .alert-dot { position: absolute; top: 12px; right: 12px; width: 8px; height: 8px; border-radius: 50%; display: none; }
+        .active { display: block; background: var(--green); box-shadow: 0 0 10px var(--green); animation: blink 1s infinite; }
+        
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        .footer { font-size: 10px; color: #484f58; text-align: center; margin-top: 30px; }
     </style>
 </head>
 <body>
-    <h2>🤖 AI LIVE TERMINAL</h2>
-    <div class="card"><div>NIFTY 50</div><div id="nifty" class="price">Connecting...</div></div>
-    <div class="card"><div>SENSEX</div><div id="sensex" class="price">Connecting...</div></div>
-    <div class="card"><div>AI SIGNAL</div><div id="signal" class="signal">SCANNING...</div></div>
+    <div class="container">
+        <div class="header">
+            <h2 style="color: var(--blue); margin-bottom: 5px;">💎 SMART SCANNER</h2>
+            <p style="font-size: 12px; color: #8b949e;">Live 15M Trend Prediction</p>
+        </div>
+
+        <button class="btn-alert" onclick="requestNotify()">🔔 ENABLE BUY ALERTS</button>
+        
+        <div id="scanner-grid" class="grid">
+            </div>
+
+        <div id="status" class="footer">Connecting to GitHub Data...</div>
+    </div>
 
     <script>
-        const sheetUrl = 'https://docs.google.com/spreadsheets/d/1IMXl6rCvbTRFNfeypfY4KpEdeFAsnJ0rh04t46ujcoI/export?format=csv';
-
-        async function update() {
-            try {
-                const res = await fetch(sheetUrl + '&cachebust=' + new Date().getTime());
-                const text = await res.text();
-                const data = text.split('\n')[0].split(',');
-
-                document.getElementById('nifty').innerText = "₹" + data[0].replace(/"/g, '');
-                document.getElementById('sensex').innerText = "₹" + data[1].replace(/"/g, '');
-                
-                const sig = data[4].replace(/"/g, '');
-                const sigBox = document.getElementById('signal');
-                sigBox.innerText = sig;
-                sigBox.style.color = sig.includes("BUY") ? "#4ade80" : "#f87171";
-            } catch (e) {
-                document.getElementById('nifty').innerText = "Syncing...";
-            }
+        function requestNotify() {
+            Notification.requestPermission().then(p => { if(p==='granted') alert("Alerts Activated!"); });
         }
-        setInterval(update, 10000);
-        update();
+
+        async function refreshData() {
+            try {
+                const response = await fetch('market_scan.json?v=' + new Date().getTime());
+                const result = await response.json();
+                const grid = document.getElementById('scanner-grid');
+                grid.innerHTML = '';
+
+                Object.keys(result.data).forEach(key => {
+                    const item = result.data[key];
+                    const color = item.score >= 70 ? 'var(--green)' : item.score >= 40 ? 'var(--blue)' : 'var(--red)';
+                    
+                    // Desktop/Mobile Notification
+                    if(item.alert && Notification.permission === 'granted') {
+                        new Notification(`🚀 BUY ALERT: ${key}`, { body: `Price: ₹${item.price} | Score: ${item.score}%` });
+                    }
+
+                    grid.innerHTML += `
+                        <div class="card">
+                            <div class="alert-dot ${item.alert ? 'active' : ''}"></div>
+                            <div class="sym">${key}</div>
+                            <div class="price">₹${item.price.toLocaleString('en-IN')}</div>
+                            <div class="signal" style="color: ${color}">${item.signal}</div>
+                            <div class="score-bar">
+                                <div class="score-fill" style="width: ${item.score}%; background: ${color}"></div>
+                            </div>
+                            <div style="font-size: 10px; color: #8b949e;">RSI: ${item.rsi} | Score: ${item.score}%</div>
+                        </div>
+                    `;
+                });
+                document.getElementById('status').innerText = "Last Updated: " + result.last_update;
+            } catch (e) { document.getElementById('status').innerText = "❌ Sync Error"; }
+        }
+
+        setInterval(refreshData, 30000); // 30 सेकंड में रिफ्रेश
+        refreshData();
     </script>
 </body>
 </html>
+
 
 
 
