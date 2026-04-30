@@ -1,0 +1,26 @@
+name: Market Scanner Sync
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install Libs
+        run: pip install yfinance pandas-ta
+      - name: Run Scan
+        run: python bot.py
+      - name: Save Changes
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add market_scan.json
+          git commit -m "Auto Update" || exit 0
+          git push
