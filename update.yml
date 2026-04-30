@@ -1,27 +1,27 @@
-name: Market Scanner Update
+name: Market Scanner Sync
 on:
   schedule:
-    - cron: '*/10 * * * *' # हर 10 मिनट में अपडेट होगा
+    - cron: '*/10 * * * *'
   workflow_dispatch:
 
 jobs:
-  build:
+  update:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
-      - name: Install dependencies
+      - name: Install Libs
         run: pip install yfinance pandas-ta
-      - name: Run scanner
+      - name: Run Scan
         run: python bot.py
-      - name: Commit and push changes
+      - name: Save Changes
         run: |
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com'
           git add market_scan.json
-          git commit -m "Automated Market Scan Update" || echo "No changes"
+          git commit -m "Auto Update" || exit 0
           git push
+
