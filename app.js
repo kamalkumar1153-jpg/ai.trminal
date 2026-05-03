@@ -1,12 +1,20 @@
 async function loadSignal() {
-  const res = await fetch("https://your-backend.onrender.com/signal");
-  const data = await res.json();
 
-  document.getElementById('signal').innerText = data.signal;
-  document.getElementById('price').innerText = data.price.toFixed(2);
-  document.getElementById('vwap').innerText = data.vwap.toFixed(2);
-  document.getElementById('rsi').innerText = data.rsi.toFixed(2);
+  // Demo data (taaki site chale)
+  const price = 24000 + Math.random() * 100;
+  const vwap = 24020;
+  const rsi = 50 + Math.random() * 20 - 10;
+
+  let signal = "WAIT";
+
+  if (price > vwap && rsi > 55) signal = "BUY CE";
+  else if (price < vwap && rsi < 45) signal = "BUY PE";
+
+  document.getElementById('signal').innerText = signal;
+  document.getElementById('price').innerText = price.toFixed(2);
+  document.getElementById('vwap').innerText = vwap;
+  document.getElementById('rsi').innerText = rsi.toFixed(2);
 }
 
-setInterval(loadSignal, 5000);
+setInterval(loadSignal, 3000);
 loadSignal();
