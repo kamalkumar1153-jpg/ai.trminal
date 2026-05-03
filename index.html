@@ -1,88 +1,25 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Market Terminal v3</title>
-    <style>
-        :root { --bg: #0d1117; --card: #161b22; --blue: #58a6ff; --green: #3fb950; --red: #f85149; }
-        body { background: var(--bg); color: white; font-family: sans-serif; padding: 15px; margin: 0; }
-        .container { max-width: 450px; margin: auto; }
-        .market-card { background: var(--card); border: 1px solid #30363d; border-radius: 15px; padding: 20px; margin-bottom: 20px; position: relative; overflow: hidden; }
-        .index-name { font-size: 14px; color: #8b949e; font-weight: bold; letter-spacing: 1px; }
-        .price { font-size: 32px; font-weight: bold; margin: 10px 0; color: var(--green); }
-        .row { display: flex; justify-content: space-between; font-size: 12px; color: #8b949e; border-top: 1px solid #21262d; padding-top: 10px; }
-        .signal-box { width: 100%; padding: 12px; border-radius: 8px; margin-top: 15px; font-weight: bold; text-align: center; font-size: 14px; }
-        .score-bg { position: absolute; bottom: 0; left: 0; height: 4px; transition: 1s; }
-        .BULLISH { background: rgba(63, 185, 80, 0.1); color: var(--green); border: 1px solid var(--green); }
-        .BEARISH { background: rgba(248, 81, 73, 0.1); color: var(--red); border: 1px solid var(--red); }
-        .WAIT { background: rgba(88, 166, 255, 0.1); color: var(--blue); border: 1px solid var(--blue); }
-    </style>
+  <title>NIFTY SIGNAL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    <div class="container">
-        <h3 style="text-align: center; color: var(--blue);">🚀 AI MARKET TERMINAL</h3>
 
-        <div class="market-card" id="nifty-card">
-            <div class="index-name">NIFTY 50</div>
-            <div id="n-price" class="price">₹ --</div>
-            <div class="row">
-                <span>RSI: <b id="n-rsi">--</b></span>
-                <span>SCORE: <b id="n-score">--</b>%</span>
-            </div>
-            <div id="n-signal" class="signal-box WAIT">SYNCING...</div>
-            <div id="n-bar" class="score-bg"></div>
-        </div>
+<h1>📊 NIFTY SIGNAL</h1>
 
-        <div class="market-card" id="sensex-card">
-            <div class="index-name">SENSEX</div>
-            <div id="s-price" class="price">₹ --</div>
-            <div class="row">
-                <span>RSI: <b id="s-rsi">--</b></span>
-                <span>SCORE: <b id="s-score">--</b>%</span>
-            </div>
-            <div id="s-signal" class="signal-box WAIT">SYNCING...</div>
-            <div id="s-bar" class="score-bg"></div>
-        </div>
+<div id="box">
+  <h2 id="signal">Loading...</h2>
+  <p>Price: <span id="price">-</span></p>
+  <p>VWAP: <span id="vwap">-</span></p>
+  <p>RSI: <span id="rsi">-</span></p>
+</div>
 
-        <div id="status" style="text-align: center; font-size: 10px; color: #484f58;">Connecting to Firebase...</div>
-    </div>
+<script src="app.js"></script>
 
-    <script>
-        const FB_URL = "https://market--treminal-default-rtdb.firebaseio.com/market_data.json";
-
-        async function updateUI() {
-            try {
-                const res = await fetch(FB_URL);
-                const data = await res.json();
-
-                function render(d, prefix) {
-                    if(!d) return;
-                    document.getElementById(`${prefix}-price`).innerText = "₹ " + d.price.toLocaleString('en-IN');
-                    document.getElementById(`${prefix}-rsi`).innerText = d.rsi;
-                    document.getElementById(`${prefix}-score`).innerText = d.score;
-                    
-                    const sig = document.getElementById(`${prefix}-signal`);
-                    const bar = document.getElementById(`${prefix}-bar`);
-                    
-                    const color = d.score >= 70 ? '#3fb950' : d.score >= 40 ? '#58a6ff' : '#f85149';
-                    const type = d.score >= 70 ? 'BULLISH' : d.score >= 40 ? 'WAIT' : 'BEARISH';
-                    
-                    sig.className = `signal-box ${type}`;
-                    sig.innerText = d.signal;
-                    bar.style.width = d.score + "%";
-                    bar.style.backgroundColor = color;
-                }
-
-                render(data.nifty, 'n');
-                render(data.sensex, 's');
-                document.getElementById('status').innerText = "Last Sync: " + data.nifty.time;
-            } catch (e) { document.getElementById('status').innerText = "Firebase Connection Error!"; }
-        }
-
-        setInterval(updateUI, 5000);
-        updateUI();
-    </script>
 </body>
 </html>
 
