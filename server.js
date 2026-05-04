@@ -3,15 +3,17 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
+// Home route
 app.get('/', (req, res) => {
   res.send("Server running");
 });
 
+// 🔥 IMPORTANT: Signal route
 app.get('/signal', (req, res) => {
   res.json({
-    price: 24000,
-    vwap: 24020,
-    rsi: 55,
+    price: 24100,
+    vwap: 24080,
+    rsi: 56,
     signal: "BUY CE"
   });
 });
