@@ -1,19 +1,24 @@
 async function loadSignal() {
-  const res = await fetch("https://your-backend.onrender.com/signal");
-  const d = await res.json();
+  try {
+    const res = await fetch(" https://ai-trminal-2.onrender.com");
+    const d = await res.json();
 
-  if (d.error) {
-    document.getElementById('signal').innerText = "ERROR";
-    return;
+    console.log("DATA:", d);
+
+    if (!d || d.error) {
+      document.getElementById('signal').innerText = "NO DATA";
+      return;
+    }
+
+    document.getElementById('signal').innerText = d.signal;
+    document.getElementById('price').innerText = d.price;
+    document.getElementById('vwap').innerText = d.vwap;
+    document.getElementById('rsi').innerText = d.rsi;
+
+  } catch (e) {
+    console.log("ERROR:", e);
+    document.getElementById('signal').innerText = "SERVER OFF";
   }
-
-  document.getElementById('signal').innerText = d.signal + " ("+d.confidence+"%)";
-  document.getElementById('price').innerText = d.price;
-  document.getElementById('vwap').innerText = d.vwap;
-  document.getElementById('rsi').innerText = d.rsi;
-
-  // optional extra UI
-  console.log(d);
 }
 
 setInterval(loadSignal, 5000);
