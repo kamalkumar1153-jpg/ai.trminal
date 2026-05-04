@@ -1,20 +1,20 @@
 async function loadSignal() {
+  const res = await fetch("https://your-backend.onrender.com/signal");
+  const d = await res.json();
 
-  // Demo data (taaki site chale)
-  const price = 24000 + Math.random() * 100;
-  const vwap = 24020;
-  const rsi = 50 + Math.random() * 20 - 10;
+  if (d.error) {
+    document.getElementById('signal').innerText = "ERROR";
+    return;
+  }
 
-  let signal = "WAIT";
+  document.getElementById('signal').innerText = d.signal + " ("+d.confidence+"%)";
+  document.getElementById('price').innerText = d.price;
+  document.getElementById('vwap').innerText = d.vwap;
+  document.getElementById('rsi').innerText = d.rsi;
 
-  if (price > vwap && rsi > 55) signal = "BUY CE";
-  else if (price < vwap && rsi < 45) signal = "BUY PE";
-
-  document.getElementById('signal').innerText = signal;
-  document.getElementById('price').innerText = price.toFixed(2);
-  document.getElementById('vwap').innerText = vwap;
-  document.getElementById('rsi').innerText = rsi.toFixed(2);
+  // optional extra UI
+  console.log(d);
 }
 
-setInterval(loadSignal, 3000);
+setInterval(loadSignal, 5000);
 loadSignal();
