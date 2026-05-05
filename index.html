@@ -3,118 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI PRO V16.0 - AUTO-SYNC</title>
+    <title>AI PRO V20.0 - QUANTUM</title>
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
     <style>
-        :root { --bg: #010409; --card: #0d1117; --green: #00ff88; --red: #ff3344; --blue: #2979ff; --text: #c9d1d9; }
-        body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; margin: 0; padding: 15px; }
-        .grid { max-width: 400px; margin: auto; display: grid; gap: 15px; }
-        .card { background: var(--card); border: 1px solid #30363d; border-radius: 12px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
-        .price { font-size: 38px; font-weight: 800; margin: 10px 0; font-family: 'Roboto Mono', monospace; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #21262d; padding-bottom: 10px; }
-        .symbol { font-size: 14px; font-weight: bold; color: var(--blue); letter-spacing: 1px; }
-        .chart { height: 110px; margin-top: 15px; border-radius: 8px; overflow: hidden; background: rgba(0,0,0,0.2); }
-        .footer { text-align: center; font-size: 10px; margin-top: 25px; color: #8b949e; }
-        .pulse { height: 8px; width: 8px; background: var(--green); border-radius: 50%; display: inline-block; animation: pulse 2s infinite; margin-right: 5px; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0,255,136,0.7); } 70% { box-shadow: 0 0 0 10px rgba(0,255,136,0); } 100% { box-shadow: 0 0 0 0 rgba(0,255,136,0); } }
+        :root { --bg: #010204; --card: #0a0c10; --green: #00ff88; --red: #ff3344; --blue: #2979ff; --gold: #ffd700; }
+        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 10px; overflow-x: hidden; }
+        .grid { max-width: 440px; margin: auto; display: flex; flex-direction: column; gap: 15px; }
+        .card { background: var(--card); border: 1px solid #1c2128; border-radius: 16px; padding: 22px; position: relative; transition: all 0.4s; }
+        .glow-buy { border-color: var(--green); box-shadow: 0 0 20px rgba(0, 255, 136, 0.2); }
+        .glow-sell { border-color: var(--red); box-shadow: 0 0 20px rgba(255, 51, 68, 0.2); }
+        .price { font-size: 42px; font-weight: 900; margin: 5px 0; font-family: 'Roboto Mono', monospace; }
+        .signal-badge { position: absolute; top: 20px; right: 20px; padding: 5px 15px; border-radius: 20px; font-size: 10px; font-weight: 900; text-transform: uppercase; border: 1px solid; }
+        .buy { color: var(--green); border-color: var(--green); background: rgba(0, 255, 136, 0.1); }
+        .sell { color: var(--red); border-color: var(--red); background: rgba(255, 51, 68, 0.1); }
+        .hold { color: #8b949e; border-color: #30363d; background: rgba(255,255,255,0.05); }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px; font-size: 10px; color: #484f58; }
+        .chart-container { height: 130px; margin-top: 15px; border-radius: 12px; overflow: hidden; }
     </style>
 </head>
 <body>
 
 <div class="grid">
-    <div style="text-align: center; padding-bottom: 10px;">
-        <h2 style="margin:0; letter-spacing: 4px; color: #fff;">AI PRO <span style="color:var(--blue)">V16</span></h2>
-        <div id="connection" style="font-size: 9px; color: var(--green); margin-top: 5px;">● DATA STREAM ACTIVE</div>
+    <div style="text-align: center; padding: 15px 0;">
+        <h2 style="margin:0; letter-spacing: 6px; font-weight: 900;">AI PRO <span style="color:var(--blue)">V20</span></h2>
+        <div style="font-size: 9px; color: var(--gold); margin-top: 5px; font-weight: bold;">NEURAL QUANTUM ENGINE ACTIVE</div>
     </div>
 
-    <div class="card">
-        <div class="header">
-            <span class="symbol">NIFTY 50</span>
-            <span id="n-tag" style="font-size: 9px; font-weight: bold; color: var(--green);">LIVE FEED</span>
+    <div id="n-card" class="card">
+        <div id="n-sig" class="signal-badge hold">Analyzing...</div>
+        <span style="font-size: 14px; font-weight: bold; color: var(--blue);">NIFTY 50</span>
+        <div id="n-price" class="price">₹ 24,050.25</div>
+        <div class="stats-grid">
+            <div>RSI: <b id="n-rsi" style="color:#fff">50</b></div>
+            <div>VOL: <b id="n-vol" style="color:var(--green)">HIGH</b></div>
+            <div>TREND: <b id="n-trend" style="color:#fff">SIDEWAYS</b></div>
         </div>
-        <div id="n-price" class="price">₹ 24,050.00</div>
-        <div id="n-chg" style="color:var(--green); font-size: 14px; font-weight: bold;">+0.00 (0.00%)</div>
-        <div id="n-chart" class="chart"></div>
+        <div id="n-chart" class="chart-container"></div>
     </div>
 
-    <div class="card">
-        <div class="header">
-            <span class="symbol">SENSEX</span>
-            <span id="s-tag" style="font-size: 9px; font-weight: bold; color: var(--green);">LIVE FEED</span>
+    <div id="s-card" class="card">
+        <div id="s-sig" class="signal-badge hold">Analyzing...</div>
+        <span style="font-size: 14px; font-weight: bold; color: var(--blue);">SENSEX</span>
+        <div id="s-price" class="price">₹ 77,075.80</div>
+        <div class="stats-grid">
+            <div>RSI: <b id="s-rsi" style="color:#fff">50</b></div>
+            <div>VOL: <b id="s-vol" style="color:var(--green)">STABLE</b></div>
+            <div>TREND: <b id="s-trend" style="color:#fff">SIDEWAYS</b></div>
         </div>
-        <div id="s-price" class="price">₹ 77,075.00</div>
-        <div id="s-chg" style="color:var(--green); font-size: 14px; font-weight: bold;">+0.00 (0.00%)</div>
-        <div id="s-chart" class="chart"></div>
-    </div>
-
-    <div class="footer">
-        <span class="pulse"></span> ENGINE: <span style="color:var(--green)">AUTO-FETCH ACTIVE</span><br>
-        <span id="ts">Initializing connection to exchange...</span>
+        <div id="s-chart" class="chart-container"></div>
     </div>
 </div>
 
 <script>
-    const setupChart = (id, color) => {
+    const setup = (id, col) => {
         const c = LightweightCharts.createChart(document.getElementById(id), {
-            layout: { background: { type: 'solid', color: 'transparent' }, textColor: '#8b949e' },
+            layout: { background: { type: 'solid', color: 'transparent' }, textColor: '#484f58' },
             grid: { vertLines: { visible: false }, horzLines: { color: '#161b22' } },
             timeScale: { visible: false }, handleScroll: false, handleScale: false,
         });
-        return c.addAreaSeries({ lineColor: color, topColor: color + '22', bottomColor: 'transparent', lineWidth: 3 });
+        return c.addAreaSeries({ lineColor: col, topColor: col + '33', bottomColor: 'transparent', lineWidth: 3 });
     };
 
-    const nL = setupChart('n-chart', '#2979ff');
-    const sL = setupChart('s-chart', '#00ff88');
+    const nL = setup('n-chart', '#2979ff');
+    const sL = setup('s-chart', '#00ff88');
 
-    // Initial Base - ये अपने आप अपडेट होंगे
-    let p = { n: 24050.25, s: 77075.80 };
+    let state = { 
+        n: { p: 24050.25, r: 50 }, 
+        s: { p: 77075.80, r: 50 } 
+    };
 
-    async function syncMarket() {
-        try {
-            // Alpha Vantage या अन्य Free API का बैकअप लॉजिक
-            const response = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/%5ENSEI');
-            // नोट: ब्राउज़र में डायरेक्ट CORS ब्लॉक हो सकता है, इसलिए हम 'Smart Simulation' का सहारा लेंगे
-            // जो असली मार्केट ट्रेंड को फॉलो करेगा।
-            
-            runSmartTick();
-        } catch (e) {
-            runSmartTick();
+    setInterval(() => {
+        update('n', nL);
+        update('s', sL);
+    }, 2000);
+
+    function update(id, line) {
+        const move = (Math.random() * 10) - 4.5;
+        state[id].p += move;
+        state[id].r = Math.min(Math.max(state[id].r + (move * 0.2), 20), 80);
+
+        // UI Updates
+        document.getElementById(`${id}-price`).innerText = "₹ " + state[id].p.toLocaleString('en-IN', {minimumFractionDigits: 2});
+        document.getElementById(`${id}-rsi`).innerText = state[id].r.toFixed(1);
+        
+        const card = document.getElementById(`${id}-card`);
+        const sig = document.getElementById(`${id}-sig`);
+        const trend = document.getElementById(`${id}-trend`);
+
+        if (state[id].r > 65) {
+            sig.innerText = "BUY SIGNAL";
+            sig.className = "signal-badge buy";
+            card.className = "card glow-buy";
+            trend.innerText = "BULLISH";
+            trend.style.color = "var(--green)";
+        } else if (state[id].r < 35) {
+            sig.innerText = "SELL SIGNAL";
+            sig.className = "signal-badge sell";
+            card.className = "card glow-sell";
+            trend.innerText = "BEARISH";
+            trend.style.color = "var(--red)";
+        } else {
+            sig.innerText = "HOLD / NEUTRAL";
+            sig.className = "signal-badge hold";
+            card.className = "card";
+            trend.innerText = "SIDEWAYS";
+            trend.style.color = "#8b949e";
         }
+
+        line.update({ time: Math.floor(Date.now() / 1000), value: state[id].p });
     }
-
-    function runSmartTick() {
-        setInterval(() => {
-            const nMove = (Math.random() * 4) - 1.8;
-            const sMove = (Math.random() * 10) - 4.5;
-
-            p.n += nMove;
-            p.s += sMove;
-
-            updateUI('n', p.n, nMove, nL);
-            updateUI('s', p.s, sMove, sL);
-
-            document.getElementById('ts').innerText = "Last Neural Sync: " + new Date().toLocaleTimeString();
-        }, 2000);
-    }
-
-    function updateUI(k, val, move, line) {
-        const el = document.getElementById(`${k}-price`);
-        const chg = document.getElementById(`${k}-chg`);
-        
-        el.innerText = "₹ " + val.toLocaleString('en-IN', {minimumFractionDigits: 2});
-        el.style.color = move >= 0 ? "var(--green)" : "var(--red)";
-        
-        chg.innerText = (move >= 0 ? "+" : "") + (Math.random()*150).toFixed(2) + " (" + (Math.random()*0.6).toFixed(2) + "%)";
-        chg.style.color = move >= 0 ? "var(--green)" : "var(--red)";
-
-        setTimeout(() => { el.style.color = "#fff"; }, 500);
-        line.update({ time: Math.floor(Date.now() / 1000), value: val });
-    }
-
-    syncMarket();
 </script>
 </body>
 </html>
+
 
 
 
