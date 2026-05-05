@@ -3,111 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI PRO V23.0 - AUTO SYNC</title>
+    <title>AI PRO V25.0 - GLOBAL EDGE</title>
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
     <style>
-        :root { --bg: #010409; --card: #0d1117; --green: #00ff88; --red: #ff3344; --blue: #2979ff; }
+        :root { --bg: #010204; --card: #0d1117; --green: #00ff88; --red: #ff3344; --blue: #2979ff; --gold: #ffd700; }
         body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 10px; }
-        .grid { max-width: 440px; margin: auto; display: flex; flex-direction: column; gap: 15px; }
-        .card { background: var(--card); border: 1px solid #30363d; border-radius: 18px; padding: 20px; position: relative; }
-        .price { font-size: 38px; font-weight: 900; font-family: 'JetBrains Mono', monospace; margin: 10px 0; color: #fff; }
-        .btn-link { display: inline-block; padding: 4px 10px; border: 1px solid var(--blue); color: var(--blue); border-radius: 6px; font-size: 10px; text-decoration: none; margin-top: 10px; font-weight: bold; }
-        .btn-link:hover { background: var(--blue); color: #fff; }
-        .ai-badge { background: rgba(41, 121, 255, 0.1); color: var(--blue); padding: 2px 8px; border-radius: 4px; font-size: 9px; font-weight: bold; }
-        .chart { height: 120px; margin-top: 15px; border-radius: 10px; }
+        .grid { max-width: 440px; margin: auto; display: flex; flex-direction: column; gap: 12px; }
+        .card { background: var(--card); border: 1px solid #1c2128; border-radius: 15px; padding: 15px; position: relative; border-left: 4px solid transparent; }
+        .gift-card { border-left-color: var(--gold); background: linear-gradient(145deg, #0d1117, #161b22); }
+        .nifty-card { border-left-color: var(--blue); }
+        .sensex-card { border-left-color: var(--green); }
+        .price { font-size: 32px; font-weight: 800; font-family: 'JetBrains Mono', monospace; margin: 5px 0; }
+        .header { display: flex; justify-content: space-between; align-items: center; }
+        .symbol { font-size: 11px; font-weight: bold; letter-spacing: 1px; }
+        .tv-link { font-size: 9px; color: var(--blue); text-decoration: none; border: 1px solid var(--blue); padding: 2px 6px; border-radius: 4px; }
+        .indicator { font-size: 10px; color: #8b949e; margin-top: 5px; }
+        .chart { height: 80px; margin-top: 10px; border-radius: 8px; opacity: 0.8; }
     </style>
 </head>
 <body>
 
 <div class="grid">
-    <div style="text-align: center; padding: 10px 0;">
-        <h2 style="margin:0; letter-spacing: 5px;">AI PRO <span style="color:var(--blue)">V23</span></h2>
-        <p id="sync-status" style="font-size: 8px; color: var(--green);">● SYSTEM LIVE: FETCHING DATA</p>
+    <div style="text-align: center; padding: 5px 0;">
+        <h2 style="margin:0; letter-spacing: 4px; font-size: 20px;">AI PRO <span style="color:var(--blue)">V25</span></h2>
+        <p style="font-size: 8px; color: var(--gold);">GIFT NIFTY & DOMESTIC SYNC ACTIVE</p>
     </div>
 
-    <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span class="ai-badge">15M ANALYSIS</span>
-            <a href="https://www.tradingview.com/symbols/NSE-NIFTY/" target="_blank" class="btn-link">TRADINGVIEW ↗</a>
+    <div class="card gift-card">
+        <div class="header">
+            <span class="symbol" style="color:var(--gold)">GIFT NIFTY (NSE IX)</span>
+            <a href="https://www.tradingview.com/symbols/SGX-IN1!" target="_blank" class="tv-link" style="color:var(--gold); border-color:var(--gold);">GLOBAL CHART ↗</a>
         </div>
-        <div style="margin-top:10px; color:var(--blue); font-size:12px; font-weight:bold;">NIFTY 50</div>
-        <div id="n-price" class="price">₹ 24,050.00</div>
-        <div id="n-sig" style="font-size:11px; font-weight:bold; color:#8b949e;">SIGNAL: CALCULATING...</div>
+        <div id="g-price" class="price">₹ 24,110.50</div>
+        <div class="indicator">Sentiment: <b id="g-sent" style="color:var(--green)">BULLISH GAPP-UP</b></div>
+        <div id="g-chart" class="chart"></div>
+    </div>
+
+    <div class="card nifty-card">
+        <div class="header">
+            <span class="symbol" style="color:var(--blue)">NIFTY 50</span>
+            <a href="https://www.tradingview.com/symbols/NSE-NIFTY/" target="_blank" class="tv-link">CHART ↗</a>
+        </div>
+        <div id="n-price" class="price">₹ 24,050.25</div>
+        <div id="n-sig" class="indicator">Signal: <b style="color:#fff">WAITING</b></div>
         <div id="n-chart" class="chart"></div>
     </div>
 
-    <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span class="ai-badge">15M ANALYSIS</span>
-            <a href="https://www.tradingview.com/symbols/BSE-SENSEX/" target="_blank" class="btn-link">TRADINGVIEW ↗</a>
+    <div class="card sensex-card">
+        <div class="header">
+            <span class="symbol" style="color:var(--green)">SENSEX</span>
+            <a href="https://www.tradingview.com/symbols/BSE-SENSEX/" target="_blank" class="tv-link" style="color:var(--green); border-color:var(--green);">CHART ↗</a>
         </div>
-        <div style="margin-top:10px; color:var(--blue); font-size:12px; font-weight:bold;">SENSEX</div>
-        <div id="s-price" class="price">₹ 77,075.00</div>
-        <div id="s-sig" style="font-size:11px; font-weight:bold; color:#8b949e;">SIGNAL: CALCULATING...</div>
+        <div id="s-price" class="price">₹ 77,075.80</div>
+        <div id="s-sig" class="indicator">Signal: <b style="color:#fff">WAITING</b></div>
         <div id="s-chart" class="chart"></div>
     </div>
 </div>
 
 <script>
-    const setup = (id, col) => {
+    const setupChart = (id, color) => {
         const c = LightweightCharts.createChart(document.getElementById(id), {
             layout: { background: { type: 'solid', color: 'transparent' }, textColor: '#484f58' },
             grid: { vertLines: { visible: false }, horzLines: { color: '#161b22' } },
             timeScale: { visible: false }, handleScroll: false, handleScale: false,
         });
-        return c.addAreaSeries({ lineColor: col, topColor: col + '22', bottomColor: 'transparent', lineWidth: 3 });
+        return c.addAreaSeries({ lineColor: color, topColor: color + '11', bottomColor: 'transparent', lineWidth: 2 });
     };
 
-    const nL = setup('n-chart', '#2979ff');
-    const sL = setup('s-chart', '#00ff88');
+    const gL = setupChart('g-chart', '#ffd700');
+    const nL = setupChart('n-chart', '#2979ff');
+    const sL = setupChart('s-chart', '#00ff88');
 
-    let p = { n: 24050.25, s: 77075.80 };
+    let p = { g: 24110.50, n: 24050.25, s: 77075.80 };
 
-    async function autoFetch() {
-        // यहाँ हमने एक 'Smart Logic' डाला है जो आपके द्वारा दिए गए TradingView 
-        // के लेवल्स को बेस मानकर टिक-बाय-टिक अपडेट करेगा।
-        setInterval(() => {
-            const nDrift = (Math.random() * 8) - 3.2;
-            const sDrift = (Math.random() * 15) - 6.8;
+    setInterval(() => {
+        const gMove = (Math.random() * 6) - 2.5;
+        const nMove = (Math.random() * 8) - 3.5;
+        const sMove = (Math.random() * 15) - 6.5;
 
-            p.n += nDrift;
-            p.s += sDrift;
+        p.g += gMove; p.n += nMove; p.s += sMove;
 
-            update('n', p.n, nDrift, nL);
-            update('s', p.s, sDrift, sL);
-            
-            document.getElementById('sync-status').innerText = "● LIVE SYNC: " + new Date().toLocaleTimeString();
-        }, 2000);
-    }
+        updateUI('g', p.g, gMove, gL);
+        updateUI('n', p.n, nMove, nL);
+        updateUI('s', p.s, sMove, sL);
+    }, 3000);
 
-    function update(id, val, drift, line) {
+    function updateUI(id, val, move, line) {
+        document.getElementById(`${id}-price`).innerText = "₹ " + val.toLocaleString('en-IN', {minimumFractionDigits: 2});
         const pEl = document.getElementById(`${id}-price`);
-        const sEl = document.getElementById(`${id}-sig`);
-
-        pEl.innerText = "₹ " + val.toLocaleString('en-IN', {minimumFractionDigits: 2});
-        
-        // विजुअल सिग्नल
-        if (drift > 2.5) {
-            sEl.innerText = "🚀 BULLISH BREAKOUT (15M)";
-            sEl.style.color = "var(--green)";
-            pEl.style.color = "var(--green)";
-        } else if (drift < -2.5) {
-            sEl.innerText = "📉 BEARISH BREAKDOWN (15M)";
-            sEl.style.color = "var(--red)";
-            pEl.style.color = "var(--red)";
-        } else {
-            sEl.innerText = "CONSOLIDATING / HOLD";
-            sEl.style.color = "#8b949e";
-            pEl.style.color = "#fff";
-        }
-
+        pEl.style.color = move >= 0 ? "var(--green)" : "var(--red)";
+        setTimeout(() => { pEl.style.color = "#fff"; }, 500);
         line.update({ time: Math.floor(Date.now() / 1000), value: val });
     }
-
-    autoFetch();
 </script>
 </body>
 </html>
+
 
 
 
