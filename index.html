@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI PRO TERMINAL V38.0</title>
+    <title>AI PRO TERMINAL V39.0</title>
     <style>
         :root { 
             --bg: #010409; --card: #0d1117; --green: #00ff88; --red: #ff3344; 
@@ -11,52 +11,65 @@
         }
         body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
         
+        /* Ticker */
         .ticker-wrap { background: #161b22; color: var(--gold); padding: 6px 0; font-size: 10px; border-bottom: 1px solid #30363d; overflow: hidden; white-space: nowrap; }
         .ticker { display: inline-block; animation: scroll 30s linear infinite; }
         @keyframes scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
-        .container { max-width: 450px; margin: auto; padding: 12px; display: flex; flex-direction: column; gap: 15px; }
+        .container { max-width: 450px; margin: auto; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
         
+        /* Price Sync Modal Style */
+        .sync-bar { background: #161b22; border: 1px dashed var(--gray); padding: 10px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .sync-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+        .sync-inputs input { background: #0d1117; border: 1px solid #30363d; color: var(--gold); font-size: 11px; padding: 5px; border-radius: 5px; text-align: center; }
+        .sync-btn { background: var(--gold); color: black; border: none; padding: 8px; border-radius: 8px; font-weight: bold; font-size: 10px; cursor: pointer; }
+
+        /* Risk & PnL */
         .risk-management { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .input-group { background: #0d1117; border: 1px solid #30363d; padding: 8px; border-radius: 12px; text-align: center; }
         .input-group label { font-size: 9px; display: block; margin-bottom: 4px; font-weight: bold; }
         .input-group input { background: #161b22; border: none; color: white; width: 80%; text-align: center; font-family: monospace; border-radius: 4px; }
 
-        .portfolio { background: linear-gradient(145deg, #161b22, #0d1117); padding: 15px; border-radius: 16px; border: 1px solid var(--blue); display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; }
+        .portfolio { background: linear-gradient(145deg, #161b22, #0d1117); padding: 15px; border-radius: 16px; border: 1px solid var(--blue); display: flex; justify-content: space-between; align-items: center; }
         .p-val { font-size: 26px; font-weight: 900; font-family: monospace; }
         
         .target-hit { border-color: var(--green) !important; box-shadow: 0 0 15px var(--green); }
         .sl-hit { border-color: var(--red) !important; box-shadow: 0 0 15px var(--red); animation: shake 0.2s infinite; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-2px); } 75% { transform: translateX(2px); } }
 
-        .card { background: var(--card); border: 1px solid #30363d; border-radius: 20px; padding: 15px; border-left: 4px solid transparent; margin-bottom: 10px; }
+        /* Index Cards */
+        .card { background: var(--card); border: 1px solid #30363d; border-radius: 20px; padding: 15px; border-left: 4px solid transparent; }
         .nifty-border { border-left-color: var(--blue); }
         .bank-border { border-left-color: var(--purple); }
         .sensex-border { border-left-color: var(--green); }
         .gift-border { border-left-color: var(--gold); }
 
         .price { font-size: 28px; font-weight: 900; margin: 5px 0; font-family: monospace; }
-        .tv-widget { height: 230px; margin-top: 10px; border-radius: 12px; overflow: hidden; background: #fff; border: 1px solid #21262d; }
+        .tv-widget { height: 230px; margin-top: 10px; border-radius: 12px; overflow: hidden; }
 
-        .btn-row { display: flex; gap: 8px; margin: 10px 0; }
-        .buy-btn { flex: 1; background: none; border: 1px solid var(--green); color: var(--green); padding: 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .btn-row { display: flex; gap: 8px; margin-top: 10px; }
+        .buy-btn { flex: 1; background: none; border: 1px solid var(--green); color: var(--green); padding: 10px; border-radius: 8px; font-size: 11px; font-weight: bold; }
         .buy-pe { border-color: var(--red); color: var(--red); }
-        
-        .chart-link { font-size: 9px; color: inherit; text-decoration: none; border: 1px solid currentColor; padding: 2px 6px; border-radius: 4px; opacity: 0.8; }
-
-        .history-card { background: #0d1117; border: 1px solid #30363d; border-radius: 15px; padding: 15px; }
-        .history-list { max-height: 100px; overflow-y: auto; font-size: 11px; margin-top: 10px; }
-        .history-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #161b22; }
-        .download-btn { width: 100%; background: transparent; color: var(--gold); border: 1px dashed var(--gold); padding: 10px; border-radius: 10px; font-size: 11px; margin-top: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="ticker-wrap">
-    <div class="ticker">📊 AI PRO V38.0: 15m TIME-FRAME ANALYSIS ACTIVE | NIFTY(65) | BANKNIFTY(30) | SENSEX(20)...</div>
+    <div class="ticker">⚙️ AI PRO V39.0: PRICE SYNC SYSTEM ACTIVE | SET CUSTOM PRICES ON THE FLY | 15m GAUGE | RISK CONTROL...</div>
 </div>
 
 <div class="container">
+    <div class="sync-bar">
+        <span style="font-size: 9px; color: var(--gray); font-weight: bold;">SET LIVE MARKET PRICES:</span>
+        <div class="sync-inputs">
+            <input type="number" id="set-gift" placeholder="GIFT (e.g. 24173)">
+            <input type="number" id="set-nifty" placeholder="NIFTY">
+            <input type="number" id="set-bank" placeholder="BANKNIFTY">
+            <input type="number" id="set-sensex" placeholder="SENSEX">
+        </div>
+        <button class="sync-btn" onclick="syncPrices()">⚡ SYNC NOW</button>
+    </div>
+
     <div class="risk-management">
         <div class="input-group" style="border-top: 2px solid var(--green);">
             <label style="color:var(--green);">TARGET (₹)</label>
@@ -70,7 +83,7 @@
 
     <div class="portfolio" id="main-dash">
         <div>
-            <div style="font-size: 10px; color: var(--blue); font-weight: bold;">LIVE P&L (15m SIGNAL)</div>
+            <div id="status-label" style="font-size: 10px; color: var(--blue); font-weight: bold;">LIVE P&L (VIRTUAL)</div>
             <div id="pnl-val" class="p-val">₹ 0.00</div>
             <div id="pos-info" style="font-size: 9px; color: var(--gray);">READY</div>
         </div>
@@ -78,22 +91,16 @@
     </div>
 
     <div class="card gift-border">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="color:var(--gold); font-size:11px; font-weight:bold;">GIFT NIFTY</span>
-            <a href="https://www.tradingview.com/symbols/NSEIX-NIFTY1!/" target="_blank" class="chart-link">15m CHART ↗</a>
-        </div>
-        <div id="g-price" class="price" style="color:var(--gold)">₹ 24,115.78</div>
+        <span style="color:var(--gold); font-size:11px; font-weight:bold;">GIFT NIFTY</span>
+        <div id="g-price" class="price" style="color:var(--gold)">₹ 24,173.00</div>
         <div class="tv-widget">
             <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=NSEIX%3ANIFTY1!&interval=15m&showIntervalTabs=true&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="230" frameborder="0"></iframe>
         </div>
     </div>
 
     <div class="card nifty-border">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="color:var(--blue); font-size:11px; font-weight:bold;">NIFTY 50 (65 Lot)</span>
-            <a href="https://www.tradingview.com/symbols/NSE-NIFTY/" target="_blank" class="chart-link" style="color:var(--blue)">15m CHART ↗</a>
-        </div>
-        <div id="n-price" class="price">₹ 24,046.69</div>
+        <span style="color:var(--blue); font-size:11px; font-weight:bold;">NIFTY 50 (65 Lot)</span>
+        <div id="n-price" class="price">₹ 24,050.00</div>
         <div class="btn-row">
             <button class="buy-btn" onclick="buy('NIFTY','CE',24100,120)">CE BUY</button>
             <button class="buy-btn buy-pe" onclick="buy('NIFTY','PE',24100,115)">PE BUY</button>
@@ -104,11 +111,8 @@
     </div>
 
     <div class="card bank-border">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="color:var(--purple); font-size:11px; font-weight:bold;">BANK NIFTY (30 Lot)</span>
-            <a href="https://www.tradingview.com/symbols/NSE-BANKNIFTY1!/" target="_blank" class="chart-link" style="color:var(--purple)">15m CHART ↗</a>
-        </div>
-        <div id="b-price" class="price">₹ 52,433.16</div>
+        <span style="color:var(--purple); font-size:11px; font-weight:bold;">BANK NIFTY (30 Lot)</span>
+        <div id="b-price" class="price">₹ 52,433.00</div>
         <div class="btn-row">
             <button class="buy-btn" onclick="buy('BANKNIFTY','CE',52500,245)" style="border-color:var(--purple); color:var(--purple)">CE BUY</button>
             <button class="buy-btn buy-pe" onclick="buy('BANKNIFTY','PE',52500,235)">PE BUY</button>
@@ -117,98 +121,70 @@
             <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=NSE%3ABANKNIFTY&interval=15m&showIntervalTabs=true&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="230" frameborder="0"></iframe>
         </div>
     </div>
-
-    <div class="card sensex-border">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="color:var(--green); font-size:11px; font-weight:bold;">SENSEX (20 Lot)</span>
-            <a href="https://www.tradingview.com/symbols/BSE-SENSEX/" target="_blank" class="chart-link" style="color:var(--green)">15m CHART ↗</a>
-        </div>
-        <div id="s-price" class="price">₹ 77,157.92</div>
-        <div class="btn-row">
-            <button class="buy-btn" onclick="buy('SENSEX','CE',77100,350)">CE BUY</button>
-            <button class="buy-btn buy-pe" onclick="buy('SENSEX','PE',77100,340)">PE BUY</button>
-        </div>
-        <div class="tv-widget">
-            <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=BSE%3ASENSEX&interval=15m&showIntervalTabs=true&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="230" frameborder="0"></iframe>
-        </div>
-    </div>
-
-    <div class="history-card">
-        <div style="font-size: 12px; color: var(--gold); font-weight: bold;">TRADE LOG BOOK</div>
-        <div id="history-list" class="history-list">
-            <div style="color:var(--gray); text-align:center;">No trades saved today.</div>
-        </div>
-        <button class="download-btn" onclick="downloadLog()">📥 DOWNLOAD REPORT</button>
-    </div>
 </div>
 
 <script>
     const LOTS = { NIFTY: 65, BANKNIFTY: 30, SENSEX: 20 };
-    let p = { GIFT: 24115.78, NIFTY: 24046.69, BANKNIFTY: 52433.16, SENSEX: 77157.92 };
+    let p = { GIFT: 24173.00, NIFTY: 24050.00, BANKNIFTY: 52433.00, SENSEX: 77157.00 };
     let activeTrade = null;
-    let history = [];
     const winSound = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-    const lossSound = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock_short_beeps.ogg');
+
+    function syncPrices() {
+        const g = document.getElementById('set-gift').value;
+        const n = document.getElementById('set-nifty').value;
+        const b = document.getElementById('set-bank').value;
+        const s = document.getElementById('set-sensex').value;
+
+        if(g) p.GIFT = parseFloat(g);
+        if(n) p.NIFTY = parseFloat(n);
+        if(b) p.BANKNIFTY = parseFloat(b);
+        if(s) p.SENSEX = parseFloat(s);
+        
+        alert("Prices Synchronized! 🚀");
+    }
 
     function update() {
         setInterval(() => {
-            p.GIFT += (Math.random()*6-2.8); p.NIFTY += (Math.random()*10-4.8); p.BANKNIFTY += (Math.random()*30-14); p.SENSEX += (Math.random()*20-9.5);
+            p.GIFT += (Math.random()*4-2); p.NIFTY += (Math.random()*6-3); p.BANKNIFTY += (Math.random()*15-7);
             document.getElementById('g-price').innerText = "₹ " + p.GIFT.toLocaleString('en-IN', {minimumFractionDigits: 2});
             document.getElementById('n-price').innerText = "₹ " + p.NIFTY.toLocaleString('en-IN', {minimumFractionDigits: 2});
             document.getElementById('b-price').innerText = "₹ " + p.BANKNIFTY.toLocaleString('en-IN', {minimumFractionDigits: 2});
-            document.getElementById('s-price').innerText = "₹ " + p.SENSEX.toLocaleString('en-IN', {minimumFractionDigits: 2});
             if(activeTrade) calculatePnL();
         }, 3000);
     }
 
     function buy(idx, type, strike, price) {
-        activeTrade = { idx, type, strike, entry: parseFloat(price), lot: LOTS[idx], pnl: 0, time: new Date().toLocaleTimeString() };
-        document.getElementById('pos-info').innerText = `ACTIVE: ${idx} ${type} @ ₹${price}`;
-        document.getElementById('pos-info').style.color = "var(--gold)";
+        activeTrade = { idx, type, strike, entry: parseFloat(price), lot: LOTS[idx] };
+        document.getElementById('pos-info').innerText = `ACTIVE: ${idx} @ ${price}`;
         winSound.play();
     }
 
     function calculatePnL() {
         const target = parseFloat(document.getElementById('target-input').value);
         const sl = parseFloat(document.getElementById('sl-input').value) * -1;
-        const currentPrice = activeTrade.entry + (Math.random()*16-7.8);
-        activeTrade.pnl = (currentPrice - activeTrade.entry) * activeTrade.lot;
+        const currentPrice = activeTrade.entry + (Math.random()*10-5);
+        const pnl = (currentPrice - activeTrade.entry) * activeTrade.lot;
         const pnlEl = document.getElementById('pnl-val');
+        pnlEl.innerText = "₹ " + pnl.toFixed(2);
+        pnlEl.style.color = pnl >= 0 ? "var(--green)" : "var(--red)";
+        
         const dash = document.getElementById('main-dash');
-        pnlEl.innerText = "₹ " + activeTrade.pnl.toFixed(2);
-        pnlEl.style.color = activeTrade.pnl >= 0 ? "var(--green)" : "var(--red)";
-        if (activeTrade.pnl >= target) { dash.className = "portfolio target-hit"; if (Math.random() > 0.9) winSound.play(); }
-        else if (activeTrade.pnl <= sl) { dash.className = "portfolio sl-hit"; if (Math.random() > 0.9) lossSound.play(); }
-        else { dash.className = "portfolio"; }
+        if (pnl >= target) dash.className = "portfolio target-hit";
+        else if (pnl <= sl) dash.className = "portfolio sl-hit";
+        else dash.className = "portfolio";
     }
 
     function exitTrade() {
-        if (!activeTrade) return;
-        history.unshift({ ...activeTrade });
-        renderHistory();
         activeTrade = null;
         document.getElementById('pnl-val').innerText = "₹ 0.00";
-        document.getElementById('pnl-val').style.color = "#fff";
-        document.getElementById('pos-info').innerText = "POSITION CLOSED";
         document.getElementById('main-dash').className = "portfolio";
     }
 
-    function renderHistory() {
-        const list = document.getElementById('history-list');
-        list.innerHTML = history.map(t => `<div class="history-item"><span>${t.time} - ${t.idx}</span><span style="color:${t.pnl >= 0 ? 'var(--green)' : 'var(--red)'}">${t.pnl >= 0 ? '+' : ''}₹${t.pnl.toFixed(2)}</span></div>`).join('');
-    }
-
-    function downloadLog() {
-        if(!history.length) return alert("No trades!");
-        let log = "AI PRO TERMINAL REPORT\n\n";
-        history.forEach(t => log += `${t.time} | ${t.idx} | P&L: ₹${t.pnl.toFixed(2)}\n`);
-        const blob = new Blob([log], {type:'text/plain'});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Trade_Report.txt'; a.click();
-    }
     update();
 </script>
 </body>
 </html>
+
 
 
 
