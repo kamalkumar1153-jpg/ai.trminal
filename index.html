@@ -1,27 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
-  <title>NIFTY SIGNAL</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Market Terminal v3</title>
+    <style>
+        body { background: #0d1117; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; }
+        .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 15px; transition: 0.3s; }
+        .price { font-size: 24px; font-weight: bold; color: #3fb950; margin: 10px 0; }
+        .signal { font-size: 12px; font-weight: bold; color: #58a6ff; text-transform: uppercase; }
+    </style>
 </head>
-
 <body>
+    <h2 style="color: #58a6ff;">🚀 AI PRO TERMINAL</h2>
+    <div id="grid" class="grid">डेटा लोड हो रहा है...</div>
+    <p id="update-time" style="font-size: 10px; color: #8b949e; margin-top: 20px;"></p>
 
-<h1>📊 NIFTY SIGNAL</h1>
+    <script>
+        async function fetchData() {
+            try {
+                // यहाँ अपना Render URL डालें
+                const res = await fetch('https://ai-terminal-2.onrender.com/market_data');
+                const data = await res.json();
+                const grid = document.getElementById('grid');
+                grid.innerHTML = '';
 
-<div id="box">
-  <h2 id="signal">Loading...</h2>
-  <p>Price: <span id="price">-</span></p>
-  <p>VWAP: <span id="vwap">-</span></p>
-  <p>RSI: <span id="rsi">-</span></p>
-</div>
-
-<script src="app.js"></script>
-
+                for (const key in data) {
+                    const item = data[key];
+                    grid.innerHTML += `
+                        <div class="card">
+                            <div style="font-size: 12px; color: #8b949e;">${key}</div>
+                            <div class="price">₹${item.price}</div>
+                            <div class="signal">${item.signal}</div>
+                            <div style="font-size: 10px; margin-top: 5px;">Score: ${item.score}%</div>
+                        </div>`;
+                    document.getElementById('update-time').innerText = "Last Update: " + item.time;
+                }
+            } catch (e) {
+                document.getElementById('grid').innerText = "Server Connection Error...";
+            }
+        }
+        setInterval(fetchData, 10000);
+        fetchData();
+    </script>
 </body>
 </html>
+
 
 
 
