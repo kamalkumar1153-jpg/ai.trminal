@@ -1,6 +1,6 @@
 async function loadSignal() {
   try {
-    const res = await fetch(" https://ai-trminal-2.onrender.com/marketdata");
+    const res = await fetch(" https://ai-trminal-2.onrender.com/market_data");
     const d = await res.json();
 
     console.log("DATA:", d);
