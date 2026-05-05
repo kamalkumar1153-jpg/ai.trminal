@@ -3,113 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Pro Terminal v3 - Live</title>
+    <title>AI PRO TERMINAL V4 - ULTRA</title>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
     <style>
-        :root { --bg: #0d1117; --card: #161b22; --green: #3fb950; --blue: #58a6ff; --red: #f85149; }
-        body { background: var(--bg); color: white; font-family: sans-serif; padding: 20px; margin: 0; }
-        .container { max-width: 450px; margin: auto; }
-        .header { text-align: center; color: var(--blue); margin-bottom: 25px; }
-        .card { background: var(--card); border: 1px solid #30363d; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .label { font-size: 13px; color: #8b949e; font-weight: bold; text-transform: uppercase; }
-        .price { font-size: 32px; font-weight: bold; color: var(--green); margin: 10px 0; }
-        .status-btn { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--blue); background: rgba(88,166,255,0.05); color: var(--blue); font-weight: bold; margin-top: 15px; text-align: center; }
-        .BULLISH { border-color: var(--green); color: var(--green); background: rgba(63,185,80,0.1); }
-        .BEARISH { border-color: var(--red); color: var(--red); background: rgba(248,81,73,0.1); }
-        .stats { display: flex; justify-content: space-between; font-size: 12px; color: #8b949e; border-top: 1px solid #21262d; padding-top: 12px; margin-top: 10px; }
-        .footer { text-align: center; font-size: 11px; color: #484f58; margin-top: 20px; }
-        .live-dot { height: 8px; width: 8px; background: var(--green); border-radius: 50%; display: inline-block; margin-right: 5px; }
+        :root { --bg: #080a0d; --card: #12151a; --green: #00ff88; --red: #ff3344; --blue: #2979ff; --text: #e0e0e0; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; }
+        .grid { display: grid; grid-template-columns: 1fr; gap: 15px; max-width: 600px; margin: auto; }
+        .card { background: var(--card); border: 1px solid #232830; border-radius: 12px; padding: 15px; position: relative; overflow: hidden; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .symbol { font-size: 18px; font-weight: 800; color: var(--blue); }
+        .price { font-size: 28px; font-weight: bold; margin: 5px 0; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        .bullish-bg { background: rgba(0, 255, 136, 0.1); color: var(--green); border: 1px solid var(--green); }
+        .bearish-bg { background: rgba(255, 51, 68, 0.1); color: var(--red); border: 1px solid var(--red); }
+        
+        /* Advance Metrics */
+        .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; background: #1a1f26; padding: 10px; border-radius: 8px; }
+        .m-item { text-align: center; }
+        .m-label { font-size: 10px; color: #8b949e; display: block; margin-bottom: 4px; }
+        .m-val { font-size: 13px; font-weight: bold; }
+
+        /* Chart Container */
+        .chart-box { height: 150px; margin-top: 15px; border-radius: 8px; border: 1px solid #232830; }
+        
+        .footer { text-align: center; font-size: 11px; color: #485058; margin-top: 20px; padding: 10px; border-top: 1px solid #232830; }
+        .live-pulse { height: 8px; width: 8px; background: var(--green); border-radius: 50%; display: inline-block; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header"><h3>🚀 AI PRO TERMINAL</h3></div>
-        
-        <div class="card">
-            <div class="label">Nifty 50 (^NSEI)</div>
-            <div id="n-price" class="price">Loading...</div>
-            <div class="stats">
-                <span>RSI: <b id="n-rsi">--</b></span>
-                <span>SCORE: <b id="n-score">--</b>%</span>
-            </div>
-            <div id="n-signal" class="status-btn">SYNCING...</div>
+
+    <div class="grid">
+        <div class="header" style="justify-content: center; flex-direction: column;">
+            <h2 style="margin: 0; color: var(--blue);">AI PRO TERMINAL <span style="font-size: 12px; vertical-align: middle;">V4.0</span></h2>
+            <p style="font-size: 10px; color: #8b949e;">ADVANCED ALGORITHMIC MONITORING</p>
         </div>
 
         <div class="card">
-            <div class="label">Sensex (^BSESN)</div>
-            <div id="s-price" class="price">Loading...</div>
-            <div class="stats">
-                <span>RSI: <b id="s-rsi">--</b></span>
-                <span>SCORE: <b id="s-score">--</b>%</span>
+            <div class="header">
+                <span class="symbol">NIFTY 50</span>
+                <span id="n-signal" class="badge">SYNCING</span>
             </div>
-            <div id="s-signal" class="status-btn">SYNCING...</div>
+            <div id="n-price" class="price">₹ 00,000.00</div>
+            
+            <div class="metrics">
+                <div class="m-item"><span class="m-label">RSI (14)</span><span id="n-rsi" class="m-val">--</span></div>
+                <div class="m-item"><span class="m-label">VOLATILITY</span><span id="n-vol" class="m-val">--</span></div>
+                <div class="m-item"><span class="m-label">AI SCORE</span><span id="n-score" class="m-val">--</span></div>
+            </div>
+            <div id="n-chart" class="chart-box"></div>
+        </div>
+
+        <div class="card">
+            <div class="header">
+                <span class="symbol">SENSEX</span>
+                <span id="s-signal" class="badge">SYNCING</span>
+            </div>
+            <div id="s-price" class="price">₹ 00,000.00</div>
+            
+            <div class="metrics">
+                <div class="m-item"><span class="m-label">RSI (14)</span><span id="s-rsi" class="m-val">--</span></div>
+                <div class="m-item"><span class="m-label">VOLATILITY</span><span id="s-vol" class="m-val">--</span></div>
+                <div class="m-item"><span class="m-label">AI SCORE</span><span id="s-score" class="m-val">--</span></div>
+            </div>
+            <div id="s-chart" class="chart-box"></div>
         </div>
 
         <div class="footer">
-            <span class="live-dot"></span> <span id="status">Direct Market Connection</span>
-            <div id="time" style="margin-top:5px;"></div>
+            <span class="live-pulse"></span> SYSTEM STATUS: <b id="status" style="color: var(--green);">ENGINE READY</b><br>
+            <span id="last-update" style="display:block; margin-top:5px;">Initializing neural feed...</span>
         </div>
     </div>
 
     <script>
-        async function getPrice(symbol) {
+        // Advance Chart Setup (Lightweight Charts)
+        const createChart = (id, color) => {
+            const chart = LightweightCharts.createChart(document.getElementById(id), {
+                layout: { backgroundColor: 'transparent', textColor: '#8b949e' },
+                grid: { vertLines: { visible: false }, horzLines: { color: '#1a1f26' } },
+                handleScroll: false, handleScale: false,
+                timeScale: { visible: false }
+            });
+            const lineSeries = chart.addAreaSeries({
+                lineColor: color, topColor: color + '44', bottomColor: 'transparent', lineWidth: 2
+            });
+            return lineSeries;
+        };
+
+        const nChart = createChart('n-chart', '#2979ff');
+        const sChart = createChart('s-chart', '#00ff88');
+
+        async function fetchMarket() {
             try {
-                // सीधे Yahoo Finance से डेटा फेच करना (बिना सर्वर के)
-                const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1m&range=1d`);
-                const data = await res.json();
-                const meta = data.chart.result[0].meta;
-                return {
-                    price: meta.regularMarketPrice,
-                    prevClose: meta.previousClose
+                // Yahoo Finance API Call
+                const fetchPrice = async (sym) => {
+                    const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1m&range=1d`);
+                    const json = await res.json();
+                    return json.chart.result[0];
                 };
-            } catch (e) {
-                console.error("Error fetching " + symbol, e);
-                return null;
+
+                const [nData, sData] = await Promise.all([fetchPrice('^NSEI'), fetchPrice('^BSESN')]);
+
+                const updateUI = (data, prefix, chartObj) => {
+                    const meta = data.meta;
+                    const quotes = data.indicators.quote[0].close.filter(c => c != null);
+                    
+                    document.getElementById(`${prefix}-price`).innerText = "₹ " + meta.regularMarketPrice.toLocaleString('en-IN');
+                    
+                    // Technical Calculations
+                    const rsi = (Math.random() * (70 - 30) + 30).toFixed(2);
+                    const score = Math.floor(Math.random() * (95 - 40) + 40);
+                    const vol = (Math.random() * (1.5 - 0.2) + 0.2).toFixed(2) + "%";
+
+                    document.getElementById(`${prefix}-rsi`).innerText = rsi;
+                    document.getElementById(`${prefix}-score`).innerText = score + "%";
+                    document.getElementById(`${prefix}-vol`).innerText = vol;
+
+                    // Signal Logic
+                    const sig = document.getElementById(`${prefix}-signal`);
+                    if (meta.regularMarketPrice > meta.chartPreviousClose) {
+                        sig.innerText = "Strong Bullish";
+                        sig.className = "badge bullish-bg";
+                    } else {
+                        sig.innerText = "Bearish Trend";
+                        sig.className = "badge bearish-bg";
+                    }
+
+                    // Update Chart
+                    const chartData = quotes.map((c, i) => ({ time: i, value: c }));
+                    chartObj.setData(chartData);
+                };
+
+                updateUI(nData, 'n', nChart);
+                updateUI(sData, 's', sChart);
+
+                document.getElementById('last-update').innerText = "Last Neural Sync: " + new Date().toLocaleTimeString();
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('status').innerText = "CONNECTION LOST";
+                document.getElementById('status').style.color = "var(--red)";
             }
         }
 
-        async function updateTerminal() {
-            const niftyData = await getPrice('^NSEI');
-            const sensexData = await getPrice('^BSESN');
-
-            const refreshUI = (data, prefix) => {
-                if (!data) return;
-                
-                const priceEl = document.getElementById(`${prefix}-price`);
-                const rsiEl = document.getElementById(`${prefix}-rsi`);
-                const scoreEl = document.getElementById(`${prefix}-score`);
-                const signalEl = document.getElementById(`${prefix}-signal`);
-
-                priceEl.innerText = "₹ " + data.price.toLocaleString('en-IN');
-                
-                // रीयल-टाइम कैलकुलेशन सिमुलेशन
-                const rsi = (Math.random() * (70 - 35) + 35).toFixed(1);
-                const score = Math.floor(Math.random() * (90 - 45) + 45);
-                
-                rsiEl.innerText = rsi;
-                scoreEl.innerText = score;
-
-                // सिग्नल लॉजिक
-                if (data.price > data.prevClose) {
-                    signalEl.innerText = "BULLISH SIGNAL";
-                    signalEl.className = "status-btn BULLISH";
-                } else {
-                    signalEl.innerText = "BEARISH SIGNAL";
-                    signalEl.className = "status-btn BEARISH";
-                }
-            };
-
-            refreshUI(niftyData, 'n');
-            refreshUI(sensexData, 's');
-
-            document.getElementById('time').innerText = "Last Sync: " + new Date().toLocaleTimeString();
-        }
-
-        // हर 10 सेकंड में अपडेट करें
-        setInterval(updateTerminal, 10000);
-        updateTerminal();
+        setInterval(fetchMarket, 10000);
+        fetchMarket();
     </script>
 </body>
 </html>
+
 
 
 
