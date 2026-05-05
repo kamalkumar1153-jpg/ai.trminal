@@ -3,31 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Market Terminal v3</title>
+    <title>AI Pro Terminal v3</title>
     <style>
         :root { --bg: #0d1117; --card: #161b22; --green: #3fb950; --blue: #58a6ff; --red: #f85149; }
-        body { background: var(--bg); color: white; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; padding: 20px; margin: 0; }
-        .container { max-width: 400px; margin: auto; }
-        .card { background: var(--card); border: 1px solid #30363d; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: transform 0.2s; }
-        .card:active { transform: scale(0.98); }
-        .label { font-size: 14px; color: #8b949e; font-weight: bold; letter-spacing: 1px; }
-        .price { font-size: 34px; font-weight: bold; color: var(--green); margin: 10px 0; letter-spacing: -1px; }
-        .status-btn { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--blue); background: rgba(88,166,255,0.1); color: var(--blue); font-weight: bold; font-size: 14px; margin-top: 15px; text-transform: uppercase; }
+        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; padding: 20px; margin: 0; }
+        .container { max-width: 450px; margin: auto; }
+        .header { text-align: center; color: var(--blue); letter-spacing: 1px; margin-bottom: 25px; }
+        .card { background: var(--card); border: 1px solid #30363d; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        .label { font-size: 13px; color: #8b949e; font-weight: bold; text-transform: uppercase; }
+        .price { font-size: 32px; font-weight: bold; color: var(--green); margin: 10px 0; }
+        .status-btn { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--blue); background: rgba(88,166,255,0.05); color: var(--blue); font-weight: bold; margin-top: 15px; }
         .BULLISH { border-color: var(--green); color: var(--green); background: rgba(63,185,80,0.1); }
         .BEARISH { border-color: var(--red); color: var(--red); background: rgba(248,81,73,0.1); }
-        .row { display: flex; justify-content: space-between; font-size: 12px; color: #8b949e; border-top: 1px solid #21262d; padding-top: 12px; margin-top: 10px; }
-        .dot { height: 8px; width: 8px; background-color: var(--green); border-radius: 50%; display: inline-block; margin-right: 5px; animation: blink 1.5s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        .stats { display: flex; justify-content: space-between; font-size: 12px; color: #8b949e; border-top: 1px solid #21262d; padding-top: 12px; margin-top: 10px; }
+        .sync-info { text-align: center; font-size: 10px; color: #484f58; margin-top: 20px; }
+        .dot { height: 7px; width: 7px; background: var(--green); border-radius: 50%; display: inline-block; margin-right: 5px; animation: blink 1.2s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
     <div class="container">
-        <h3 style="text-align: center; color: var(--blue); letter-spacing: 2px;">🚀 AI PRO TERMINAL</h3>
+        <div class="header">
+            <h3>💎 AI PRO TERMINAL</h3>
+        </div>
         
         <div class="card">
-            <div class="label">NIFTY 50</div>
+            <div class="label">Nifty 50</div>
             <div id="n-price" class="price">₹ --</div>
-            <div class="row">
+            <div class="stats">
                 <span>RSI: <b id="n-rsi">--</b></span>
                 <span>SCORE: <b id="n-score">--</b>%</span>
             </div>
@@ -35,58 +38,65 @@
         </div>
 
         <div class="card">
-            <div class="label">SENSEX</div>
+            <div class="label">Sensex</div>
             <div id="s-price" class="price">₹ --</div>
-            <div class="row">
+            <div class="stats">
                 <span>RSI: <b id="s-rsi">--</b></span>
                 <span>SCORE: <b id="s-score">--</b>%</span>
             </div>
             <div id="s-signal" class="status-btn">SYNCING...</div>
         </div>
 
-        <div id="status" style="text-align: center; font-size: 11px; color: #484f58;">
-            <span class="dot"></span> LIVE DATA FEED
-            <div id="time" style="margin-top: 5px;">Connecting to API...</div>
+        <div class="sync-info">
+            <span class="dot"></span> <span id="status-text">Connecting to Render API...</span>
+            <div id="time" style="margin-top: 5px;"></div>
         </div>
     </div>
 
     <script>
         const API_URL = "https://ai-terminal-2.onrender.com/market_data";
 
-        async function refreshData() {
+        async function fetchMarketData() {
             try {
-                const res = await fetch(API_URL);
-                const data = await res.json();
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('API Error');
+                
+                const data = await response.json();
 
-                const updateUI = (d, pre) => {
-                    if(!d) return;
-                    document.getElementById(`${pre}-price`).innerText = "₹ " + d.price;
-                    document.getElementById(`${pre}-rsi`).innerText = d.rsi;
-                    document.getElementById(`${pre}-score`).innerText = d.score;
+                const updateCard = (marketData, prefix) => {
+                    if (!marketData) return;
+                    document.getElementById(`${prefix}-price`).innerText = "₹ " + marketData.price;
+                    document.getElementById(`${prefix}-rsi`).innerText = marketData.rsi;
+                    document.getElementById(`${prefix}-score`).innerText = marketData.score;
                     
-                    const btn = document.getElementById(`${pre}-signal`);
-                    btn.innerText = d.signal;
+                    const btn = document.getElementById(`${prefix}-signal`);
+                    btn.innerText = marketData.signal;
                     
-                    // डायनेमिक कलर्स
+                    // डायनेमिक कलर्स सेट करें
                     btn.className = "status-btn";
-                    if(d.score >= 70) btn.classList.add("BULLISH");
-                    if(d.score <= 30) btn.classList.add("BEARISH");
+                    if (marketData.score >= 70) btn.classList.add("BULLISH");
+                    else if (marketData.score <= 35) btn.classList.add("BEARISH");
                 };
 
-                updateUI(data.nifty, 'n');
-                updateUI(data.sensex, 's');
-                document.getElementById('time').innerText = "Last Update: " + data.last_update;
-            } catch (e) {
-                document.getElementById('time').innerText = "API Offline - Restarting...";
+                updateCard(data.nifty, 'n');
+                updateCard(data.sensex, 's');
+                
+                document.getElementById('status-text').innerText = "LIVE DATA FEED ACTIVE";
+                document.getElementById('time').innerText = "Last Sync: " + data.last_update;
+                
+            } catch (err) {
+                document.getElementById('status-text').innerText = "API Offline - Reconnecting...";
+                console.error("Fetch failed:", err);
             }
         }
 
-        // हर 10 सेकंड में ऑटो-अपडेट
-        setInterval(refreshData, 10000);
-        refreshData();
+        // हर 15 सेकंड में ऑटो-अपडेट
+        setInterval(fetchMarketData, 15000);
+        fetchMarketData();
     </script>
 </body>
 </html>
+
 
 
 
