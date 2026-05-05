@@ -3,70 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Market Terminal</title>
+    <title>AI Market Terminal v3</title>
     <style>
         :root { --bg: #0d1117; --card: #161b22; --green: #3fb950; --blue: #58a6ff; --red: #f85149; }
-        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; padding: 20px; margin: 0; }
-        .card { background: var(--card); border: 1px solid #30363d; border-radius: 12px; padding: 20px; margin-bottom: 15px; position: relative; }
-        .price { font-size: 30px; font-weight: bold; color: var(--green); margin: 5px 0; }
-        .label { font-size: 12px; color: #8b949e; font-weight: bold; }
-        .status-btn { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--blue); background: rgba(88,166,255,0.1); color: var(--blue); font-weight: bold; margin-top: 10px; }
+        body { background: var(--bg); color: white; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; padding: 20px; margin: 0; }
+        .container { max-width: 400px; margin: auto; }
+        .card { background: var(--card); border: 1px solid #30363d; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: transform 0.2s; }
+        .card:active { transform: scale(0.98); }
+        .label { font-size: 14px; color: #8b949e; font-weight: bold; letter-spacing: 1px; }
+        .price { font-size: 34px; font-weight: bold; color: var(--green); margin: 10px 0; letter-spacing: -1px; }
+        .status-btn { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--blue); background: rgba(88,166,255,0.1); color: var(--blue); font-weight: bold; font-size: 14px; margin-top: 15px; text-transform: uppercase; }
         .BULLISH { border-color: var(--green); color: var(--green); background: rgba(63,185,80,0.1); }
-        .row { display: flex; justify-content: space-between; font-size: 11px; color: #8b949e; margin-top: 10px; }
+        .BEARISH { border-color: var(--red); color: var(--red); background: rgba(248,81,73,0.1); }
+        .row { display: flex; justify-content: space-between; font-size: 12px; color: #8b949e; border-top: 1px solid #21262d; padding-top: 12px; margin-top: 10px; }
+        .dot { height: 8px; width: 8px; background-color: var(--green); border-radius: 50%; display: inline-block; margin-right: 5px; animation: blink 1.5s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
-    <h3 style="text-align: center; color: var(--blue);">💎 AI MARKET TERMINAL</h3>
-
-    <div class="card">
-        <div class="label">NIFTY 50</div>
-        <div id="n-price" class="price">₹ --</div>
-        <div class="row">
-            <span>RSI: <b id="n-rsi">--</b></span>
-            <span>SCORE: <b id="n-score">--</b>%</span>
+    <div class="container">
+        <h3 style="text-align: center; color: var(--blue); letter-spacing: 2px;">🚀 AI PRO TERMINAL</h3>
+        
+        <div class="card">
+            <div class="label">NIFTY 50</div>
+            <div id="n-price" class="price">₹ --</div>
+            <div class="row">
+                <span>RSI: <b id="n-rsi">--</b></span>
+                <span>SCORE: <b id="n-score">--</b>%</span>
+            </div>
+            <div id="n-signal" class="status-btn">SYNCING...</div>
         </div>
-        <div id="n-signal" class="status-btn">SYNCING...</div>
-    </div>
 
-    <div class="card">
-        <div class="label">SENSEX</div>
-        <div id="s-price" class="price">₹ --</div>
-        <div class="row">
-            <span>RSI: <b id="s-rsi">--</b></span>
-            <span>SCORE: <b id="s-score">--</b>%</span>
+        <div class="card">
+            <div class="label">SENSEX</div>
+            <div id="s-price" class="price">₹ --</div>
+            <div class="row">
+                <span>RSI: <b id="s-rsi">--</b></span>
+                <span>SCORE: <b id="s-score">--</b>%</span>
+            </div>
+            <div id="s-signal" class="status-btn">SYNCING...</div>
         </div>
-        <div id="s-signal" class="status-btn">SYNCING...</div>
-    </div>
 
-    <p id="time" style="text-align: center; font-size: 10px; color: #484f58;">Connecting to Render...</p>
+        <div id="status" style="text-align: center; font-size: 11px; color: #484f58;">
+            <span class="dot"></span> LIVE DATA FEED
+            <div id="time" style="margin-top: 5px;">Connecting to API...</div>
+        </div>
+    </div>
 
     <script>
-        async function updateData() {
+        const API_URL = "https://ai-terminal-2.onrender.com/market_data";
+
+        async function refreshData() {
             try {
-                const res = await fetch('https://ai-terminal-2.onrender.com/market_data');
+                const res = await fetch(API_URL);
                 const data = await res.json();
 
-                const setUI = (d, prefix) => {
-                    document.getElementById(`${prefix}-price`).innerText = "₹ " + d.price;
-                    document.getElementById(`${prefix}-rsi`).innerText = d.rsi;
-                    document.getElementById(`${prefix}-score`).innerText = d.score;
-                    const btn = document.getElementById(`${prefix}-signal`);
+                const updateUI = (d, pre) => {
+                    if(!d) return;
+                    document.getElementById(`${pre}-price`).innerText = "₹ " + d.price;
+                    document.getElementById(`${pre}-rsi`).innerText = d.rsi;
+                    document.getElementById(`${pre}-score`).innerText = d.score;
+                    
+                    const btn = document.getElementById(`${pre}-signal`);
                     btn.innerText = d.signal;
-                    btn.className = "status-btn " + (d.signal === "BULLISH" ? "BULLISH" : "");
+                    
+                    // डायनेमिक कलर्स
+                    btn.className = "status-btn";
+                    if(d.score >= 70) btn.classList.add("BULLISH");
+                    if(d.score <= 30) btn.classList.add("BEARISH");
                 };
 
-                setUI(data.nifty, 'n');
-                setUI(data.sensex, 's');
-                document.getElementById('time').innerText = "Last Sync: " + data.last_update;
+                updateUI(data.nifty, 'n');
+                updateUI(data.sensex, 's');
+                document.getElementById('time').innerText = "Last Update: " + data.last_update;
             } catch (e) {
-                document.getElementById('time').innerText = "Sync Error - Check Render Logs";
+                document.getElementById('time').innerText = "API Offline - Restarting...";
             }
         }
-        setInterval(updateData, 10000);
-        updateData();
+
+        // हर 10 सेकंड में ऑटो-अपडेट
+        setInterval(refreshData, 10000);
+        refreshData();
     </script>
 </body>
 </html>
+
 
 
 
