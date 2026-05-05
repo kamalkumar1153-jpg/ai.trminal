@@ -5,50 +5,41 @@ const app = express();
 
 app.use(cors());
 
-// होम पेज पर मैसेज (ताकि "Cannot GET /" न दिखे)
+// होम पेज - ताकि ब्राउज़र में 'Not Found' न दिखे
 app.get('/', (req, res) => {
-    res.send('AI Pro Terminal API is Running...');
+    res.send('AI Terminal Server is Active ✅. Use /market_data for JSON.');
 });
 
-// मार्केट डेटा लाने का फंक्शन
-async function fetchStock(symbol) {
-    try {
-        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=15m&range=1d`;
-        const response = await axios.get(url);
-        const data = response.data.chart.result[0];
-        const price = data.meta.regularMarketPrice;
-        const closeArr = data.indicators.quote[0].close;
-        const lastClose = closeArr[closeArr.length - 1];
-        const prevClose = closeArr[closeArr.length - 2];
-
-        // स्मार्ट सिग्नल लॉजिक
-        let score = lastClose > prevClose ? 80 : 40;
-        let signal = score >= 70 ? "BULLISH" : "WAITING";
-
-        return {
-            price: price.toLocaleString('en-IN'),
-            score: score,
-            signal: signal,
-            rsi: (Math.random() * (70 - 30) + 30).toFixed(1) // RSI सिमुलेशन
-        };
-    } catch (error) {
-        return { price: "0.00", score: 0, signal: "ERR", rsi: "0" };
-    }
-}
-
-// API Endpoint
+// मुख्य डेटा एंडपॉइंट
 app.get('/market_data', async (req, res) => {
-    const nifty = await fetchStock('^NSEI');
-    const sensex = await fetchStock('^BSESN');
-    
-    res.json({
-        nifty,
-        sensex,
-        last_update: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })
-    });
+    try {
+        // Yahoo Finance से लाइव डेटा (Nifty & Sensex)
+        const symbols = ['^NSEI', '^BSESN'];
+        const results = {};
+
+        for (let sym of symbols) {
+            const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=15m&range=1d`;
+            const resp = await axios.get(url);
+            const meta = resp.data.chart.result[0].meta;
+            
+            const key = sym === '^NSEI' ? 'nifty' : 'sensex';
+            results[key] = {
+                price: meta.regularMarketPrice.toLocaleString('en-IN'),
+                score: Math.floor(Math.random() * (90 - 40) + 40), // डेमो स्कोर
+                rsi: (Math.random() * (70 - 30) + 30).toFixed(1),
+                signal: meta.regularMarketPrice > meta.chartPreviousClose ? "BULLISH" : "WAITING"
+            };
+        }
+        
+        results.last_update = new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' });
+        res.json(results);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch market data" });
+    }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server is live on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server live on port ${PORT}`));
+
 
 
