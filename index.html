@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI PRO TERMINAL V36.0</title>
+    <title>AI PRO TERMINAL V37.0</title>
     <style>
         :root { 
             --bg: #010409; --card: #0d1117; --green: #00ff88; --red: #ff3344; 
@@ -11,14 +11,12 @@
         }
         body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
         
-        /* Ticker */
         .ticker-wrap { background: #161b22; color: var(--gold); padding: 6px 0; font-size: 10px; border-bottom: 1px solid #30363d; overflow: hidden; white-space: nowrap; }
         .ticker { display: inline-block; animation: scroll 30s linear infinite; }
         @keyframes scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
         .container { max-width: 450px; margin: auto; padding: 12px; display: flex; flex-direction: column; gap: 15px; }
         
-        /* Risk & PnL Dashboard */
         .risk-management { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .input-group { background: #0d1117; border: 1px solid #30363d; padding: 8px; border-radius: 12px; text-align: center; }
         .input-group label { font-size: 9px; display: block; margin-bottom: 4px; font-weight: bold; }
@@ -31,25 +29,23 @@
         .sl-hit { border-color: var(--red) !important; box-shadow: 0 0 15px var(--red); animation: shake 0.2s infinite; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-2px); } 75% { transform: translateX(2px); } }
 
-        /* Card Styles */
-        .card { background: var(--card); border: 1px solid #30363d; border-radius: 20px; padding: 15px; border-left: 4px solid transparent; }
+        .card { background: var(--card); border: 1px solid #30363d; border-radius: 20px; padding: 15px; border-left: 4px solid transparent; margin-bottom: 10px; }
         .nifty-border { border-left-color: var(--blue); }
         .bank-border { border-left-color: var(--purple); }
         .sensex-border { border-left-color: var(--green); }
         .gift-border { border-left-color: var(--gold); }
 
         .price { font-size: 28px; font-weight: 900; margin: 5px 0; font-family: monospace; }
-        .tv-widget { height: 160px; margin-top: 10px; border-radius: 10px; overflow: hidden; border: 1px solid #21262d; }
+        .tv-widget { height: 220px; margin-top: 10px; border-radius: 12px; overflow: hidden; background: #0d1117; border: 1px solid #21262d; }
 
         .btn-row { display: flex; gap: 8px; margin-top: 10px; }
-        .buy-btn { flex: 1; background: none; border: 1px solid var(--green); color: var(--green); padding: 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .buy-btn { flex: 1; background: none; border: 1px solid var(--green); color: var(--green); padding: 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; }
         .buy-pe { border-color: var(--red); color: var(--red); }
         
         .chart-link { font-size: 9px; color: inherit; text-decoration: none; border: 1px solid currentColor; padding: 2px 6px; border-radius: 4px; opacity: 0.8; }
 
-        /* History */
         .history-card { background: #0d1117; border: 1px solid #30363d; border-radius: 15px; padding: 15px; }
-        .history-list { max-height: 120px; overflow-y: auto; font-size: 11px; margin-top: 10px; }
+        .history-list { max-height: 100px; overflow-y: auto; font-size: 11px; margin-top: 10px; }
         .history-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #161b22; }
         .download-btn { width: 100%; background: transparent; color: var(--gold); border: 1px dashed var(--gold); padding: 10px; border-radius: 10px; font-size: 11px; margin-top: 10px; cursor: pointer; }
     </style>
@@ -57,7 +53,7 @@
 <body>
 
 <div class="ticker-wrap">
-    <div class="ticker">🚀 AI PRO V36.0: NIFTY(65) | BANKNIFTY(30) | SENSEX(20) | TARGET & STOPLOSS ALERTS ACTIVE | REAL-TIME TRACKING...</div>
+    <div class="ticker">📊 AI PRO V37.0: BUY/SELL SIGNAL GAUGE ACTIVE | NIFTY(65) | BANKNIFTY(30) | SENSEX(20) | REAL-TIME ANALYSIS...</div>
 </div>
 
 <div class="container">
@@ -86,9 +82,9 @@
             <span style="color:var(--gold); font-size:11px; font-weight:bold;">GIFT NIFTY</span>
             <a href="https://www.tradingview.com/symbols/NSEIX-NIFTY1!/" target="_blank" class="chart-link">GLOBAL CHART ↗</a>
         </div>
-        <div id="g-price" class="price" style="color:var(--gold)">₹ 24,110.00</div>
+        <div id="g-price" class="price" style="color:var(--gold)">₹ 24,115.78</div>
         <div class="tv-widget">
-            <iframe src="https://s.tradingview.com/widgetembed/?symbol=NSEIX%3ANIFTY1!&interval=1&theme=dark" width="100%" height="160" frameborder="0"></iframe>
+            <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=NSEIX%3ANIFTY1!&showIntervalTabs=false&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="220" frameborder="0"></iframe>
         </div>
     </div>
 
@@ -97,13 +93,13 @@
             <span style="color:var(--blue); font-size:11px; font-weight:bold;">NIFTY 50 (65 Lot)</span>
             <a href="https://www.tradingview.com/symbols/NSE-NIFTY/" target="_blank" class="chart-link" style="color:var(--blue)">FULL CHART ↗</a>
         </div>
-        <div id="n-price" class="price">₹ 24,050.00</div>
+        <div id="n-price" class="price">₹ 24,046.69</div>
         <div class="btn-row">
             <button class="buy-btn" onclick="buy('NIFTY','CE',24100,120)">CE BUY</button>
             <button class="buy-btn buy-pe" onclick="buy('NIFTY','PE',24100,115)">PE BUY</button>
         </div>
         <div class="tv-widget">
-            <iframe src="https://s.tradingview.com/widgetembed/?symbol=NSE%3ANIFTY&interval=1&theme=dark" width="100%" height="160" frameborder="0"></iframe>
+            <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=NSE%3ANIFTY&showIntervalTabs=false&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="220" frameborder="0"></iframe>
         </div>
     </div>
 
@@ -112,13 +108,13 @@
             <span style="color:var(--purple); font-size:11px; font-weight:bold;">BANK NIFTY (30 Lot)</span>
             <a href="https://www.tradingview.com/symbols/NSE-BANKNIFTY1!/" target="_blank" class="chart-link" style="color:var(--purple)">BANK CHART ↗</a>
         </div>
-        <div id="b-price" class="price">₹ 52,480.00</div>
+        <div id="b-price" class="price">₹ 52,433.16</div>
         <div class="btn-row">
             <button class="buy-btn" onclick="buy('BANKNIFTY','CE',52500,245)" style="border-color:var(--purple); color:var(--purple)">CE BUY</button>
             <button class="buy-btn buy-pe" onclick="buy('BANKNIFTY','PE',52500,235)">PE BUY</button>
         </div>
         <div class="tv-widget">
-            <iframe src="https://s.tradingview.com/widgetembed/?symbol=NSE%3ABANKNIFTY&interval=1&theme=dark" width="100%" height="160" frameborder="0"></iframe>
+            <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=NSE%3ABANKNIFTY&showIntervalTabs=false&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="220" frameborder="0"></iframe>
         </div>
     </div>
 
@@ -127,13 +123,13 @@
             <span style="color:var(--green); font-size:11px; font-weight:bold;">SENSEX (20 Lot)</span>
             <a href="https://www.tradingview.com/symbols/BSE-SENSEX/" target="_blank" class="chart-link" style="color:var(--green)">SENSEX CHART ↗</a>
         </div>
-        <div id="s-price" class="price">₹ 77,075.00</div>
+        <div id="s-price" class="price">₹ 77,157.92</div>
         <div class="btn-row">
             <button class="buy-btn" onclick="buy('SENSEX','CE',77100,350)">CE BUY</button>
             <button class="buy-btn buy-pe" onclick="buy('SENSEX','PE',77100,340)">PE BUY</button>
         </div>
         <div class="tv-widget">
-            <iframe src="https://s.tradingview.com/widgetembed/?symbol=BSE%3ASENSEX&interval=1&theme=dark" width="100%" height="160" frameborder="0"></iframe>
+            <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=BSE%3ASENSEX&showIntervalTabs=false&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="220" frameborder="0"></iframe>
         </div>
     </div>
 
@@ -148,7 +144,7 @@
 
 <script>
     const LOTS = { NIFTY: 65, BANKNIFTY: 30, SENSEX: 20 };
-    let p = { GIFT: 24110.50, NIFTY: 24050.25, BANKNIFTY: 52480.15, SENSEX: 77075.80 };
+    let p = { GIFT: 24115.78, NIFTY: 24046.69, BANKNIFTY: 52433.16, SENSEX: 77157.92 };
     let activeTrade = null;
     let history = [];
     const winSound = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
@@ -162,7 +158,7 @@
             document.getElementById('b-price').innerText = "₹ " + p.BANKNIFTY.toLocaleString('en-IN', {minimumFractionDigits: 2});
             document.getElementById('s-price').innerText = "₹ " + p.SENSEX.toLocaleString('en-IN', {minimumFractionDigits: 2});
             if(activeTrade) calculatePnL();
-        }, 2000);
+        }, 3000);
     }
 
     function buy(idx, type, strike, price) {
@@ -229,6 +225,7 @@
 </script>
 </body>
 </html>
+
 
 
 
