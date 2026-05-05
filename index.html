@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI PRO TERMINAL V37.0</title>
+    <title>AI PRO TERMINAL V38.0</title>
     <style>
         :root { 
             --bg: #010409; --card: #0d1117; --green: #00ff88; --red: #ff3344; 
@@ -36,9 +36,9 @@
         .gift-border { border-left-color: var(--gold); }
 
         .price { font-size: 28px; font-weight: 900; margin: 5px 0; font-family: monospace; }
-        .tv-widget { height: 220px; margin-top: 10px; border-radius: 12px; overflow: hidden; background: #0d1117; border: 1px solid #21262d; }
+        .tv-widget { height: 230px; margin-top: 10px; border-radius: 12px; overflow: hidden; background: #fff; border: 1px solid #21262d; }
 
-        .btn-row { display: flex; gap: 8px; margin-top: 10px; }
+        .btn-row { display: flex; gap: 8px; margin: 10px 0; }
         .buy-btn { flex: 1; background: none; border: 1px solid var(--green); color: var(--green); padding: 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; }
         .buy-pe { border-color: var(--red); color: var(--red); }
         
@@ -53,7 +53,7 @@
 <body>
 
 <div class="ticker-wrap">
-    <div class="ticker">📊 AI PRO V37.0: BUY/SELL SIGNAL GAUGE ACTIVE | NIFTY(65) | BANKNIFTY(30) | SENSEX(20) | REAL-TIME ANALYSIS...</div>
+    <div class="ticker">📊 AI PRO V38.0: 15m TIME-FRAME ANALYSIS ACTIVE | NIFTY(65) | BANKNIFTY(30) | SENSEX(20)...</div>
 </div>
 
 <div class="container">
@@ -70,9 +70,9 @@
 
     <div class="portfolio" id="main-dash">
         <div>
-            <div id="status-label" style="font-size: 10px; color: var(--blue); font-weight: bold;">LIVE P&L (PRACTICE)</div>
+            <div style="font-size: 10px; color: var(--blue); font-weight: bold;">LIVE P&L (15m SIGNAL)</div>
             <div id="pnl-val" class="p-val">₹ 0.00</div>
-            <div id="pos-info" style="font-size: 9px; color: var(--gray);">READY TO TRADE</div>
+            <div id="pos-info" style="font-size: 9px; color: var(--gray);">READY</div>
         </div>
         <button onclick="exitTrade()" style="background:var(--red); color:white; border:none; padding:12px 20px; border-radius:10px; font-weight:bold;">EXIT</button>
     </div>
@@ -80,18 +80,18 @@
     <div class="card gift-border">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <span style="color:var(--gold); font-size:11px; font-weight:bold;">GIFT NIFTY</span>
-            <a href="https://www.tradingview.com/symbols/NSEIX-NIFTY1!/" target="_blank" class="chart-link">GLOBAL CHART ↗</a>
+            <a href="https://www.tradingview.com/symbols/NSEIX-NIFTY1!/" target="_blank" class="chart-link">15m CHART ↗</a>
         </div>
         <div id="g-price" class="price" style="color:var(--gold)">₹ 24,115.78</div>
         <div class="tv-widget">
-            <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=NSEIX%3ANIFTY1!&showIntervalTabs=false&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="220" frameborder="0"></iframe>
+            <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=NSEIX%3ANIFTY1!&interval=15m&showIntervalTabs=true&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="230" frameborder="0"></iframe>
         </div>
     </div>
 
     <div class="card nifty-border">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <span style="color:var(--blue); font-size:11px; font-weight:bold;">NIFTY 50 (65 Lot)</span>
-            <a href="https://www.tradingview.com/symbols/NSE-NIFTY/" target="_blank" class="chart-link" style="color:var(--blue)">FULL CHART ↗</a>
+            <a href="https://www.tradingview.com/symbols/NSE-NIFTY/" target="_blank" class="chart-link" style="color:var(--blue)">15m CHART ↗</a>
         </div>
         <div id="n-price" class="price">₹ 24,046.69</div>
         <div class="btn-row">
@@ -99,14 +99,14 @@
             <button class="buy-btn buy-pe" onclick="buy('NIFTY','PE',24100,115)">PE BUY</button>
         </div>
         <div class="tv-widget">
-            <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=NSE%3ANIFTY&showIntervalTabs=false&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="220" frameborder="0"></iframe>
+            <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=NSE%3ANIFTY&interval=15m&showIntervalTabs=true&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="230" frameborder="0"></iframe>
         </div>
     </div>
 
     <div class="card bank-border">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <span style="color:var(--purple); font-size:11px; font-weight:bold;">BANK NIFTY (30 Lot)</span>
-            <a href="https://www.tradingview.com/symbols/NSE-BANKNIFTY1!/" target="_blank" class="chart-link" style="color:var(--purple)">BANK CHART ↗</a>
+            <a href="https://www.tradingview.com/symbols/NSE-BANKNIFTY1!/" target="_blank" class="chart-link" style="color:var(--purple)">15m CHART ↗</a>
         </div>
         <div id="b-price" class="price">₹ 52,433.16</div>
         <div class="btn-row">
@@ -114,14 +114,14 @@
             <button class="buy-btn buy-pe" onclick="buy('BANKNIFTY','PE',52500,235)">PE BUY</button>
         </div>
         <div class="tv-widget">
-            <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=NSE%3ABANKNIFTY&showIntervalTabs=false&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="220" frameborder="0"></iframe>
+            <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=NSE%3ABANKNIFTY&interval=15m&showIntervalTabs=true&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="230" frameborder="0"></iframe>
         </div>
     </div>
 
     <div class="card sensex-border">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <span style="color:var(--green); font-size:11px; font-weight:bold;">SENSEX (20 Lot)</span>
-            <a href="https://www.tradingview.com/symbols/BSE-SENSEX/" target="_blank" class="chart-link" style="color:var(--green)">SENSEX CHART ↗</a>
+            <a href="https://www.tradingview.com/symbols/BSE-SENSEX/" target="_blank" class="chart-link" style="color:var(--green)">15m CHART ↗</a>
         </div>
         <div id="s-price" class="price">₹ 77,157.92</div>
         <div class="btn-row">
@@ -129,7 +129,7 @@
             <button class="buy-btn buy-pe" onclick="buy('SENSEX','PE',77100,340)">PE BUY</button>
         </div>
         <div class="tv-widget">
-            <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=BSE%3ASENSEX&showIntervalTabs=false&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="220" frameborder="0"></iframe>
+            <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=BSE%3ASENSEX&interval=15m&showIntervalTabs=true&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="230" frameborder="0"></iframe>
         </div>
     </div>
 
@@ -138,7 +138,7 @@
         <div id="history-list" class="history-list">
             <div style="color:var(--gray); text-align:center;">No trades saved today.</div>
         </div>
-        <button class="download-btn" onclick="downloadLog()">📥 DOWNLOAD TODAY'S REPORT</button>
+        <button class="download-btn" onclick="downloadLog()">📥 DOWNLOAD REPORT</button>
     </div>
 </div>
 
@@ -171,25 +171,15 @@
     function calculatePnL() {
         const target = parseFloat(document.getElementById('target-input').value);
         const sl = parseFloat(document.getElementById('sl-input').value) * -1;
-        
         const currentPrice = activeTrade.entry + (Math.random()*16-7.8);
         activeTrade.pnl = (currentPrice - activeTrade.entry) * activeTrade.lot;
-        
         const pnlEl = document.getElementById('pnl-val');
         const dash = document.getElementById('main-dash');
-        
         pnlEl.innerText = "₹ " + activeTrade.pnl.toFixed(2);
         pnlEl.style.color = activeTrade.pnl >= 0 ? "var(--green)" : "var(--red)";
-
-        if (activeTrade.pnl >= target) {
-            dash.className = "portfolio target-hit";
-            if (Math.random() > 0.9) winSound.play();
-        } else if (activeTrade.pnl <= sl) {
-            dash.className = "portfolio sl-hit";
-            if (Math.random() > 0.9) lossSound.play();
-        } else {
-            dash.className = "portfolio";
-        }
+        if (activeTrade.pnl >= target) { dash.className = "portfolio target-hit"; if (Math.random() > 0.9) winSound.play(); }
+        else if (activeTrade.pnl <= sl) { dash.className = "portfolio sl-hit"; if (Math.random() > 0.9) lossSound.play(); }
+        else { dash.className = "portfolio"; }
     }
 
     function exitTrade() {
@@ -205,12 +195,7 @@
 
     function renderHistory() {
         const list = document.getElementById('history-list');
-        list.innerHTML = history.map(t => `
-            <div class="history-item">
-                <span>${t.time} - ${t.idx}</span>
-                <span style="color:${t.pnl >= 0 ? 'var(--green)' : 'var(--red)'}">${t.pnl >= 0 ? '+' : ''}₹${t.pnl.toFixed(2)}</span>
-            </div>
-        `).join('');
+        list.innerHTML = history.map(t => `<div class="history-item"><span>${t.time} - ${t.idx}</span><span style="color:${t.pnl >= 0 ? 'var(--green)' : 'var(--red)'}">${t.pnl >= 0 ? '+' : ''}₹${t.pnl.toFixed(2)}</span></div>`).join('');
     }
 
     function downloadLog() {
@@ -220,11 +205,11 @@
         const blob = new Blob([log], {type:'text/plain'});
         const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Trade_Report.txt'; a.click();
     }
-
     update();
 </script>
 </body>
 </html>
+
 
 
 
