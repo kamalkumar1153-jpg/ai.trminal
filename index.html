@@ -3,98 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI PRO TERMINAL V39.0</title>
+    <title>AI PRO TERMINAL V40.0</title>
     <style>
         :root { 
             --bg: #010409; --card: #0d1117; --green: #00ff88; --red: #ff3344; 
             --blue: #2979ff; --gold: #ffd700; --purple: #bf40bf; --gray: #8b949e; 
         }
-        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
         
-        /* Ticker */
         .ticker-wrap { background: #161b22; color: var(--gold); padding: 6px 0; font-size: 10px; border-bottom: 1px solid #30363d; overflow: hidden; white-space: nowrap; }
         .ticker { display: inline-block; animation: scroll 30s linear infinite; }
         @keyframes scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
         .container { max-width: 450px; margin: auto; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
         
-        /* Price Sync Modal Style */
-        .sync-bar { background: #161b22; border: 1px dashed var(--gray); padding: 10px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px; }
-        .sync-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-        .sync-inputs input { background: #0d1117; border: 1px solid #30363d; color: var(--gold); font-size: 11px; padding: 5px; border-radius: 5px; text-align: center; }
-        .sync-btn { background: var(--gold); color: black; border: none; padding: 8px; border-radius: 8px; font-weight: bold; font-size: 10px; cursor: pointer; }
+        /* Price Sync Tool */
+        .sync-bar { background: #161b22; border: 1px solid var(--blue); padding: 10px; border-radius: 12px; }
+        .sync-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+        .sync-inputs input { background: #0d1117; border: 1px solid #30363d; color: var(--gold); font-size: 11px; padding: 6px; border-radius: 6px; text-align: center; width: 100%; box-sizing: border-box; }
+        .sync-btn { width: 100%; background: var(--gold); color: black; border: none; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 11px; cursor: pointer; }
 
-        /* Risk & PnL */
-        .risk-management { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .input-group { background: #0d1117; border: 1px solid #30363d; padding: 8px; border-radius: 12px; text-align: center; }
-        .input-group label { font-size: 9px; display: block; margin-bottom: 4px; font-weight: bold; }
-        .input-group input { background: #161b22; border: none; color: white; width: 80%; text-align: center; font-family: monospace; border-radius: 4px; }
-
+        /* P&L Dashboard */
         .portfolio { background: linear-gradient(145deg, #161b22, #0d1117); padding: 15px; border-radius: 16px; border: 1px solid var(--blue); display: flex; justify-content: space-between; align-items: center; }
         .p-val { font-size: 26px; font-weight: 900; font-family: monospace; }
         
-        .target-hit { border-color: var(--green) !important; box-shadow: 0 0 15px var(--green); }
-        .sl-hit { border-color: var(--red) !important; box-shadow: 0 0 15px var(--red); animation: shake 0.2s infinite; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-2px); } 75% { transform: translateX(2px); } }
-
-        /* Index Cards */
-        .card { background: var(--card); border: 1px solid #30363d; border-radius: 20px; padding: 15px; border-left: 4px solid transparent; }
+        .card { background: var(--card); border: 1px solid #30363d; border-radius: 20px; padding: 15px; border-left: 4px solid transparent; margin-bottom: 10px; }
         .nifty-border { border-left-color: var(--blue); }
         .bank-border { border-left-color: var(--purple); }
         .sensex-border { border-left-color: var(--green); }
         .gift-border { border-left-color: var(--gold); }
 
         .price { font-size: 28px; font-weight: 900; margin: 5px 0; font-family: monospace; }
-        .tv-widget { height: 230px; margin-top: 10px; border-radius: 12px; overflow: hidden; }
+        .tv-widget { height: 230px; margin-top: 10px; border-radius: 12px; overflow: hidden; border: 1px solid #21262d; }
 
         .btn-row { display: flex; gap: 8px; margin-top: 10px; }
-        .buy-btn { flex: 1; background: none; border: 1px solid var(--green); color: var(--green); padding: 10px; border-radius: 8px; font-size: 11px; font-weight: bold; }
+        .buy-btn { flex: 1; background: none; border: 1px solid var(--green); color: var(--green); padding: 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; }
         .buy-pe { border-color: var(--red); color: var(--red); }
     </style>
 </head>
 <body>
 
 <div class="ticker-wrap">
-    <div class="ticker">⚙️ AI PRO V39.0: PRICE SYNC SYSTEM ACTIVE | SET CUSTOM PRICES ON THE FLY | 15m GAUGE | RISK CONTROL...</div>
+    <div class="ticker">⚙️ AI PRO V40.0: GIFT NIFTY | NIFTY | BANK NIFTY | SENSEX | 15m GAUGE SYNCED...</div>
 </div>
 
 <div class="container">
     <div class="sync-bar">
-        <span style="font-size: 9px; color: var(--gray); font-weight: bold;">SET LIVE MARKET PRICES:</span>
         <div class="sync-inputs">
-            <input type="number" id="set-gift" placeholder="GIFT (e.g. 24173)">
-            <input type="number" id="set-nifty" placeholder="NIFTY">
-            <input type="number" id="set-bank" placeholder="BANKNIFTY">
-            <input type="number" id="set-sensex" placeholder="SENSEX">
+            <input type="number" id="set-gift" placeholder="SET GIFT (24173)">
+            <input type="number" id="set-nifty" placeholder="SET NIFTY">
+            <input type="number" id="set-bank" placeholder="SET BANKNIFTY">
+            <input type="number" id="set-sensex" placeholder="SET SENSEX">
         </div>
         <button class="sync-btn" onclick="syncPrices()">⚡ SYNC NOW</button>
     </div>
 
-    <div class="risk-management">
-        <div class="input-group" style="border-top: 2px solid var(--green);">
-            <label style="color:var(--green);">TARGET (₹)</label>
-            <input type="number" id="target-input" value="1000">
-        </div>
-        <div class="input-group" style="border-top: 2px solid var(--red);">
-            <label style="color:var(--red);">STOP LOSS (₹)</label>
-            <input type="number" id="sl-input" value="500">
-        </div>
-    </div>
-
     <div class="portfolio" id="main-dash">
         <div>
-            <div id="status-label" style="font-size: 10px; color: var(--blue); font-weight: bold;">LIVE P&L (VIRTUAL)</div>
+            <div style="font-size: 10px; color: var(--blue); font-weight: bold;">LIVE P&L (VIRTUAL)</div>
             <div id="pnl-val" class="p-val">₹ 0.00</div>
-            <div id="pos-info" style="font-size: 9px; color: var(--gray);">READY</div>
+            <div id="pos-info" style="font-size: 9px; color: var(--gray);">WAITING...</div>
         </div>
-        <button onclick="exitTrade()" style="background:var(--red); color:white; border:none; padding:12px 20px; border-radius:10px; font-weight:bold;">EXIT</button>
+        <button onclick="exitTrade()" style="background:var(--red); color:white; border:none; padding:10px 18px; border-radius:10px; font-weight:bold;">EXIT ALL</button>
     </div>
 
     <div class="card gift-border">
         <span style="color:var(--gold); font-size:11px; font-weight:bold;">GIFT NIFTY</span>
         <div id="g-price" class="price" style="color:var(--gold)">₹ 24,173.00</div>
         <div class="tv-widget">
-            <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=NSEIX%3ANIFTY1!&interval=15m&showIntervalTabs=true&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="230" frameborder="0"></iframe>
+            <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=NSEIX%3ANIFTY1!&interval=15m&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="230" frameborder="0"></iframe>
         </div>
     </div>
 
@@ -106,7 +83,7 @@
             <button class="buy-btn buy-pe" onclick="buy('NIFTY','PE',24100,115)">PE BUY</button>
         </div>
         <div class="tv-widget">
-            <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=NSE%3ANIFTY&interval=15m&showIntervalTabs=true&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="230" frameborder="0"></iframe>
+            <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=NSE%3ANIFTY&interval=15m&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="230" frameborder="0"></iframe>
         </div>
     </div>
 
@@ -118,72 +95,78 @@
             <button class="buy-btn buy-pe" onclick="buy('BANKNIFTY','PE',52500,235)">PE BUY</button>
         </div>
         <div class="tv-widget">
-            <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=NSE%3ABANKNIFTY&interval=15m&showIntervalTabs=true&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="230" frameborder="0"></iframe>
+            <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=NSE%3ABANKNIFTY&interval=15m&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="230" frameborder="0"></iframe>
+        </div>
+    </div>
+
+    <div class="card sensex-border">
+        <span style="color:var(--green); font-size:11px; font-weight:bold;">SENSEX (20 Lot)</span>
+        <div id="s-price" class="price">₹ 77,075.00</div>
+        <div class="btn-row">
+            <button class="buy-btn" onclick="buy('SENSEX','CE',77100,350)">CE BUY</button>
+            <button class="buy-btn buy-pe" onclick="buy('SENSEX','PE',77100,340)">PE BUY</button>
+        </div>
+        <div class="tv-widget">
+            <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=BSE%3ASENSEX&interval=15m&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="230" frameborder="0"></iframe>
         </div>
     </div>
 </div>
 
 <script>
     const LOTS = { NIFTY: 65, BANKNIFTY: 30, SENSEX: 20 };
-    let p = { GIFT: 24173.00, NIFTY: 24050.00, BANKNIFTY: 52433.00, SENSEX: 77157.00 };
+    let p = { GIFT: 24173.00, NIFTY: 24050.00, BANKNIFTY: 52433.00, SENSEX: 77075.00 };
     let activeTrade = null;
-    const winSound = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
 
     function syncPrices() {
         const g = document.getElementById('set-gift').value;
         const n = document.getElementById('set-nifty').value;
         const b = document.getElementById('set-bank').value;
         const s = document.getElementById('set-sensex').value;
-
         if(g) p.GIFT = parseFloat(g);
         if(n) p.NIFTY = parseFloat(n);
         if(b) p.BANKNIFTY = parseFloat(b);
         if(s) p.SENSEX = parseFloat(s);
-        
-        alert("Prices Synchronized! 🚀");
+        alert("Prices Synced! 🎯");
     }
 
     function update() {
         setInterval(() => {
-            p.GIFT += (Math.random()*4-2); p.NIFTY += (Math.random()*6-3); p.BANKNIFTY += (Math.random()*15-7);
+            p.GIFT += (Math.random()*4-2); p.NIFTY += (Math.random()*6-3); 
+            p.BANKNIFTY += (Math.random()*15-7); p.SENSEX += (Math.random()*12-6);
             document.getElementById('g-price').innerText = "₹ " + p.GIFT.toLocaleString('en-IN', {minimumFractionDigits: 2});
             document.getElementById('n-price').innerText = "₹ " + p.NIFTY.toLocaleString('en-IN', {minimumFractionDigits: 2});
             document.getElementById('b-price').innerText = "₹ " + p.BANKNIFTY.toLocaleString('en-IN', {minimumFractionDigits: 2});
+            document.getElementById('s-price').innerText = "₹ " + p.SENSEX.toLocaleString('en-IN', {minimumFractionDigits: 2});
             if(activeTrade) calculatePnL();
         }, 3000);
     }
 
     function buy(idx, type, strike, price) {
         activeTrade = { idx, type, strike, entry: parseFloat(price), lot: LOTS[idx] };
-        document.getElementById('pos-info').innerText = `ACTIVE: ${idx} @ ${price}`;
-        winSound.play();
+        document.getElementById('pos-info').innerText = `ACTIVE: ${idx} ${type} @ ${price}`;
+        document.getElementById('pos-info').style.color = "var(--gold)";
     }
 
     function calculatePnL() {
-        const target = parseFloat(document.getElementById('target-input').value);
-        const sl = parseFloat(document.getElementById('sl-input').value) * -1;
         const currentPrice = activeTrade.entry + (Math.random()*10-5);
         const pnl = (currentPrice - activeTrade.entry) * activeTrade.lot;
         const pnlEl = document.getElementById('pnl-val');
         pnlEl.innerText = "₹ " + pnl.toFixed(2);
         pnlEl.style.color = pnl >= 0 ? "var(--green)" : "var(--red)";
-        
-        const dash = document.getElementById('main-dash');
-        if (pnl >= target) dash.className = "portfolio target-hit";
-        else if (pnl <= sl) dash.className = "portfolio sl-hit";
-        else dash.className = "portfolio";
     }
 
     function exitTrade() {
         activeTrade = null;
         document.getElementById('pnl-val').innerText = "₹ 0.00";
-        document.getElementById('main-dash').className = "portfolio";
+        document.getElementById('pnl-val').style.color = "#fff";
+        document.getElementById('pos-info').innerText = "CLOSED";
     }
 
     update();
 </script>
 </body>
 </html>
+
 
 
 
