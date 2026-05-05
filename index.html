@@ -3,125 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI PRO TERMINAL V8.5</title>
+    <title>AI PRO TERMINAL V9.0</title>
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
     <style>
         :root { --bg: #05070a; --card: #0d1117; --green: #00ff88; --red: #ff3344; --blue: #2979ff; --text: #e0e6ed; }
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; padding: 12px; overflow-x: hidden; }
-        .terminal-grid { display: grid; grid-template-columns: 1fr; gap: 12px; max-width: 450px; margin: auto; }
-        .card { background: var(--card); border: 1px solid #21262d; border-radius: 12px; padding: 18px; position: relative; overflow: hidden; box-shadow: 0 4px 25px rgba(0,0,0,0.6); }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1f2937; padding-bottom: 10px; }
-        .symbol { font-size: 16px; font-weight: 900; color: var(--blue); letter-spacing: 1px; }
-        .price { font-size: 36px; font-weight: 800; margin: 12px 0 5px 0; letter-spacing: -1px; font-family: monospace; }
-        .change { font-size: 14px; font-weight: 600; margin-bottom: 15px; }
-        .badge { padding: 3px 8px; border-radius: 4px; font-size: 9px; font-weight: bold; text-transform: uppercase; border: 1px solid; }
-        .bull { color: var(--green); border-color: var(--green); background: rgba(0,255,136,0.05); }
-        .bear { color: var(--red); border-color: var(--red); background: rgba(255,51,68,0.05); }
-        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: #00000044; padding: 10px; border-radius: 8px; }
-        .s-box { text-align: center; }
-        .s-label { font-size: 9px; color: #8b949e; display: block; margin-bottom: 3px; }
-        .s-val { font-size: 13px; font-weight: bold; color: #fff; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; padding: 15px; }
+        .terminal-grid { max-width: 450px; margin: auto; display: grid; gap: 15px; }
+        .card { background: var(--card); border: 1px solid #21262d; border-radius: 12px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+        .price { font-size: 32px; font-weight: 800; margin: 15px 0 5px 0; font-family: monospace; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; border: 1px solid; }
+        .bull { color: var(--green); border-color: var(--green); }
+        .bear { color: var(--red); border-color: var(--red); }
+        .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px; text-align: center; background: #000; padding: 10px; border-radius: 8px; }
+        .s-label { font-size: 9px; color: #8b949e; display: block; }
+        .s-val { font-size: 13px; font-weight: bold; }
         .chart { height: 130px; margin-top: 15px; border-radius: 8px; overflow: hidden; }
-        .footer { text-align: center; font-size: 10px; margin-top: 25px; color: #484f58; }
-        .pulse { height: 8px; width: 8px; background: var(--green); border-radius: 50%; display: inline-block; animation: pulse 1.8s infinite; margin-right: 5px; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0,255,136,0.4); } 70% { box-shadow: 0 0 0 8px rgba(0,255,136,0); } 100% { box-shadow: 0 0 0 0 rgba(0,255,136,0); } }
+        .footer { text-align: center; font-size: 10px; margin-top: 30px; color: #8b949e; }
+        .pulse { height: 8px; width: 8px; background: var(--green); border-radius: 50%; display: inline-block; animation: p 1.5s infinite; margin-right: 5px; }
+        @keyframes p { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div class="terminal-grid">
-        <div style="text-align: center; padding: 10px 0;">
-            <h1 style="font-size: 18px; margin: 0; letter-spacing: 3px; color: #fff;">AI PRO TERMINAL <span style="color: var(--blue);">V8.5</span></h1>
-            <p style="font-size: 8px; color: #8b949e; margin-top: 5px; letter-spacing: 1.5px;">PROPRIETARY ALGORITHMIC ENGINE</p>
+        <div style="text-align: center;">
+            <h1 style="font-size: 18px; letter-spacing: 2px;">AI PRO TERMINAL <span style="color:var(--blue)">V9.0</span></h1>
         </div>
 
         <div class="card">
             <div class="header">
-                <span class="symbol">NIFTY 50</span>
+                <span style="font-weight:bold; color:var(--blue)">NIFTY 50</span>
                 <span id="n-badge" class="badge bull">SIGNAL: BUY</span>
             </div>
-            <div id="n-price" class="price">₹ --,---.--</div>
-            <div id="n-change" class="change" style="color: var(--green);">+00.00 (+0.00%)</div>
+            <div id="n-price" class="price">₹ 22,480.15</div>
+            <div id="n-chg" style="color:var(--green); font-size:14px">+45.20 (+0.21%)</div>
             <div class="stats">
-                <div class="s-box"><span class="s-label">RSI (14)</span><span id="n-rsi" class="s-val">--</span></div>
-                <div class="s-box"><span class="s-label">VOLATILITY</span><span id="n-vol" class="s-val">LOW</span></div>
-                <div class="s-box"><span class="s-label">AI CONF.</span><span id="n-score" class="s-val">--</span></div>
+                <div><span class="s-label">RSI</span><span id="n-rsi" class="s-val">54.2</span></div>
+                <div><span class="s-label">VOL</span><span class="s-val" style="color:var(--green)">LOW</span></div>
+                <div><span class="s-label">AI CONF.</span><span id="n-score" class="s-val">88%</span></div>
             </div>
             <div id="n-chart" class="chart"></div>
         </div>
 
         <div class="card">
             <div class="header">
-                <span class="symbol">SENSEX</span>
+                <span style="font-weight:bold; color:var(--blue)">SENSEX</span>
                 <span id="s-badge" class="badge bull">SIGNAL: HOLD</span>
             </div>
-            <div id="s-price" class="price">₹ --,---.--</div>
-            <div id="s-change" class="change" style="color: var(--green);">+00.00 (+0.00%)</div>
+            <div id="s-price" class="price">₹ 73,920.40</div>
+            <div id="s-chg" style="color:var(--green); font-size:14px">+112.10 (+0.15%)</div>
             <div class="stats">
-                <div class="s-box"><span class="s-label">RSI (14)</span><span id="s-rsi" class="s-val">--</span></div>
-                <div class="s-box"><span class="s-label">VOLATILITY</span><span id="s-vol" class="s-val">STABLE</span></div>
-                <div class="s-box"><span class="s-label">AI CONF.</span><span id="s-score" class="s-val">--</span></div>
+                <div><span class="s-label">RSI</span><span id="s-rsi" class="s-val">51.8</span></div>
+                <div><span class="s-label">VOL</span><span class="s-val" style="color:var(--green)">STABLE</span></div>
+                <div><span class="s-label">AI CONF.</span><span id="s-score" class="s-val">84%</span></div>
             </div>
             <div id="s-chart" class="chart"></div>
         </div>
 
         <div class="footer">
-            <span class="pulse"></span> STATUS: <span style="color: var(--green);">DEEP-SYNC ACTIVE</span><br>
-            <span id="neural-status">Neural processing in progress...</span>
+            <span class="pulse"></span> ENGINE: <span style="color:var(--green)">ACTIVE</span><br>
+            <span id="clock">Syncing...</span>
         </div>
     </div>
 
     <script>
-        const initChart = (id, color) => {
+        const setupChart = (id, color) => {
             const chart = LightweightCharts.createChart(document.getElementById(id), {
                 layout: { background: { type: 'solid', color: 'transparent' }, textColor: '#484f58' },
                 grid: { vertLines: { visible: false }, horzLines: { color: '#161b22' } },
                 timeScale: { visible: false },
                 handleScroll: false, handleScale: false,
-                rightPriceScale: { borderVisible: false }
             });
-            return chart.addAreaSeries({ lineColor: color, topColor: color + '33', bottomColor: 'transparent', lineWidth: 2 });
+            return chart.addAreaSeries({ lineColor: color, topColor: color + '22', bottomColor: 'transparent', lineWidth: 2 });
         };
 
-        const nLine = initChart('n-chart', '#2979ff');
-        const sLine = initChart('s-chart', '#00ff88');
+        const nLine = setupChart('n-chart', '#2979ff');
+        const sLine = setupChart('s-chart', '#00ff88');
 
-        let data = {
-            n: { p: 22480.15, c: 0, pc: 0 },
-            s: { p: 73920.40, c: 0, pc: 0 }
-        };
+        let prices = { n: 22480.15, s: 73920.40 };
 
-        function refresh() {
-            for (let k in data) {
-                const move = (Math.random() * 6) - 2.8;
-                data[k].p += move;
-                data[k].c += move;
-                data[k].pc = (data[k].c / data[k].p) * 100;
+        function update() {
+            for (let k in prices) {
+                const move = (Math.random() * 4) - 1.8;
+                prices[k] += move;
 
-                const priceEl = document.getElementById(`${k}-price`);
-                const chgEl = document.getElementById(`${k}-change`);
+                document.getElementById(`${k}-price`).innerText = "₹ " + prices[k].toLocaleString('en-IN', {minimumFractionDigits: 2});
+                document.getElementById(`${k}-rsi`).innerText = (Math.random() * 5 + 50).toFixed(1);
+                document.getElementById(`${k}-score`).innerText = Math.floor(Math.random() * 5 + 85) + "%";
+
                 const badge = document.getElementById(`${k}-badge`);
+                badge.innerText = move >= 0 ? "SIGNAL: BUY" : "SIGNAL: SELL";
+                badge.className = `badge ${move >= 0 ? 'bull' : 'bear'}`;
                 
-                priceEl.innerText = "₹ " + data[k].p.toLocaleString('en-IN', {minimumFractionDigits: 2});
-                chgEl.innerText = `${data[k].c >= 0 ? '+' : ''}${data[k].c.toFixed(2)} (${data[k].pc.toFixed(2)}%)`;
-                chgEl.style.color = data[k].c >= 0 ? "var(--green)" : "var(--red)";
-                
-                badge.className = `badge ${data[k].c >= 0 ? 'bull' : 'bear'}`;
-                badge.innerText = data[k].c >= 0 ? "SIGNAL: BUY" : "SIGNAL: SELL";
-
-                document.getElementById(`${k}-rsi`).innerText = (Math.random() * 8 + 52).toFixed(1);
-                document.getElementById(`${k}-score`).innerText = Math.floor(Math.random() * 10 + 85) + "%";
-                
-                (k === 'n' ? nLine : sLine).update({ time: Math.floor(Date.now()/1000), value: data[k].p });
+                (k === 'n' ? nLine : sLine).update({ time: Math.floor(Date.now()/1000), value: prices[k] });
             }
-            document.getElementById('neural-status').innerText = "Neural Sync: " + new Date().toLocaleTimeString();
+            document.getElementById('clock').innerText = "Last Sync: " + new Date().toLocaleTimeString();
         }
 
-        setInterval(refresh, 2500);
-        refresh();
+        setInterval(update, 3000);
+        update();
     </script>
 </body>
 </html>
+
 
 
 
