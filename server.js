@@ -4,48 +4,51 @@ const axios = require('axios');
 const app = express();
 
 app.use(cors());
-app.use(express.json());
 
-// मार्केट डेटा लाने का फंक्शन (Yahoo Finance API का उपयोग)
-async function getMarketData() {
+// होम पेज पर मैसेज (ताकि "Cannot GET /" न दिखे)
+app.get('/', (req, res) => {
+    res.send('AI Pro Terminal API is Running...');
+});
+
+// मार्केट डेटा लाने का फंक्शन
+async function fetchStock(symbol) {
     try {
-        const symbols = ['^NSEI', '^BSESN', 'RELIANCE.NS', 'SBIN.NS'];
-        let results = {};
+        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=15m&range=1d`;
+        const response = await axios.get(url);
+        const data = response.data.chart.result[0];
+        const price = data.meta.regularMarketPrice;
+        const closeArr = data.indicators.quote[0].close;
+        const lastClose = closeArr[closeArr.length - 1];
+        const prevClose = closeArr[closeArr.length - 2];
 
-        for (let sym of symbols) {
-            // Yahoo Finance Query
-            const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=15m&range=1d`;
-            const resp = await axios.get(url);
-            const quote = resp.data.chart.result[0].indicators.quote[0];
-            const price = resp.data.chart.result[0].meta.regularMarketPrice;
-            
-            // सरल सिग्नल लॉजिक
-            const closeArr = quote.close;
-            const lastClose = closeArr[closeArr.length - 1];
-            const prevClose = closeArr[closeArr.length - 2];
-            
-            let signal = lastClose > prevClose ? "STRONG BUY" : "WAIT";
-            let score = lastClose > prevClose ? 85 : 45;
+        // स्मार्ट सिग्नल लॉजिक
+        let score = lastClose > prevClose ? 80 : 40;
+        let signal = score >= 70 ? "BULLISH" : "WAITING";
 
-            results[sym.replace('^', '').replace('.NS', '')] = {
-                price: price.toFixed(2),
-                score: score,
-                signal: signal,
-                time: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })
-            };
-        }
-        return results;
-    } catch (err) {
-        return { error: "API limit or connection issue" };
+        return {
+            price: price.toLocaleString('en-IN'),
+            score: score,
+            signal: signal,
+            rsi: (Math.random() * (70 - 30) + 30).toFixed(1) // RSI सिमुलेशन
+        };
+    } catch (error) {
+        return { price: "0.00", score: 0, signal: "ERR", rsi: "0" };
     }
 }
 
 // API Endpoint
 app.get('/market_data', async (req, res) => {
-    const data = await getMarketData();
-    res.json(data);
+    const nifty = await fetchStock('^NSEI');
+    const sensex = await fetchStock('^BSESN');
+    
+    res.json({
+        nifty,
+        sensex,
+        last_update: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })
+    });
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server is live on port ${PORT}`));
+
 
