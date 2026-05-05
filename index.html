@@ -3,49 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Market Terminal v3</title>
+    <title>AI Market Terminal</title>
     <style>
-        body { background: #0d1117; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; }
-        .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 15px; transition: 0.3s; }
-        .price { font-size: 24px; font-weight: bold; color: #3fb950; margin: 10px 0; }
-        .signal { font-size: 12px; font-weight: bold; color: #58a6ff; text-transform: uppercase; }
+        :root { --bg: #0d1117; --card: #161b22; --green: #3fb950; --blue: #58a6ff; --red: #f85149; }
+        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; padding: 20px; margin: 0; }
+        .card { background: var(--card); border: 1px solid #30363d; border-radius: 12px; padding: 20px; margin-bottom: 15px; position: relative; }
+        .price { font-size: 30px; font-weight: bold; color: var(--green); margin: 5px 0; }
+        .label { font-size: 12px; color: #8b949e; font-weight: bold; }
+        .status-btn { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--blue); background: rgba(88,166,255,0.1); color: var(--blue); font-weight: bold; margin-top: 10px; }
+        .BULLISH { border-color: var(--green); color: var(--green); background: rgba(63,185,80,0.1); }
+        .row { display: flex; justify-content: space-between; font-size: 11px; color: #8b949e; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <h2 style="color: #58a6ff;">🚀 AI PRO TERMINAL</h2>
-    <div id="grid" class="grid">डेटा लोड हो रहा है...</div>
-    <p id="update-time" style="font-size: 10px; color: #8b949e; margin-top: 20px;"></p>
+    <h3 style="text-align: center; color: var(--blue);">💎 AI MARKET TERMINAL</h3>
+
+    <div class="card">
+        <div class="label">NIFTY 50</div>
+        <div id="n-price" class="price">₹ --</div>
+        <div class="row">
+            <span>RSI: <b id="n-rsi">--</b></span>
+            <span>SCORE: <b id="n-score">--</b>%</span>
+        </div>
+        <div id="n-signal" class="status-btn">SYNCING...</div>
+    </div>
+
+    <div class="card">
+        <div class="label">SENSEX</div>
+        <div id="s-price" class="price">₹ --</div>
+        <div class="row">
+            <span>RSI: <b id="s-rsi">--</b></span>
+            <span>SCORE: <b id="s-score">--</b>%</span>
+        </div>
+        <div id="s-signal" class="status-btn">SYNCING...</div>
+    </div>
+
+    <p id="time" style="text-align: center; font-size: 10px; color: #484f58;">Connecting to Render...</p>
 
     <script>
-        async function fetchData() {
+        async function updateData() {
             try {
-                // यहाँ अपना Render URL डालें
                 const res = await fetch('https://ai-terminal-2.onrender.com/market_data');
                 const data = await res.json();
-                const grid = document.getElementById('grid');
-                grid.innerHTML = '';
 
-                for (const key in data) {
-                    const item = data[key];
-                    grid.innerHTML += `
-                        <div class="card">
-                            <div style="font-size: 12px; color: #8b949e;">${key}</div>
-                            <div class="price">₹${item.price}</div>
-                            <div class="signal">${item.signal}</div>
-                            <div style="font-size: 10px; margin-top: 5px;">Score: ${item.score}%</div>
-                        </div>`;
-                    document.getElementById('update-time').innerText = "Last Update: " + item.time;
-                }
+                const setUI = (d, prefix) => {
+                    document.getElementById(`${prefix}-price`).innerText = "₹ " + d.price;
+                    document.getElementById(`${prefix}-rsi`).innerText = d.rsi;
+                    document.getElementById(`${prefix}-score`).innerText = d.score;
+                    const btn = document.getElementById(`${prefix}-signal`);
+                    btn.innerText = d.signal;
+                    btn.className = "status-btn " + (d.signal === "BULLISH" ? "BULLISH" : "");
+                };
+
+                setUI(data.nifty, 'n');
+                setUI(data.sensex, 's');
+                document.getElementById('time').innerText = "Last Sync: " + data.last_update;
             } catch (e) {
-                document.getElementById('grid').innerText = "Server Connection Error...";
+                document.getElementById('time').innerText = "Sync Error - Check Render Logs";
             }
         }
-        setInterval(fetchData, 10000);
-        fetchData();
+        setInterval(updateData, 10000);
+        updateData();
     </script>
 </body>
 </html>
+
 
 
 
