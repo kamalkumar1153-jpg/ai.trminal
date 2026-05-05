@@ -3,118 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI PRO V20.0 - QUANTUM</title>
+    <title>AI PRO V22.0 - AUDIO</title>
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
     <style>
-        :root { --bg: #010204; --card: #0a0c10; --green: #00ff88; --red: #ff3344; --blue: #2979ff; --gold: #ffd700; }
-        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 10px; overflow-x: hidden; }
+        :root { --bg: #010204; --card: #0d1117; --green: #00ff88; --red: #ff3344; --blue: #2979ff; }
+        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 10px; }
         .grid { max-width: 440px; margin: auto; display: flex; flex-direction: column; gap: 15px; }
-        .card { background: var(--card); border: 1px solid #1c2128; border-radius: 16px; padding: 22px; position: relative; transition: all 0.4s; }
-        .glow-buy { border-color: var(--green); box-shadow: 0 0 20px rgba(0, 255, 136, 0.2); }
-        .glow-sell { border-color: var(--red); box-shadow: 0 0 20px rgba(255, 51, 68, 0.2); }
-        .price { font-size: 42px; font-weight: 900; margin: 5px 0; font-family: 'Roboto Mono', monospace; }
-        .signal-badge { position: absolute; top: 20px; right: 20px; padding: 5px 15px; border-radius: 20px; font-size: 10px; font-weight: 900; text-transform: uppercase; border: 1px solid; }
-        .buy { color: var(--green); border-color: var(--green); background: rgba(0, 255, 136, 0.1); }
-        .sell { color: var(--red); border-color: var(--red); background: rgba(255, 51, 68, 0.1); }
-        .hold { color: #8b949e; border-color: #30363d; background: rgba(255,255,255,0.05); }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px; font-size: 10px; color: #484f58; }
-        .chart-container { height: 130px; margin-top: 15px; border-radius: 12px; overflow: hidden; }
+        .card { background: var(--card); border: 1px solid #30363d; border-radius: 20px; padding: 20px; position: relative; }
+        .price { font-size: 38px; font-weight: 900; font-family: monospace; }
+        .alert-btn { background: var(--blue); color: #fff; border: none; padding: 10px; border-radius: 8px; font-size: 10px; width: 100%; margin-bottom: 10px; cursor: pointer; }
+        .indicator { font-size: 10px; color: #8b949e; margin-top: 10px; display: flex; justify-content: space-between; }
+        .chart { height: 120px; margin-top: 15px; border-radius: 10px; }
     </style>
 </head>
 <body>
 
 <div class="grid">
-    <div style="text-align: center; padding: 15px 0;">
-        <h2 style="margin:0; letter-spacing: 6px; font-weight: 900;">AI PRO <span style="color:var(--blue)">V20</span></h2>
-        <div style="font-size: 9px; color: var(--gold); margin-top: 5px; font-weight: bold;">NEURAL QUANTUM ENGINE ACTIVE</div>
+    <button class="alert-btn" onclick="initAudio()">Click to Enable Audio Alerts 🔊</button>
+
+    <div class="card" id="n-card">
+        <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--blue); font-weight:bold;">NIFTY 50</span>
+            <span id="n-sig" style="font-size:10px; font-weight:bold;">WAITING...</span>
+        </div>
+        <div id="n-price" class="price">₹ 24,050.00</div>
+        <div class="indicator">
+            <span>Trend Strength: <b id="n-str">0</b>%</span>
+            <span id="n-mode">MODE: MONITOR</span>
+        </div>
+        <div id="n-chart" class="chart"></div>
     </div>
 
-    <div id="n-card" class="card">
-        <div id="n-sig" class="signal-badge hold">Analyzing...</div>
-        <span style="font-size: 14px; font-weight: bold; color: var(--blue);">NIFTY 50</span>
-        <div id="n-price" class="price">₹ 24,050.25</div>
-        <div class="stats-grid">
-            <div>RSI: <b id="n-rsi" style="color:#fff">50</b></div>
-            <div>VOL: <b id="n-vol" style="color:var(--green)">HIGH</b></div>
-            <div>TREND: <b id="n-trend" style="color:#fff">SIDEWAYS</b></div>
+    <div class="card" id="s-card">
+        <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--blue); font-weight:bold;">SENSEX</span>
+            <span id="s-sig" style="font-size:10px; font-weight:bold;">WAITING...</span>
         </div>
-        <div id="n-chart" class="chart-container"></div>
-    </div>
-
-    <div id="s-card" class="card">
-        <div id="s-sig" class="signal-badge hold">Analyzing...</div>
-        <span style="font-size: 14px; font-weight: bold; color: var(--blue);">SENSEX</span>
-        <div id="s-price" class="price">₹ 77,075.80</div>
-        <div class="stats-grid">
-            <div>RSI: <b id="s-rsi" style="color:#fff">50</b></div>
-            <div>VOL: <b id="s-vol" style="color:var(--green)">STABLE</b></div>
-            <div>TREND: <b id="s-trend" style="color:#fff">SIDEWAYS</b></div>
+        <div id="s-price" class="price">₹ 77,075.00</div>
+        <div class="indicator">
+            <span>Trend Strength: <b id="s-str">0</b>%</span>
+            <span id="s-mode">MODE: MONITOR</span>
         </div>
-        <div id="s-chart" class="chart-container"></div>
+        <div id="s-chart" class="chart"></div>
     </div>
 </div>
 
 <script>
+    let audioCtx;
+    function initAudio() { 
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
+        document.querySelector('.alert-btn').style.display = 'none';
+    }
+
+    function playSound(freq, type) {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.5);
+    }
+
     const setup = (id, col) => {
         const c = LightweightCharts.createChart(document.getElementById(id), {
             layout: { background: { type: 'solid', color: 'transparent' }, textColor: '#484f58' },
             grid: { vertLines: { visible: false }, horzLines: { color: '#161b22' } },
             timeScale: { visible: false }, handleScroll: false, handleScale: false,
         });
-        return c.addAreaSeries({ lineColor: col, topColor: col + '33', bottomColor: 'transparent', lineWidth: 3 });
+        return c.addAreaSeries({ lineColor: col, topColor: col + '22', bottomColor: 'transparent', lineWidth: 3 });
     };
 
     const nL = setup('n-chart', '#2979ff');
     const sL = setup('s-chart', '#00ff88');
 
-    let state = { 
-        n: { p: 24050.25, r: 50 }, 
-        s: { p: 77075.80, r: 50 } 
-    };
+    let prices = { n: 24050.25, s: 77075.80 };
+    let lastSig = { n: '', s: '' };
 
     setInterval(() => {
         update('n', nL);
         update('s', sL);
-    }, 2000);
+    }, 3000);
 
     function update(id, line) {
-        const move = (Math.random() * 10) - 4.5;
-        state[id].p += move;
-        state[id].r = Math.min(Math.max(state[id].r + (move * 0.2), 20), 80);
-
-        // UI Updates
-        document.getElementById(`${id}-price`).innerText = "₹ " + state[id].p.toLocaleString('en-IN', {minimumFractionDigits: 2});
-        document.getElementById(`${id}-rsi`).innerText = state[id].r.toFixed(1);
+        const move = (Math.random() * 14) - 6;
+        prices[id] += move;
+        document.getElementById(`${id}-price`).innerText = "₹ " + prices[id].toLocaleString('en-IN', {minimumFractionDigits: 2});
         
-        const card = document.getElementById(`${id}-card`);
-        const sig = document.getElementById(`${id}-sig`);
-        const trend = document.getElementById(`${id}-trend`);
+        const sigEl = document.getElementById(`${id}-sig`);
+        const str = Math.floor(Math.random() * 50) + 50;
+        document.getElementById(`${id}-str`).innerText = str;
 
-        if (state[id].r > 65) {
-            sig.innerText = "BUY SIGNAL";
-            sig.className = "signal-badge buy";
-            card.className = "card glow-buy";
-            trend.innerText = "BULLISH";
-            trend.style.color = "var(--green)";
-        } else if (state[id].r < 35) {
-            sig.innerText = "SELL SIGNAL";
-            sig.className = "signal-badge sell";
-            card.className = "card glow-sell";
-            trend.innerText = "BEARISH";
-            trend.style.color = "var(--red)";
+        if (move > 4) {
+            sigEl.innerText = "🚀 BUY ALERT";
+            sigEl.style.color = "var(--green)";
+            if (lastSig[id] !== 'buy') { playSound(880, 'sine'); lastSig[id] = 'buy'; }
+        } else if (move < -4) {
+            sigEl.innerText = "📉 SELL ALERT";
+            sigEl.style.color = "var(--red)";
+            if (lastSig[id] !== 'sell') { playSound(440, 'triangle'); lastSig[id] = 'sell'; }
         } else {
-            sig.innerText = "HOLD / NEUTRAL";
-            sig.className = "signal-badge hold";
-            card.className = "card";
-            trend.innerText = "SIDEWAYS";
-            trend.style.color = "#8b949e";
+            sigEl.innerText = "SIDEWAYS";
+            sigEl.style.color = "#8b949e";
+            lastSig[id] = 'hold';
         }
 
-        line.update({ time: Math.floor(Date.now() / 1000), value: state[id].p });
+        line.update({ time: Math.floor(Date.now() / 1000), value: prices[id] });
     }
 </script>
 </body>
 </html>
+
 
 
 
