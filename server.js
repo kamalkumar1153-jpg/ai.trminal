@@ -4,8 +4,15 @@ const path = require('path');
 
 const app = express();
 
-app.use(express.static('public'));
+// ✅ static folder serve
+app.use(express.static(path.join(__dirname, 'public')));
 
+// ✅ ROOT FIX (important)
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/index.html'));
+});
+
+// ===== INDICATORS =====
 function calculateEMA(prices, period) {
   const k = 2 / (period + 1);
   let ema = prices[0];
@@ -19,16 +26,19 @@ function calculateEMA(prices, period) {
 function calculateRSI(prices, period = 14) {
   let gains = 0, losses = 0;
 
-  for (let i = 1; i <= period; i++) {
+  for (let i = 1; i < period; i++) {
     const diff = prices[i] - prices[i - 1];
     if (diff >= 0) gains += diff;
     else losses -= diff;
   }
 
-  let rs = gains / losses;
+  if (losses === 0) return 100;
+
+  const rs = gains / losses;
   return 100 - (100 / (1 + rs));
 }
 
+// ===== SIGNAL FUNCTION =====
 async function getSignal(symbol) {
   const result = await yahooFinance.chart(symbol, {
     interval: '5m',
@@ -38,6 +48,7 @@ async function getSignal(symbol) {
   const prices = result.indicators.quote[0].close.filter(p => p);
 
   const lastPrice = prices[prices.length - 1];
+
   const ema9 = calculateEMA(prices.slice(-20), 9);
   const ema21 = calculateEMA(prices.slice(-30), 21);
   const rsi = calculateRSI(prices.slice(-15));
@@ -59,6 +70,7 @@ async function getSignal(symbol) {
   };
 }
 
+// ===== API =====
 app.get('/signal', async (req, res) => {
   try {
     const nifty = await getSignal("^NSEI");
@@ -75,7 +87,9 @@ app.get('/signal', async (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log("Server running on port 3000"));
+// ===== START SERVER =====
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("Server running on port " + PORT));
 
 
 
