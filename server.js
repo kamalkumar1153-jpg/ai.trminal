@@ -1,74 +1,81 @@
 const express = require('express');
-const cors = require('cors');
-const axios = require('axios');
+const yahooFinance = require('yahoo-finance2').default;
+const path = require('path');
+
 const app = express();
 
-// 1. CORS को इनेबल करें ताकि GitHub वेबसाइट डेटा ले सके
-app.use(cors());
+app.use(express.static('public'));
 
-// 2. होम रूट - यह चेक करने के लिए कि सर्वर चालू है या नहीं
-app.get('/', (req, res) => {
-    res.send('<h1>AI Terminal Server is Active ✅</h1><p>Use <b>/market_data</b> for JSON feed.</p>');
+function calculateEMA(prices, period) {
+  const k = 2 / (period + 1);
+  let ema = prices[0];
+
+  for (let i = 1; i < prices.length; i++) {
+    ema = prices[i] * k + ema * (1 - k);
+  }
+  return ema;
+}
+
+function calculateRSI(prices, period = 14) {
+  let gains = 0, losses = 0;
+
+  for (let i = 1; i <= period; i++) {
+    const diff = prices[i] - prices[i - 1];
+    if (diff >= 0) gains += diff;
+    else losses -= diff;
+  }
+
+  let rs = gains / losses;
+  return 100 - (100 / (1 + rs));
+}
+
+async function getSignal(symbol) {
+  const result = await yahooFinance.chart(symbol, {
+    interval: '5m',
+    range: '1d'
+  });
+
+  const prices = result.indicators.quote[0].close.filter(p => p);
+
+  const lastPrice = prices[prices.length - 1];
+  const ema9 = calculateEMA(prices.slice(-20), 9);
+  const ema21 = calculateEMA(prices.slice(-30), 21);
+  const rsi = calculateRSI(prices.slice(-15));
+
+  let signal = "HOLD";
+
+  if (lastPrice > ema9 && ema9 > ema21 && rsi > 55) {
+    signal = "BUY";
+  } else if (lastPrice < ema9 && ema9 < ema21 && rsi < 45) {
+    signal = "SELL";
+  }
+
+  return {
+    price: lastPrice.toFixed(2),
+    ema9: ema9.toFixed(2),
+    ema21: ema21.toFixed(2),
+    rsi: rsi.toFixed(2),
+    signal
+  };
+}
+
+app.get('/signal', async (req, res) => {
+  try {
+    const nifty = await getSignal("^NSEI");
+    const sensex = await getSignal("^BSESN");
+
+    res.json({
+      nifty,
+      sensex,
+      time: new Date()
+    });
+
+  } catch (e) {
+    res.json({ error: "API Error" });
+  }
 });
 
-// 3. मार्केट डेटा एंडपॉइंट
-app.get('/market_data', async (req, res) => {
-    try {
-        // Yahoo Finance API (Nifty 50 और Sensex के लिए)
-        // हम User-Agent हेडर जोड़ रहे हैं ताकि Yahoo ब्लॉक न करे
-        const config = {
-            headers: { 'User-Agent': 'Mozilla/5.0' }
-        };
-
-        const symbols = {
-            nifty: '^NSEI',
-            sensex: '^BSESN'
-        };
-
-        let results = {};
-
-        for (let [name, sym] of Object.entries(symbols)) {
-            const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=15m&range=1d`;
-            const resp = await axios.get(url, config);
-            
-            const meta = resp.data.chart.result[0].meta;
-            const price = meta.regularMarketPrice;
-            const prevClose = meta.chartPreviousClose;
-
-            // टेक्निकल इंडिकेटर्स (डेमो कैलकुलेशन)
-            results[name] = {
-                price: price.toLocaleString('en-IN'),
-                rsi: (Math.random() * (70 - 30) + 30).toFixed(1), // लाइव RSI के लिए TA-Lib चाहिए, अभी रैंडम है
-                score: Math.floor(Math.random() * (85 - 45) + 45),
-                signal: price > prevClose ? "BULLISH" : "BEARISH"
-            };
-        }
-
-        results.last_update = new Date().toLocaleTimeString('en-IN', { 
-            timeZone: 'Asia/Kolkata',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-
-        res.json(results);
-
-    } catch (err) {
-        console.error("Fetch Error:", err.message);
-        res.status(500).json({ error: "Market data fetch failed" });
-    }
-});
-
-// 4. पोर्ट सेटिंग्स (Termux के लिए 8080 सबसे बेस्ट है)
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`
-🚀 AI PRO TERMINAL SERVER LIVE
-------------------------------
-Local:   http://localhost:${PORT}
-Network: http://127.0.0.1:${PORT}
-    `);
-});
+app.listen(3000, () => console.log("Server running on port 3000"));
 
 
 
