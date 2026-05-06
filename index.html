@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI PRO TERMINAL V43.0</title>
+    <title>AI PRO TERMINAL V44.0</title>
     <style>
         :root { 
             --bg: #010409; --card: #0d1117; --green: #00ff88; --red: #ff3344; 
@@ -21,15 +21,6 @@
         .portfolio { background: #0d1117; padding: 15px; border-radius: 15px; border: 1px solid var(--blue); display: flex; justify-content: space-between; align-items: center; }
         .p-val { font-size: 24px; font-weight: 900; font-family: monospace; }
 
-        /* Trade Log Table */
-        .log-section { background: #161b22; border-radius: 15px; padding: 12px; border: 1px solid #30363d; margin-top: 10px; }
-        .log-header { font-size: 12px; color: var(--gold); font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #30363d; padding-bottom: 5px; }
-        table { width: 100%; border-collapse: collapse; font-size: 10px; text-align: left; }
-        th { color: var(--gray); padding: 5px; }
-        td { padding: 8px 5px; border-bottom: 1px solid #21262d; }
-        .win { color: var(--green); font-weight: bold; }
-        .loss { color: var(--red); font-weight: bold; }
-
         /* Card Styles */
         .card { background: var(--card); border: 1px solid #30363d; border-radius: 20px; padding: 15px; border-left: 4px solid transparent; }
         .nifty-border { border-left-color: var(--blue); }
@@ -41,6 +32,15 @@
         .btn-row { display: flex; gap: 8px; margin-top: 10px; }
         .buy-btn { flex: 1; background: none; border: 1px solid var(--green); color: var(--green); padding: 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; }
         .buy-pe { border-color: var(--red); color: var(--red); }
+
+        /* Trade Log Table */
+        .log-section { background: #161b22; border-radius: 15px; padding: 12px; border: 1px solid #30363d; margin-top: 10px; }
+        .log-header { font-size: 12px; color: var(--gold); font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #30363d; padding-bottom: 5px; }
+        table { width: 100%; border-collapse: collapse; font-size: 10px; text-align: left; }
+        th { color: var(--gray); padding: 5px; }
+        td { padding: 8px 5px; border-bottom: 1px solid #21262d; }
+        .win { color: var(--green); font-weight: bold; }
+        .loss { color: var(--red); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -73,7 +73,7 @@
     </div>
 
     <div class="card nifty-border">
-        <span style="color:var(--blue); font-size:11px; font-weight:bold;">NIFTY 50</span>
+        <span style="color:var(--blue); font-size:11px; font-weight:bold;">NIFTY 50 (65 Lot)</span>
         <div id="n-price" class="price">₹ 24,050.00</div>
         <div class="btn-row">
             <button class="buy-btn" onclick="buy('NIFTY','CE',120)">CE BUY</button>
@@ -84,8 +84,20 @@
         </div>
     </div>
 
+    <div class="card bank-border">
+        <span style="color:var(--purple); font-size:11px; font-weight:bold;">BANK NIFTY (30 Lot)</span>
+        <div id="b-price" class="price">₹ 52,433.00</div>
+        <div class="btn-row">
+            <button class="buy-btn" style="border-color:var(--purple); color:var(--purple)" onclick="buy('BANKNIFTY','CE',245)">CE BUY</button>
+            <button class="buy-btn buy-pe" onclick="buy('BANKNIFTY','PE',235)">PE BUY</button>
+        </div>
+        <div class="tv-widget">
+            <iframe src="https://www.tradingview-widget.com/embed-widget/technical-analysis/?symbol=NSE%3ABANKNIFTY&interval=15m&isTransparent=true&displayMode=single&locale=in&theme=dark" width="100%" height="220" frameborder="0"></iframe>
+        </div>
+    </div>
+
     <div class="card sensex-border">
-        <span style="color:var(--green); font-size:11px; font-weight:bold;">SENSEX</span>
+        <span style="color:var(--green); font-size:11px; font-weight:bold;">SENSEX (20 Lot)</span>
         <div id="s-price" class="price">₹ 77,075.00</div>
         <div class="btn-row">
             <button class="buy-btn" onclick="buy('SENSEX','CE',350)">CE BUY</button>
@@ -97,19 +109,12 @@
     </div>
 
     <div class="log-section">
-        <div class="log-header">📜 TRADE LOG BOOK (TODAY)</div>
+        <div class="log-header">📜 TRADE LOG BOOK</div>
         <table>
             <thead>
-                <tr>
-                    <th>INDEX</th>
-                    <th>TYPE</th>
-                    <th>ENTRY</th>
-                    <th>EXIT</th>
-                    <th>P&L</th>
-                </tr>
+                <tr><th>INDEX</th><th>TYPE</th><th>ENTRY</th><th>EXIT</th><th>P&L</th></tr>
             </thead>
-            <tbody id="trade-log">
-                </tbody>
+            <tbody id="trade-log"></tbody>
         </table>
     </div>
 </div>
@@ -134,13 +139,19 @@
 
     function update() {
         setInterval(() => {
-            p.GIFT += (Math.random()*4-2); p.NIFTY += (Math.random()*6-3); 
-            p.SENSEX += (Math.random()*12-6);
+            // FIXED MOVEMENT: Ab price ₹2 se ₹15 tak random move karega
+            p.GIFT += (Math.random() * 10 - 5); 
+            p.NIFTY += (Math.random() * 14 - 7); 
+            p.BANKNIFTY += (Math.random() * 30 - 15);
+            p.SENSEX += (Math.random() * 24 - 12);
+
             document.getElementById('g-price').innerText = "₹ " + p.GIFT.toLocaleString('en-IN', {minimumFractionDigits: 2});
             document.getElementById('n-price').innerText = "₹ " + p.NIFTY.toLocaleString('en-IN', {minimumFractionDigits: 2});
+            document.getElementById('b-price').innerText = "₹ " + p.BANKNIFTY.toLocaleString('en-IN', {minimumFractionDigits: 2});
             document.getElementById('s-price').innerText = "₹ " + p.SENSEX.toLocaleString('en-IN', {minimumFractionDigits: 2});
+            
             if(activeTrade) calculatePnL();
-        }, 3000);
+        }, 2000); // 2 Seconds update for better feeling
     }
 
     function buy(idx, type, price) {
@@ -150,9 +161,9 @@
     }
 
     function calculatePnL() {
-        let diff = (p[activeTrade.idx] - activeTrade.startPrice) * 0.1;
-        let exitPrice = activeTrade.type === 'CE' ? activeTrade.entry + diff : activeTrade.entry - diff;
-        currentPnl = (exitPrice - activeTrade.entry) * activeTrade.lot;
+        // P&L Logic: Index move ka 20% option premium move maana jayega
+        let diff = (p[activeTrade.idx] - activeTrade.startPrice) * 0.2;
+        currentPnl = activeTrade.type === 'CE' ? (diff * activeTrade.lot) : (-diff * activeTrade.lot);
         
         const el = document.getElementById('pnl-val');
         el.innerText = "₹ " + currentPnl.toFixed(2);
@@ -161,8 +172,6 @@
 
     function exitTrade() {
         if(!activeTrade) return;
-        
-        // Log Book update
         const tbody = document.getElementById('trade-log');
         const row = document.createElement('tr');
         const pnlClass = currentPnl >= 0 ? 'win' : 'loss';
@@ -174,10 +183,8 @@
             <td>${(activeTrade.entry + (currentPnl/activeTrade.lot)).toFixed(2)}</td>
             <td class="${pnlClass}">${currentPnl >= 0 ? '+' : ''}${currentPnl.toFixed(2)}</td>
         `;
-        
-        tbody.prepend(row); // Naya trade sabse upar dikhega
+        tbody.prepend(row);
 
-        // Reset Trade
         activeTrade = null;
         currentPnl = 0;
         document.getElementById('pnl-val').innerText = "₹ 0.00";
@@ -189,6 +196,7 @@
 </script>
 </body>
 </html>
+
 
 
 
