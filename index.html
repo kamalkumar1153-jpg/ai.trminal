@@ -1,27 +1,46 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Live Signal</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
-<h1>📊 Live Intraday Signals</h1>
+<script>
+    // 1. अपनी Firebase Config यहाँ डालें
+const firebaseConfig = {
+  apiKey: "AIzaSyAB6k07n5Xs8wk1R7rlpldCldmdjpw1NHg",
+  authDomain: "ai-pro-terminal.firebaseapp.com",
+  databaseURL: "https://ai-pro-terminal-default-rtdb.firebaseio.com",
+  projectId: "ai-pro-terminal",
+  storageBucket: "ai-pro-terminal.firebasestorage.app",
+  messagingSenderId: "922428332789",
+  appId: "1:922428332789:web:9f6edba9ac1655e75fc3bc",
+  measurementId: "G-VKZ9TD9KN4"
+};
+    // 2. Firebase Initialize करें
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-<div class="box">
-  <h2>NIFTY</h2>
-  <p id="nifty">Loading...</p>
-</div>
+    // 3. Live Price Listener (असली जादू यहाँ है)
+    // जैसे ही Firebase में भाव बदलेगा, आपका टर्मिनल अपने आप अपडेट होगा
+    db.ref('market_data').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if(data) {
+            p.NIFTY = data.nifty_price;
+            p.BANKNIFTY = data.banknifty_price;
+            p.SENSEX = data.sensex_price;
+            
+            // UI अपडेट करें
+            updateDisplay();
+        }
+    });
 
-<div class="box">
-  <h2>SENSEX</h2>
-  <p id="sensex">Loading...</p>
-</div>
+    function updateDisplay() {
+        document.getElementById('n-price').innerText = "₹ " + p.NIFTY.toFixed(2);
+        document.getElementById('b-price').innerText = "₹ " + p.BANKNIFTY.toFixed(2);
+        document.getElementById('s-price').innerText = "₹ " + p.SENSEX.toFixed(2);
+        
+        // अगर ट्रेड चालू है तो P&L भी अपडेट होगा
+        if(activeTrade) calculatePnL();
+    }
+</script>
 
-<script src="app.js"></script>
-
-</body>
-</html>
 
 
 
