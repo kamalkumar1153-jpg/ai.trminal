@@ -4,7 +4,7 @@ import os
 import time
 
 # GitHub के वातावरण से डेटा लेना
-ACCESS_TOKEN = os.getenv('UPSTOX_ACCESS_TOKEN')
+ACCESS_TOKEN = os.getenv(' eyJ0eXAiOiJKV1QiLCJrZXlfaWQiOiJza192MS4wIiwiYWxnIjoiSFMyNTYifQ.eyJzdWIiOiIyRUNDRTMiLCJqdGkiOiI2OWZiZmVhMDU2Y2E0NTAwN2E4OGMzYTUiLCJpc011bHRpQ2xpZW50IjpmYWxzZSwiaXNQbHVzUGxhbiI6dHJ1ZSwiaWF0IjoxNzc4MTIyNDAwLCJpc3MiOiJ1ZGFwaS1nYXRld2F5LXNlcnZpY2UiLCJleHAiOjE3NzgxOTEyMDB9.RHT9rklePvmLGupInQdvri65LJedQrYUfZ7szmfvrdY')
 FIREBASE_URL = os.getenv('FIREBASE_URL')
 
 def sync_to_cloud():
